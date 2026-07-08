@@ -7,6 +7,7 @@ import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
+import { resetPasswordEmailTemplate } from '../../templates/resetPassword.template.js';
 
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
@@ -113,14 +114,10 @@ export class AuthController {
     await EmailService.sendEmail({
       to: email,
       subject: "Password Reset Request",
-      html: `
-        <h2>Password Reset</h2>
-        <p>Hi ${user.name},</p>
-        <p>You requested to reset your password.</p>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
-        <p>If you didn't request this, please ignore this email.</p>
-      `
+      html: resetPasswordEmailTemplate({
+        name: user.name,
+        resetUrl
+      })
     });
     
     return new ApiResponse({

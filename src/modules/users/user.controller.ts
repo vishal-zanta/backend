@@ -6,6 +6,7 @@ import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
+import { welcomeEmailTemplate } from '../../templates/welcomeEmail.template.js';
 
 function generatePrefix(designation: string): string {
   return designation
@@ -78,17 +79,14 @@ export class UserController {
     await EmailService.sendEmail({
       to: email,
       subject: "Welcome! Your Account Credentials",
-      html: `
-        <h2>Welcome to the CRM, ${name}</h2>
-        <p>Your account has been created successfully with the role: ${assignedRole.designationEnglish} (${assignedRole.designationHindi}).</p>
-        <p>Here are your login credentials:</p>
-        <ul>
-          <li><strong>User Code:</strong> ${userCode}</li>
-          <li><strong>Email / Login ID:</strong> ${email}</li>
-          <li><strong>Password:</strong> ${password}</li>
-        </ul>
-        <p>Please log in and change your password as soon as possible.</p>
-      `
+      html: welcomeEmailTemplate({
+        name,
+        roleEnglish: assignedRole.designationEnglish,
+        roleHindi: assignedRole.designationHindi,
+        userCode,
+        email,
+        password
+      })
     });
 
     // Don't send password back in API response
