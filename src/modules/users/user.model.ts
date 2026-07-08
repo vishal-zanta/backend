@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { PasswordHelper } from '../../utils/passwordHelper.js';
 
 export interface IUser extends Document {
+  userCode: string;
   name: string;
   email: string;
   password: string;
@@ -15,6 +16,11 @@ export interface IUser extends Document {
 }
 
 const userSchema = new Schema<IUser>({
+  userCode: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name: {
     type: String,
     required: true,

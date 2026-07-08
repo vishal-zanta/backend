@@ -7,6 +7,19 @@ import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
 
+function generatePrefix(designation: string): string {
+  return designation
+    .split(' ')
+    .filter(word => word.trim().length > 0)
+    .map(word => {
+      if (word.length <= 2) {
+        return word.toLowerCase();
+      }
+      return word[0].toLowerCase();
+    })
+    .join('');
+}
+
 export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
     validateRequestFields(["name", "email", "phone", "role", "district","password"], req.body);
@@ -23,8 +36,23 @@ export class UserController {
       throw new ApiError({ status: 404, message: 'Role not found' });
     }
 
+    const prefix = generatePrefix(assignedRole.designationEnglish);
+    const lastUser = await User.findOne({ userCode: { $regex: `^${prefix}-\\d+$`, $options: 'i' } })
+                               .sort({ createdAt: -1 })
+                               .exec();
+
+    let nextNumber = 1;
+    if (lastUser && lastUser.userCode) {
+      const match = lastUser.userCode.match(/-(\d+)$/);
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
+    }
+    const userCode = `${prefix}-${nextNumber.toString().padStart(4, '0')}`.toLowerCase();
+
 
     const user = await User.create({
+      userCode,
       name,
       email,
       phone,
@@ -42,6 +70,7 @@ export class UserController {
         <p>Your account has been created successfully with the role: ${assignedRole.designationEnglish} (${assignedRole.designationHindi}).</p>
         <p>Here are your login credentials:</p>
         <ul>
+          <li><strong>User Code:</strong> ${userCode}</li>
           <li><strong>Email / Login ID:</strong> ${email}</li>
           <li><strong>Password:</strong> ${password}</li>
         </ul>

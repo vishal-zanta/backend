@@ -1,35 +1,30 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IRole extends Document {
-  designationEnglish: string;
-  designationHindi: string;
-  level: string;
+export interface IService extends Document {
+  title: string;
+  titleHindi: string;
+  department: string;
   active: boolean;
-  permissions: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const roleSchema = new Schema<IRole>({
-  designationEnglish: {
+const serviceSchema = new Schema<IService>({
+  title: {
     type: String,
     required: true,
     trim: true,
     unique: true
   },
-  designationHindi: {
+  titleHindi: {
     type: String,
     required: true,
     trim: true
   },
-  level: {
+  department: {
     type: String,
     required: true,
     trim: true
-  },
-  permissions: {
-    type: [String],
-    default: []
   },
   active: {
     type: Boolean,
@@ -39,4 +34,4 @@ const roleSchema = new Schema<IRole>({
   timestamps: true
 });
 
-export const Role = mongoose.model<IRole>('Role', roleSchema);
+export const Service = mongoose.model<IService>('Service', serviceSchema);
