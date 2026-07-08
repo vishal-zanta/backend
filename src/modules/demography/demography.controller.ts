@@ -13,7 +13,13 @@ export class DemographyController {
     
     const existing = await Demography.findOne({ name: req.body.name });
     if (existing) {
-      throw new ApiError({ status: 400, message: 'District with this name already exists' });
+      if (existing.active) {
+        throw new ApiError({ status: 400, message: 'District with this name already exists' });
+      } else {
+        Object.assign(existing, req.body, { active: true });
+        await existing.save();
+        return new ApiResponse({ res, status: 201, data: existing, message: 'Demography created successfully' });
+      }
     }
 
     const demography = await Demography.create(req.body);

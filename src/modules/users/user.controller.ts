@@ -27,7 +27,7 @@ export class UserController {
     const { name, email, phone, role, district, password } = req.body;
 
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-    if (existingUser) {
+    if (existingUser && existingUser.status !== 'INACTIVE') {
       throw new ApiError({ status: 400, message: 'User with this email or phone already exists' });
     }
 
@@ -51,15 +51,28 @@ export class UserController {
     const userCode = `${prefix}-${nextNumber.toString().padStart(4, '0')}`.toLowerCase();
 
 
-    const user = await User.create({
-      userCode,
-      name,
-      email,
-      phone,
-      password,
-      role,
-      district
-    });
+    let user;
+    if (existingUser && existingUser.status === 'INACTIVE') {
+      existingUser.userCode = userCode;
+      existingUser.name = name;
+      existingUser.email = email;
+      existingUser.phone = phone;
+      existingUser.password = password;
+      existingUser.role = role;
+      existingUser.district = district;
+      existingUser.status = 'ACTIVE';
+      user = await existingUser.save();
+    } else {
+      user = await User.create({
+        userCode,
+        name,
+        email,
+        phone,
+        password,
+        role,
+        district
+      });
+    }
 
     // Send email with credentials
     await EmailService.sendEmail({

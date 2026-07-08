@@ -1,122 +1,125 @@
 {
   "info": {
-    "name": "Bihar CRM Backend API",
+    "name": "Bihar CRM Backend API2",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
-      "key": "baseUrl",
+      "key": "base_url",
       "value": "http://localhost:3000/api/v1",
       "type": "string"
     },
     {
-      "key": "token",
-      "value": "YOUR_JWT_TOKEN",
+      "key": "auth_token",
+      "value": "your_jwt_token_here",
       "type": "string"
     }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
   "item": [
     {
-      "name": "System",
+      "name": "Roles",
       "item": [
         {
-          "name": "Health Check",
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designationEnglish\": \"Clerk\",\n  \"designationHindi\": \"क्लर्क\",\n  \"level\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Roles",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["health"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Auth",
-      "item": [
-        {
-          "name": "Login",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"your_password\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
+              "raw": "{{base_url}}/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles"
+              ]
             }
           }
         },
         {
-          "name": "Forgot Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/forgot-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "forgot-password"]
-            }
-          }
-        },
-        {
-          "name": "Get Profile",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/auth/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "profile"]
-            }
-          }
-        },
-        {
-          "name": "Update Profile",
+          "name": "Update Role",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Name\"\n}"
-            },
+              "raw": "{\n  \"level\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/auth/user",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "user"]
+              "raw": "{{base_url}}/roles/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
             }
           }
         }
@@ -126,56 +129,43 @@
       "name": "Users",
       "item": [
         {
-          "name": "Get Users",
+          "name": "Create User",
           "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "method": "POST",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users?search=john&role=60f1b2b3b3b3b3b3b3b3b3b3",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"],
-              "query": [
-                {
-                  "key": "search",
-                  "value": "john",
-                  "description": "Search by name or email"
-                },
-                {
-                  "key": "role",
-                  "value": "60f1b2b3b3b3b3b3b3b3b3b3",
-                  "description": "Filter by role ID"
-                }
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"1234567890\",\n  \"role\": \"ROLE_ID\",\n  \"district\": \"DISTRICT_ID\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           }
         },
         {
-          "name": "Create User",
+          "name": "Get Users",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"phone\": \"1234567890\",\n  \"role\": \"60f1b2b3b3b3b3b3b3b3b3b3\",\n  \"district\": \"Patna\"\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"]
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
             }
           }
         },
@@ -183,30 +173,30 @@
           "name": "Update User",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"status\": \"SUSPENDED\"\n}"
-            },
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", ":id"],
+              "raw": "{{base_url}}/users/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
               "variable": [
                 {
                   "key": "id",
-                  "value": "USER_ID_HERE"
+                  "value": "INSERT_ID_HERE"
                 }
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Smith\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           }
         },
@@ -214,20 +204,19 @@
           "name": "Delete User",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", ":id"],
+              "raw": "{{base_url}}/users/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
               "variable": [
                 {
                   "key": "id",
-                  "value": "USER_ID_HERE"
+                  "value": "INSERT_ID_HERE"
                 }
               ]
             }
@@ -236,101 +225,826 @@
       ]
     },
     {
-      "name": "Roles",
+      "name": "Complaint Sources",
       "item": [
         {
-          "name": "Get Roles",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/roles",
-              "host": ["{{baseUrl}}"],
-              "path": ["roles"]
-            }
-          }
-        },
-        {
-          "name": "Create Role",
+          "name": "Create Source",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaint-sources",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaint-sources"
+              ]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"designationEnglish\": \"New Role\",\n  \"designationHindi\": \"नया पद\",\n  \"level\": \"L3\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/roles",
-              "host": ["{{baseUrl}}"],
-              "path": ["roles"]
+              "raw": "{\n  \"title\": \"WhatsApp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           }
         },
         {
-          "name": "Update Role",
+          "name": "Get Sources",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaint-sources",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaint-sources"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Source",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"level\": \"L4\"\n}"
-            },
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/roles/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["roles", ":id"],
+              "raw": "{{base_url}}/complaint-sources/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaint-sources"
+              ],
               "variable": [
                 {
                   "key": "id",
-                  "value": "ROLE_ID_HERE"
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"IVR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Source",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaint-sources/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaint-sources"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Create Service",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Public Works\",\n  \"titleHindi\": \"सार्वजनिक कार्य\",\n  \"department\": \"PWD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department\": \"PWD Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sub-Services",
+      "item": [
+        {
+          "name": "Create Sub-Service",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/sub",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services",
+                "sub"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pothole\",\n  \"titleHindi\": \"गड्ढा\",\n  \"sla\": 48,\n  \"geoTagged\": true,\n  \"fieldVisit\": true,\n  \"service\": \"SERVICE_ID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Sub-Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/sub",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services",
+                "sub"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Sub-Service",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/sub/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services",
+                "sub"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sla\": 24\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Sub-Service",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/sub/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services",
+                "sub"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demography (Districts)",
+      "item": [
+        {
+          "name": "Create Demography",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Patna\",\n  \"nameHindi\": \"पटना\",\n  \"division\": \"Patna\",\n  \"zone\": \"South Bihar\",\n  \"population\": 2442383,\n  \"urban\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Demographies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Demography",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"population\": 2500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Demography",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ULBs",
+      "item": [
+        {
+          "name": "Create ULB",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography/ulb",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography",
+                "ulb"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Patna Municipal Corporation\",\n  \"nameHindi\": \"पटना नगर निगम\",\n  \"wards\": 75,\n  \"district\": \"DISTRICT_ID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get ULBs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography/ulb",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography",
+                "ulb"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update ULB",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography/ulb/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography",
+                "ulb"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wards\": 80\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete ULB",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/demography/ulb/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demography",
+                "ulb"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SLA Configs",
+      "item": [
+        {
+          "name": "Create SLA Config",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sla-configs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sla-configs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subService\": \"SUBSERVICE_ID\",\n  \"escalations\": [\n    {\n      \"role\": \"ROLE_ID_1\",\n      \"slaHours\": 24\n    },\n    {\n      \"role\": \"ROLE_ID_2\",\n      \"slaHours\": 48\n    }\n  ],\n  \"officer\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get SLA Configs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sla-configs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sla-configs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update SLA Config",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sla-configs/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sla-configs"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false,\n  \"officer\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete SLA Config",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sla-configs/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sla-configs"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Officer Tagging",
+      "item": [
+        {
+          "name": "Create Officer Tagging",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/officer-taggings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "officer-taggings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"officer\": \"USER_ID\",\n  \"services\": [\n    \"SUBSERVICE_ID_1\"\n  ],\n  \"wards\": [\n    \"Ward 1\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Officer Taggings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/officer-taggings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "officer-taggings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Officer Tagging",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/officer-taggings/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "officer-taggings"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wards\": [\n    \"Ward 1\",\n    \"Ward 2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Officer Tagging",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/officer-taggings/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "officer-taggings"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workflow Levels",
+      "item": [
+        {
+          "name": "Create Workflow Level",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workflow-levels",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workflow-levels"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"ROLE_ID\",\n  \"description\": \"First Level\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Workflow Levels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workflow-levels",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workflow-levels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Workflow Level",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workflow-levels/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workflow-levels"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated First Level\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Workflow Level",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workflow-levels/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workflow-levels"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "INSERT_ID_HERE"
                 }
               ]
             }
           }
         },
         {
-          "name": "Delete Role",
+          "name": "Bulk Update Orders",
           "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "method": "POST",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/roles/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["roles", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "ROLE_ID_HERE"
-                }
+              "raw": "{{base_url}}/workflow-levels/bulk-order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workflow-levels",
+                "bulk-order"
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"LEVEL_ID_1\",\n      \"order\": 1\n    },\n    {\n      \"id\": \"LEVEL_ID_2\",\n      \"order\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           }
         }

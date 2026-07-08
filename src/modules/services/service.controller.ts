@@ -13,7 +13,13 @@ export class ServiceController {
     
     const existingService = await Service.findOne({ title: req.body.title });
     if (existingService) {
-      throw new ApiError({ status: 400, message: 'Service with this title already exists' });
+      if (existingService.active) {
+        throw new ApiError({ status: 400, message: 'Service with this title already exists' });
+      } else {
+        Object.assign(existingService, req.body, { active: true });
+        await existingService.save();
+        return new ApiResponse({ res, status: 201, data: existingService, message: 'Service created successfully' });
+      }
     }
 
     const service = await Service.create(req.body);

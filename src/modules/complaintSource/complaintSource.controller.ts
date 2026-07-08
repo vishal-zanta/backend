@@ -11,7 +11,14 @@ export class ComplaintSourceController {
     
     const existingSource = await ComplaintSource.findOne({ title: req.body.title });
     if (existingSource) {
-      throw new ApiError({ status: 400, message: 'Complaint source with this title already exists' });
+      if (existingSource.active) {
+        throw new ApiError({ status: 400, message: 'Complaint source with this title already exists' });
+      } else {
+        existingSource.title = req.body.title;
+        existingSource.active = true;
+        await existingSource.save();
+        return new ApiResponse({ res, status: 201, data: existingSource, message: 'Complaint source created successfully' });
+      }
     }
 
     const source = await ComplaintSource.create(req.body);

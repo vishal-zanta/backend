@@ -11,7 +11,13 @@ export class RoleController {
     
     const existingRole = await Role.findOne({ designationEnglish: req.body.designationEnglish });
     if (existingRole) {
-      throw new ApiError({ status: 400, message: 'Role with this designation already exists' });
+      if (existingRole.active) {
+        throw new ApiError({ status: 400, message: 'Role with this designation already exists' });
+      } else {
+        Object.assign(existingRole, req.body, { active: true });
+        await existingRole.save();
+        return new ApiResponse({ res, status: 201, data: existingRole, message: 'Role created successfully' });
+      }
     }
 
     const role = await Role.create(req.body);

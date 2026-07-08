@@ -7,6 +7,8 @@ import complaintSourceRoutes from "../complaintSource/complaintSource.routes.js"
 import serviceRoutes from "../services/service.routes.js";
 import demographyRoutes from "../demography/demography.routes.js";
 import slaConfigRoutes from "../slaConfig/slaConfig.routes.js";
+import officerTaggingRoutes from "../officerTagging/officerTagging.routes.js";
+import workflowLevelRoutes from "../workflowLevel/workflowLevel.routes.js";
 
 const router = Router();
 
@@ -18,5 +20,7 @@ router.use("/complaint-sources", complaintSourceRoutes);
 router.use("/services", serviceRoutes);
 router.use("/demography", demographyRoutes);
 router.use("/sla-configs", slaConfigRoutes);
+router.use("/officer-taggings", officerTaggingRoutes);
+router.use("/workflow-levels", workflowLevelRoutes);
 
 export default router;
