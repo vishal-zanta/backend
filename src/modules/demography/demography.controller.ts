@@ -27,8 +27,20 @@ export class DemographyController {
   });
 
   static getDemographies = asyncHandler(async (req: Request, res: Response) => {
-    const demographies = await Demography.find({ active: true });
-    return new ApiResponse({ res, status: 200, data: demographies, message: 'Demographies fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { active: true };
+    const demographies = await Demography.find(query).skip(skip).limit(limit);
+    const total = await Demography.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: demographies, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Demographies fetched successfully' 
+    });
   });
 
   static updateDemography = asyncHandler(async (req: Request, res: Response) => {
@@ -72,8 +84,19 @@ export class DemographyController {
       query.district = districtId;
     }
 
-    const ulbs = await Ulb.find(query).populate('district');
-    return new ApiResponse({ res, status: 200, data: ulbs, message: 'ULBs fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const ulbs = await Ulb.find(query).populate('district').skip(skip).limit(limit);
+    const total = await Ulb.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: ulbs, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'ULBs fetched successfully' 
+    });
   });
 
   static updateUlb = asyncHandler(async (req: Request, res: Response) => {

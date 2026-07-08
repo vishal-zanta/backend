@@ -25,8 +25,20 @@ export class RoleController {
   });
 
   static getRoles = asyncHandler(async (req: Request, res: Response) => {
-    const roles = await Role.find({ active: true });
-    return new ApiResponse({ res, status: 200, data: roles, message: 'Roles fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { active: true };
+    const roles = await Role.find(query).skip(skip).limit(limit);
+    const total = await Role.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: roles, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Roles fetched successfully' 
+    });
   });
 
   static updateRole = asyncHandler(async (req: Request, res: Response) => {

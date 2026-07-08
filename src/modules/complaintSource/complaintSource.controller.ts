@@ -26,8 +26,20 @@ export class ComplaintSourceController {
   });
 
   static getSources = asyncHandler(async (req: Request, res: Response) => {
-    const sources = await ComplaintSource.find({ active: true });
-    return new ApiResponse({ res, status: 200, data: sources, message: 'Complaint sources fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { active: true };
+    const sources = await ComplaintSource.find(query).skip(skip).limit(limit);
+    const total = await ComplaintSource.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: sources, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Complaint sources fetched successfully' 
+    });
   });
 
   static updateSource = asyncHandler(async (req: Request, res: Response) => {

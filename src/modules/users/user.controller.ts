@@ -119,8 +119,24 @@ export class UserController {
       ];
     }
 
-    const users = await User.find(query).populate('role').select('-password');
-    return new ApiResponse({ res, status: 200, data: users, message: 'Users fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const users = await User.find(query)
+      .populate('role')
+      .select('-password')
+      .skip(skip)
+      .limit(limit);
+      
+    const total = await User.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: users, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Users fetched successfully' 
+    });
   });
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {

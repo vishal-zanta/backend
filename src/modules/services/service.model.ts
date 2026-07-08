@@ -31,7 +31,16 @@ const serviceSchema = new Schema<IService>({
     default: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+serviceSchema.virtual('subservices', {
+  ref: 'SubService',
+  localField: '_id',
+  foreignField: 'service',
+  match: { active: true }
 });
 
 export const Service = mongoose.model<IService>('Service', serviceSchema);

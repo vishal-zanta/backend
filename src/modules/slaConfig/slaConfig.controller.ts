@@ -59,11 +59,24 @@ export class SlaConfigController {
       query.subService = subServiceId;
     }
 
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
     const configs = await SlaConfig.find(query)
       .populate('subService')
-      .populate('escalations.role');
+      .populate('escalations.role')
+      .skip(skip)
+      .limit(limit);
       
-    return new ApiResponse({ res, status: 200, data: configs, message: 'SLA Configs fetched successfully' });
+    const total = await SlaConfig.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: configs, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'SLA Configs fetched successfully' 
+    });
   });
 
   static updateConfig = asyncHandler(async (req: Request, res: Response) => {

@@ -27,8 +27,20 @@ export class ServiceController {
   });
 
   static getServices = asyncHandler(async (req: Request, res: Response) => {
-    const services = await Service.find({ active: true });
-    return new ApiResponse({ res, status: 200, data: services, message: 'Services fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { active: true };
+    const services = await Service.find(query).populate('subservices').skip(skip).limit(limit);
+    const total = await Service.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: services, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Services fetched successfully' 
+    });
   });
 
   static updateService = asyncHandler(async (req: Request, res: Response) => {
@@ -74,8 +86,19 @@ export class ServiceController {
       query.service = serviceId;
     }
 
-    const subServices = await SubService.find(query).populate('service');
-    return new ApiResponse({ res, status: 200, data: subServices, message: 'Sub-Services fetched successfully' });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const subServices = await SubService.find(query).populate('service').skip(skip).limit(limit);
+    const total = await SubService.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: subServices, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Sub-Services fetched successfully' 
+    });
   });
 
   static updateSubService = asyncHandler(async (req: Request, res: Response) => {

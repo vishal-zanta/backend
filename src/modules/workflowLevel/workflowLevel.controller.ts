@@ -43,10 +43,25 @@ export class WorkflowLevelController {
   });
 
   static getLevels = asyncHandler(async (req: Request, res: Response) => {
-    const levels = await WorkflowLevel.find({ active: true })
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { active: true };
+    const levels = await WorkflowLevel.find(query)
       .sort({ order: 1 })
-      .populate('role');
-    return new ApiResponse({ res, status: 200, data: levels, message: 'Workflow levels fetched successfully' });
+      .populate('role')
+      .skip(skip)
+      .limit(limit);
+      
+    const total = await WorkflowLevel.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: levels, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Workflow levels fetched successfully' 
+    });
   });
 
   static updateLevel = asyncHandler(async (req: Request, res: Response) => {

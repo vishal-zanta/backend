@@ -43,7 +43,12 @@ export class OfficerTaggingController {
   });
 
   static getTaggings = asyncHandler(async (req: Request, res: Response) => {
-    const taggings = await OfficerTagging.find({ active: true })
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { active: true };
+    const taggings = await OfficerTagging.find(query)
       .populate({
         path: 'officer',
         select: 'name role',
@@ -52,9 +57,18 @@ export class OfficerTaggingController {
           select: 'designationEnglish designationHindi'
         }
       })
-      .populate('services', 'title titleHindi');
+      .populate('services', 'title titleHindi')
+      .skip(skip)
+      .limit(limit);
       
-    return new ApiResponse({ res, status: 200, data: taggings, message: 'Officer Taggings fetched successfully' });
+    const total = await OfficerTagging.countDocuments(query);
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: { docs: taggings, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Officer Taggings fetched successfully' 
+    });
   });
 
   static updateTagging = asyncHandler(async (req: Request, res: Response) => {
