@@ -46,8 +46,6 @@ export class StorageService {
     if (mimetype.startsWith("image/")) {
       try {
         finalBuffer = await sharp(fileBuffer)
-          // Convert to highly optimized WebP format with near-lossless compression.
-          // This massively reduces file size without any visible decrease in quality!
           .webp({ quality: 90, nearLossless: true })
           .toBuffer();
           

@@ -10,47 +10,38 @@ export interface IAttachment {
 export interface IGrievance extends Document {
   citizen: mongoose.Types.ObjectId;
   classification: {
-    department: string;
-    subCategory?: string;
+    subService: mongoose.Types.ObjectId;
     scheme?: string;
-    service?: string;
-    nature: "COMPLAINT" | "REQUEST" | "ENQUIRY" | "SUGGESTION";
+    nature: mongoose.Types.ObjectId;
     subject: string;
   };
-  description: {
-    details: string;
+  evidence: {
+    details?: string;
     occurrenceDate?: Date;
-    issuePeriod?: string;
-    frequency?: "ONE_TIME" | "RECURRING";
+    frequency: mongoose.Types.ObjectId;
     attachments?: IAttachment[];
   };
   impact?: {
     urgency?: "NORMAL" | "URGENT" | "CRITICAL";
-    affectedBeneficiary?: "SELF" | "FAMILY" | "COMMUNITY";
+    affectedBeneficiary: mongoose.Types.ObjectId;
     vulnerability?: {
       seniorCitizen?: boolean;
       woman?: boolean;
       personWithDisability?: boolean;
       economicallyWeakerSection?: boolean;
     };
-    publicImpact?: "INDIVIDUAL" | "COMMUNITY" | "SYSTEMIC";
+    publicImpact: mongoose.Types.ObjectId;
   };
-  previousReference?: {
-    grievanceId?: string;
-    submissionDate?: Date;
-    department?: string;
-  };
+  previousReferenceGrievanceId?: mongoose.Types.ObjectId;
   communication?: {
-    preferredMode?: "CALL" | "SMS" | "EMAIL" | "APP_NOTIFICATION";
+    preferredMode?: mongoose.Types.ObjectId;
     feedbackConsent?: boolean;
     satisfactionSurveyConsent?: boolean;
   };
-  system?: {
+
     grievanceId?: string;
-    registrationDate?: Date;
-    channel?: "WEB" | "MOBILE_APP" | "CALL_CENTER" | "EMAIL" | "WHATSAPP";
+    channel?: mongoose.Types.ObjectId;
     assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL";
-    slaHours?: number;
     status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
     address?: {
       state?: string;
@@ -61,8 +52,8 @@ export interface IGrievance extends Document {
       landmark?: string;
     };
     escalationLevel?: number;
-  };
-  rating?: number; // Added rating
+  
+  rating?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -88,20 +79,19 @@ const GrievanceSchema = new Schema<IGrievance>(
     citizen: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Citizen",
-      required: true,
+      // required: true,
       index: true,
     },
     classification: {
-      department: {
-        type: String,
+      subService: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SubService",
         required: true,
       },
-      subCategory: String,
       scheme: String,
-      service: String,
       nature: {
-        type: String,
-        enum: ["COMPLAINT", "REQUEST", "ENQUIRY", "SUGGESTION"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Option",
         required: true,
       },
       subject: {
@@ -109,16 +99,15 @@ const GrievanceSchema = new Schema<IGrievance>(
         required: true,
       },
     },
-    description: {
+    evidence: {
       details: {
         type: String,
-        required: true,
       },
       occurrenceDate: Date,
-      issuePeriod: String,
       frequency: {
-        type: String,
-        enum: ["ONE_TIME", "RECURRING"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Option",
+        required: true,
       },
       attachments: [AttachmentSchema],
     },
@@ -129,8 +118,9 @@ const GrievanceSchema = new Schema<IGrievance>(
         default: "NORMAL",
       },
       affectedBeneficiary: {
-        type: String,
-        enum: ["SELF", "FAMILY", "COMMUNITY"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Option",
+        required: true,
       },
       vulnerability: {
         seniorCitizen: Boolean,
@@ -139,45 +129,48 @@ const GrievanceSchema = new Schema<IGrievance>(
         economicallyWeakerSection: Boolean,
       },
       publicImpact: {
-        type: String,
-        enum: ["INDIVIDUAL", "COMMUNITY", "SYSTEMIC"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Option",
+        // required: true,
       },
     },
-    previousReference: {
-      grievanceId: String,
-      submissionDate: Date,
-      department: String,
+    previousReferenceGrievanceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Grievance",
     },
     communication: {
       preferredMode: {
-        type: String,
-        enum: ["CALL", "SMS", "EMAIL", "APP_NOTIFICATION"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComplaintSource",
       },
       feedbackConsent: Boolean,
       satisfactionSurveyConsent: Boolean,
     },
-    system: {
+   
       grievanceId: {
         type: String,
         unique: true,
         sparse: true, // It might be uniquely generated later, sparse allows multiple docs without grievanceId initially
       },
-      registrationDate: {
-        type: Date,
-        default: Date.now,
-      },
+
       channel: {
-        type: String,
-        enum: ["WEB", "MOBILE_APP", "CALL_CENTER", "EMAIL", "WHATSAPP"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComplaintSource",
       },
       assignedPriority: {
         type: String,
         enum: ["NORMAL", "URGENT", "CRITICAL"],
       },
-      slaHours: Number,
       status: {
         type: String,
-        enum: ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REOPENED", "ESCALATED"],
+        enum: [
+          "OPEN",
+          "IN_PROGRESS",
+          "RESOLVED",
+          "CLOSED",
+          "REOPENED",
+          "ESCALATED",
+        ],
         default: "OPEN",
       },
       address: {
@@ -192,7 +185,7 @@ const GrievanceSchema = new Schema<IGrievance>(
         type: Number,
         default: 0,
       },
-    },
+   
     rating: {
       type: Number,
       min: 1,
@@ -201,7 +194,7 @@ const GrievanceSchema = new Schema<IGrievance>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Grievance = mongoose.model<IGrievance>("Grievance", GrievanceSchema);

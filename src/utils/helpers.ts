@@ -255,3 +255,13 @@ export const buildMongoQuery = ({
       throw new ApiError({ status: 400, message: errors.join(', ') });
     }
   }
+
+
+  // Helper to reliably convert a title string into snake_case
+  export const toSnakeCase = (str: string) => {
+    return str
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  };

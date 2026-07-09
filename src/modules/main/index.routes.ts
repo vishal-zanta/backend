@@ -11,6 +11,8 @@ import officerTaggingRoutes from "../officerTagging/officerTagging.routes.js";
 import workflowLevelRoutes from "../workflowLevel/workflowLevel.routes.js";
 import captchaRoutes from "../captcha/captcha.routes.js";
 import citizenRoutes from "../citizen/citizen.routes.js";
+import grievanceRoutes from "../grievance/grievance.routes.js";
+import optionsRoutes from "../options/option.routes.js";
 
 const router = Router();
 
@@ -18,6 +20,7 @@ router.use("/", healthRoutes);
 router.use("/captcha", captchaRoutes);
 router.use("/citizen", citizenRoutes);
 router.use("/auth", authRoutes);
+router.use("/options", optionsRoutes);
 router.use("/users", userRoutes);
 router.use("/roles", roleRoutes);
 router.use("/complaint-sources", complaintSourceRoutes);
@@ -26,5 +29,6 @@ router.use("/demography", demographyRoutes);
 router.use("/sla-configs", slaConfigRoutes);
 router.use("/officer-taggings", officerTaggingRoutes);
 router.use("/workflow-levels", workflowLevelRoutes);
+router.use("/grievances", grievanceRoutes);
 
 export default router;
