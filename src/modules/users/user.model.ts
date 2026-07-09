@@ -10,7 +10,7 @@ export interface IUser extends Document {
   role: mongoose.Types.ObjectId;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   isAdmin: boolean;
-  district:String;
+  district: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,7 +48,10 @@ const userSchema = new Schema<IUser>({
     ref: 'Role',
     // required: true
   },
-  district:String,
+  district: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Demography'
+  },
   status: {
     type: String,
     enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED'],

@@ -9,10 +9,14 @@ import demographyRoutes from "../demography/demography.routes.js";
 import slaConfigRoutes from "../slaConfig/slaConfig.routes.js";
 import officerTaggingRoutes from "../officerTagging/officerTagging.routes.js";
 import workflowLevelRoutes from "../workflowLevel/workflowLevel.routes.js";
+import captchaRoutes from "../captcha/captcha.routes.js";
+import citizenRoutes from "../citizen/citizen.routes.js";
 
 const router = Router();
 
 router.use("/", healthRoutes);
+router.use("/captcha", captchaRoutes);
+router.use("/citizen", citizenRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/roles", roleRoutes);
