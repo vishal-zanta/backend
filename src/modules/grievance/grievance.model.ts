@@ -9,6 +9,13 @@ export interface IAttachment {
 
 export interface IGrievance extends Document {
   citizen: mongoose.Types.ObjectId;
+  citizenInfo?: {
+    fullName?: string;
+    mobile: string;
+    alternateMobile?: string;
+    email?: string;
+    preferredLanguage?: string;
+  };
   classification: {
     subService: mongoose.Types.ObjectId;
     scheme?: string;
@@ -81,6 +88,13 @@ const GrievanceSchema = new Schema<IGrievance>(
       ref: "Citizen",
       // required: true,
       index: true,
+    },
+    citizenInfo: {
+      fullName: String,
+      mobile: { type: String, required: true },
+      alternateMobile: String,
+      email: String,
+      preferredLanguage: String,
     },
     classification: {
       subService: {

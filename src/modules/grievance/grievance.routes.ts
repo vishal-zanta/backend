@@ -8,4 +8,7 @@ const router = Router();
 
 router.post("/citizen",  citizenAuthProtect,  upload.array("attachments", 5),  GrievanceController.createGrievance);
 
+// Get all grievances for the logged-in citizen
+router.get("/citizen", citizenAuthProtect, GrievanceController.getCitizenGrievances);
+
 export default router;
