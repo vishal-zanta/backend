@@ -1,0 +1,15 @@
+services:
+  portal-backend:
+    image: portal-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
