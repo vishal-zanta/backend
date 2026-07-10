@@ -3,6 +3,9 @@ import { StorageService } from "../../libs/storage.lib.js";
 import { getNextSequenceValue } from "../../utils/counter.model.js";
 import { State } from "country-state-city";
 import { ObjectId } from "mongoose";
+import { TimelineService } from "../timeline/timeline.service.js";
+import { User } from "../users/user.model.js";
+import { timelineTemplates } from "../timeline/timeline.template.js";
 
 // Helper to determine the Attachment schema 'type' from mimetype
 const getAttachmentType = (mimetype: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" => {
@@ -101,6 +104,21 @@ export class GrievanceService {
     }
 
     const newGrievance = await Grievance.create(payloadToCreate);
+
+const officer:any=await User.findById(createdBy).populate("role").lean();
+
+    await TimelineService.logEvent({
+      grievanceId: newGrievance._id,
+      type:"COMPLAINT_REGISTERED",
+      actor:{
+        id: createdBy|| citizen?._id,
+        name: officer?.name || "CITIZEN" || "System",
+        role: officer?.role?.level || "CITIZEN",
+      },
+      metadata:{
+        description:timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, officer?.role?.level || "CITIZEN")
+      }
+    });
 
     return newGrievance;
   }

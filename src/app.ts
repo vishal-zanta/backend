@@ -12,6 +12,9 @@ import { handleErrorResponse } from "./middlewares/errorHandler.js";
 // Routes
 import indexRoutes from "./modules/main/index.routes.js";
 
+// Cronjobs
+import { initCronJobs } from "./cronjobs/escalation.cron.js";
+
 const app = express();
 const port = config.port;
 
@@ -29,6 +32,9 @@ app.use(apiLogger);
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize Cron Jobs
+initCronJobs();
 
 // Routes
 app.use("/api/v1", indexRoutes);

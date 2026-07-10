@@ -56,7 +56,7 @@ export interface IGrievance extends Document {
     satisfactionSurveyConsent?: boolean;
   };
 
-    grievanceId?: string;
+    grievanceId: string;
     createdBy?: mongoose.Types.ObjectId;
     channel?: mongoose.Types.ObjectId;
     assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL";

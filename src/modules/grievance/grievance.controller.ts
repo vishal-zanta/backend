@@ -4,14 +4,14 @@ import { StorageService } from "../../libs/storage.lib.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import ApiResponse from "../../utils/apiResponse.js";
 import { ApiError } from "../../middlewares/errorHandler.js";
-import { getNextSequenceValue } from "../../utils/counter.model.js";
-import { State } from "country-state-city";
 import { buildPagination } from "../../utils/helpers.js";
 import exifr from "exifr";
 
 import { GrievanceService } from "./grievance.service.js";
 import { SubService } from "../services/subService.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
+import { TimelineService } from "../timeline/timeline.service.js";
+import { timelineTemplates } from "../timeline/timeline.template.js";
 
 export class GrievanceController {
   
@@ -188,6 +188,52 @@ export class GrievanceController {
         pagination,
       },
       message: "Grievances retrieved successfully",
+    });
+  });
+
+  /**
+   * Get single grievance details for the logged-in citizen
+   */
+  static getCitizenGrievanceById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const citizen = req.citizen;
+
+    if (!citizen) {
+      throw new ApiError({ status: 401, message: "Unauthorized. Citizen not found." });
+    }
+
+    const grievance = await Grievance.findById(id).populate({
+      path: "classification.subService",
+      populate: {
+        path: "service"
+      }
+    });
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    // Verify ownership
+    const isOwner = 
+      (grievance.citizen && grievance.citizen.toString() === citizen._id.toString()) ||
+      (grievance.citizenInfo?.mobile === citizen.mobile) ||
+      (citizen.alternateMobile && grievance.citizenInfo?.mobile === citizen.alternateMobile);
+
+    if (!isOwner) {
+      throw new ApiError({ status: 403, message: "Access denied. You do not own this grievance." });
+    }
+
+    const timeline = await TimelineService.getTimelineHistory(id);
+    const responseData = {
+      ...grievance.toJSON(),
+      timeline,
+    };
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: responseData,
+      message: "Grievance details retrieved successfully",
     });
   });
 
@@ -498,9 +544,22 @@ export class GrievanceController {
       { new: true, runValidators: true }
     );
 
+
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
+     await TimelineService.logEvent({
+          grievanceId: grievance._id,
+          type:"PRIORITY_SET",
+          actor:{
+            id: req.user?.id,
+            name: req.user?.name || "System",
+            role: req.user?.role?.level || "System",
+          },
+          metadata:{
+            description:timelineTemplates.PRIORITY_SET(assignedPriority)
+          }
+        });
 
     return new ApiResponse({
       res,
@@ -586,6 +645,92 @@ export class GrievanceController {
       status: 200,
       data: grievance,
       message: "Geotagged images uploaded and verified successfully.",
+    });
+  });
+
+  /**
+   * Get single grievance details (for Admin/General) without access restrictions
+   */
+  static getAdminGrievanceById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const grievance = await Grievance.findById(id).populate({
+      path: "classification.subService",
+      populate: { path: "service" }
+    });
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    const timeline = await TimelineService.getTimelineHistory(id);
+    const responseData = {
+      ...grievance.toJSON(),
+      timeline,
+    };
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: responseData,
+      message: "Grievance details retrieved successfully",
+    });
+  });
+
+  /**
+   * Get single grievance details for the logged-in officer
+   */
+  static getOfficerGrievanceById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const officerId = (req as any).user?.id || (req as any).user?._id;
+
+    if (!officerId) {
+      throw new ApiError({ status: 401, message: "Unauthorized. Officer not found." });
+    }
+
+    const grievance = await Grievance.findById(id).populate({
+      path: "classification.subService",
+      populate: { path: "service" }
+    });
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    // Load Officer Tagging
+    let taggedServiceIds: string[] = [];
+    try {
+      const tag = await OfficerTagging.findOne({ officer: officerId, active: true });
+      if (tag && tag.services) {
+        taggedServiceIds = tag.services.map((s: any) => s.toString());
+      }
+    } catch (e) {
+      console.error("Failed to load officer tags", e);
+    }
+
+    const grievanceSubServiceId = grievance.classification?.subService?._id?.toString() || (grievance.classification?.subService as any)?.toString();
+    const assignedOfficerId = grievance.assignedOfficer?.toString();
+
+    // Verify ownership: either explicitly assigned OR subService falls under their tags
+    const isOwner = 
+      (assignedOfficerId === officerId.toString()) || 
+      (grievanceSubServiceId && taggedServiceIds.includes(grievanceSubServiceId));
+
+    if (!isOwner) {
+      throw new ApiError({ status: 403, message: "Access denied. This grievance is not assigned to you." });
+    }
+
+    const timeline = await TimelineService.getTimelineHistory(id);
+    const responseData = {
+      ...grievance.toJSON(),
+      timeline,
+    };
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: responseData,
+      message: "Grievance details retrieved successfully",
     });
   });
 

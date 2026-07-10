@@ -10,6 +10,7 @@ export interface IUser extends Document {
   role: mongoose.Types.ObjectId;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   isAdmin: boolean;
+  escalatedCount: number;
   district: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -60,6 +61,10 @@ const userSchema = new Schema<IUser>({
   isAdmin:{
     type:Boolean,
     default:false
+  },
+  escalatedCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

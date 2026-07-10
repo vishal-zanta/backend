@@ -12,17 +12,26 @@ router.post("/citizen",  citizenAuthProtect,  upload.array("attachments", 5),  G
 // Get all grievances for the logged-in citizen
 router.get("/citizen", citizenAuthProtect, GrievanceController.getCitizenGrievances);
 
+// Get single grievance details for the logged-in citizen
+router.get("/citizen/:id", citizenAuthProtect, GrievanceController.getCitizenGrievanceById);
+
 // Submit feedback for a resolved grievance
 router.post("/citizen/:id/feedback", citizenAuthProtect, GrievanceController.submitFeedback);
 
 // Get all grievances (for agents/admins)
 router.get("/all", authProtect, GrievanceController.getAllGrievances);
 
+// Get single grievance details for admin/general
+router.get("/all/:id", authProtect, GrievanceController.getAdminGrievanceById);
+
 // Get all grievances assigned to the logged-in officer
+router.get("/officer", authProtect, GrievanceController.getOfficerGrievances);
+
+// Get single grievance details for logged-in officer
 router.get(
-  "/officer",
+  "/officer/detail/:id",
   authProtect,
-  GrievanceController.getOfficerGrievances
+  GrievanceController.getOfficerGrievanceById,
 );
 
 // Create a grievance by an officer on behalf of a citizen
@@ -45,7 +54,7 @@ router.post(
   "/officer/:id/geotagged-images",
   authProtect,
   upload.array("files", 5), // allow up to 5 images
-  GrievanceController.uploadGeotaggedImages
+  GrievanceController.uploadGeotaggedImages,
 );
 
 export default router;
