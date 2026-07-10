@@ -7,29 +7,11 @@ import { ApiError } from "../../middlewares/errorHandler.js";
 import { getNextSequenceValue } from "../../utils/counter.model.js";
 import { State } from "country-state-city";
 import { buildPagination } from "../../utils/helpers.js";
+import exifr from "exifr";
 
-// Helper to determine the Attachment schema 'type' from mimetype
-const getAttachmentType = (mimetype: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" => {
-  if (mimetype.startsWith("image/")) return "IMAGE";
-  if (mimetype.startsWith("video/")) return "VIDEO";
-  if (mimetype.startsWith("audio/")) return "AUDIO";
-  return "DOCUMENT";
-};
-
-// Helper to get official state code from state name using the package
-const getStateCode = (stateName?: string): string => {
-  if (!stateName) return "BR"; // Default to Bihar (BR) if missing
-  
-  const upperInput = stateName.toUpperCase().trim();
-  
-  if (upperInput === "BIHAR") return "BR";
-
-  // Search through all official Indian states
-  const indianStates = State.getStatesOfCountry("IN");
-  const match = indianStates.find(s => s.name.toUpperCase() === upperInput);
-  
-  return match ? match.isoCode : upperInput.substring(0, 2);
-};
+import { GrievanceService } from "./grievance.service.js";
+import { SubService } from "../services/subService.model.js";
+import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 
 export class GrievanceController {
   
@@ -59,58 +41,16 @@ export class GrievanceController {
       throw new ApiError({ status: 400, message: "classification and evidence are required." });
     }
 
-    // Handle File Uploads
-    const attachments: IAttachment[] = [];
-    if (req.files && Array.isArray(req.files)) {
-      for (const file of req.files) {
-        const ext = file.originalname.split('.').pop() || "bin";
-        // Create a unique S3-like key: "grievances/CitizenId/Timestamp-Random.ext"
-        const key = `grievances/${citizen._id}/${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
-        
-        const url = await StorageService.uploadFile(key, file.buffer, file.mimetype);
-        
-        attachments.push({
-          type: getAttachmentType(file.mimetype),
-          fileName: file.originalname,
-          url,
-          uploadedAt: new Date(),
-        });
-      }
-    }
-
-    // Add attachments to evidence
-    if (attachments.length > 0) {
-      evidence.attachments = attachments;
-    }
-
-    // Generate the Unique Grievance ID (StateCode-Year-Sequence)
-    const stateName = address?.state;
-    const stateCode = getStateCode(stateName);
-    const year = new Date().getFullYear();
-    const seq = await getNextSequenceValue(`grievance_${year}`);
-    const seqString = String(seq).padStart(6, "0");
-    const grievanceId = `${stateCode}-${year}-${seqString}`;
-
-    // Merge citizenInfo (body + profile)
-    const finalCitizenInfo = {
-      ...(citizenInfo || {}),
-      mobile: citizen.mobile, // Mandatory from profile
-    };
-    // If not provided in body, fallback to profile info if available
-    if (citizen.fullName && !finalCitizenInfo.fullName) finalCitizenInfo.fullName = citizen.fullName;
-    if (citizen.email && !finalCitizenInfo.email) finalCitizenInfo.email = citizen.email;
-    if (citizen.preferredLanguage && !finalCitizenInfo.preferredLanguage) finalCitizenInfo.preferredLanguage = citizen.preferredLanguage;
-
-    const newGrievance = await Grievance.create({
-      citizen: citizen._id,
-      citizenInfo: finalCitizenInfo,
+    // Hand off to the newly created service for core business logic
+    const newGrievance = await GrievanceService.createGrievance({
+      citizen,
       classification,
       evidence,
       impact,
       communication,
-      grievanceId,
       address,
-      status: "OPEN",
+      citizenInfo,
+      files: req.files as Express.Multer.File[] | undefined,
     });
 
     return new ApiResponse({
@@ -118,6 +58,62 @@ export class GrievanceController {
       status: 201,
       data: newGrievance,
       message: "Grievance submitted successfully",
+    });
+  });
+
+  /**
+   * Create grievance by Agent/Officer on behalf of a citizen
+   */
+  static createGrievanceByAgent = asyncHandler(async (req: Request, res: Response) => {
+    // req.user contains the authenticated officer info
+    
+    // Parse nested objects from form-data.
+    let classification, evidence, impact, communication, address, citizenInfo;
+    try {
+      classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
+      evidence = typeof req.body.evidence === "string" ? JSON.parse(req.body.evidence) : req.body.evidence;
+      impact = typeof req.body.impact === "string" ? JSON.parse(req.body.impact) : req.body.impact;
+      communication = typeof req.body.communication === "string" ? JSON.parse(req.body.communication) : req.body.communication;
+      address = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
+      citizenInfo = typeof req.body.citizenInfo === "string" ? JSON.parse(req.body.citizenInfo) : req.body.citizenInfo;
+    } catch (e) {
+      throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
+    }
+
+    if (!classification || !evidence) {
+      throw new ApiError({ status: 400, message: "classification and evidence are required." });
+    }
+
+    if (!citizenInfo?.mobile) {
+      throw new ApiError({ status: 400, message: "citizenInfo.mobile is required when creating a grievance on behalf of a citizen." });
+    }
+
+    // Attempt to link to an existing Citizen profile if one exists for this mobile number
+    let citizen;
+    try {
+      const { Citizen } = await import("../citizen/citizen.model.js");
+      citizen = await Citizen.findOne({ mobile: citizenInfo.mobile });
+    } catch (e) {
+      console.warn("Could not find Citizen model to link grievance");
+    }
+
+    const newGrievance = await GrievanceService.createGrievance({
+      citizen, // Will be undefined if they don't have an account yet, but mobile will be captured in citizenInfo
+      classification,
+      evidence,
+      impact,
+      communication,
+      address,
+      citizenInfo,
+      files: req.files as Express.Multer.File[] | undefined,
+      createdBy: (req as any).user._id, // Officer/Agent creating the grievance
+    });
+
+    return new ApiResponse({
+      res,
+      status: 201,
+      data: newGrievance,
+      message: "Grievance created successfully on behalf of citizen",
     });
   });
 
@@ -169,15 +165,17 @@ export class GrievanceController {
     const totalCount = await Grievance.countDocuments(query);
     const pagination = buildPagination({ page, limit, totalCount });
 
-    // Populate all referenced fields (Options, SubServices, etc.)
+    // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .populate("classification.subService")
-      .populate("classification.nature")
-      .populate("evidence.frequency")
-      .populate("impact.affectedBeneficiary")
-      .populate("impact.publicImpact")
-      .populate("communication.preferredMode")
-      .populate("channel")
+      .select("grievanceId classification.subService address status assignedPriority createdAt")
+      .populate({
+        path: "classification.subService",
+        select: "title titleHindi sla service",
+        populate: {
+          path: "service",
+          select: "title titleHindi department"
+        }
+      })
       .skip(pagination.offset)
       .limit(pagination.limit)
       .sort({ createdAt: -1 });
@@ -190,6 +188,404 @@ export class GrievanceController {
         pagination,
       },
       message: "Grievances retrieved successfully",
+    });
+  });
+
+  /**
+   * Get all grievances (for agents/admins) with search across ID, mobile, and subService name
+   */
+  static getAllGrievances = asyncHandler(async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+
+    const query: any = {};
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      let subServiceIds: any[] = [];
+      
+      // Look up matching subServices by name
+      try {
+        
+        const matchingSubServices = await SubService.find({ name: searchRegex }).select("_id");
+        subServiceIds = matchingSubServices.map(s => s._id);
+      } catch (e) {
+        console.error("Failed to lookup SubService for search", e);
+      }
+
+      query.$or = [
+        { grievanceId: searchRegex },
+        { "citizenInfo.mobile": searchRegex },
+        
+      ];
+
+      // If any subServices matched the search string by name, include them in the OR clause
+      if (subServiceIds.length > 0) {
+        query.$or.push({ "classification.subService": { $in: subServiceIds } });
+      }
+    }
+
+    const totalCount = await Grievance.countDocuments(query);
+    const pagination = buildPagination({ page, limit, totalCount });
+
+    const grievances = await Grievance.find(query)
+      .select("grievanceId classification.subService address status assignedPriority createdAt")
+      .populate({
+        path: "classification.subService",
+        select: "title titleHindi sla service",
+        populate: {
+          path: "service",
+          select: "title titleHindi department"
+        }
+      })
+      .skip(pagination.offset)
+      .limit(pagination.limit)
+      .sort({ createdAt: -1 });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        docs: grievances,
+        pagination,
+      },
+      message: "All Grievances retrieved successfully",
+    });
+  });
+
+  /**
+   * Get all grievances assigned to the logged-in officer
+   */
+  static getOfficerGrievances = asyncHandler(async (req: Request, res: Response) => {
+    // req.user contains the authenticated officer info
+    const officerId = (req as any).user?.id;
+    // console.log(req.user)
+    if (!officerId) {
+      throw new ApiError({ status: 401, message: "Unauthorized. Officer not found." });
+    }
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+
+    // Load Officer Tagging to see what services they handle
+    let taggedServiceIds: any[] = [];
+    try {
+    
+      const tag = await OfficerTagging.findOne({ officer: officerId, active: true });
+      if (tag && tag.services) {
+        taggedServiceIds = tag.services;
+      }
+    } catch (e) {
+      console.error("Failed to load officer tags", e);
+    }
+
+    const baseConditions: any[] = [
+      { assignedOfficer: officerId }
+    ];
+
+    if (taggedServiceIds.length > 0) {
+      baseConditions.push({ "classification.subService": { $in: taggedServiceIds } });
+    }
+
+    const query: any = {
+      $or: baseConditions
+    };
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      let searchSubServiceIds: any[] = [];
+      
+      try {
+       
+        const matchingSubServices = await SubService.find({ name: searchRegex }).select("_id");
+        searchSubServiceIds = matchingSubServices.map(s => s._id);
+      } catch (e) {}
+
+      const searchQuery: any = {
+        $or: [
+          { grievanceId: searchRegex },
+          { "citizenInfo.mobile": searchRegex },
+        ]
+      };
+
+      if (searchSubServiceIds.length > 0) {
+        searchQuery.$or.push({ "classification.subService": { $in: searchSubServiceIds } });
+      }
+
+      query.$and = [
+        { $or: baseConditions },
+        searchQuery
+      ];
+      delete query.$or;
+    }
+
+    const totalCount = await Grievance.countDocuments(query);
+    const pagination = buildPagination({ page, limit, totalCount });
+
+    const grievances = await Grievance.find(query)
+      .select("grievanceId classification.subService address status assignedPriority createdAt")
+      .populate({
+        path: "classification.subService",
+        select: "title titleHindi sla service",
+        populate: {
+          path: "service",
+          select: "title titleHindi department"
+        }
+      })
+      .skip(pagination.offset)
+      .limit(pagination.limit)
+      .sort({ createdAt: -1 });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        docs: grievances,
+        pagination,
+      },
+      message: "Assigned Grievances retrieved successfully",
+    });
+  });
+
+  /**
+   * Submit citizen feedback and star rating for a resolved grievance
+   */
+  static submitFeedback = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { rating, feedbackText } = req.body;
+    const citizen = req.citizen;
+
+    if (!citizen) {
+      throw new ApiError({ status: 401, message: "Unauthorized." });
+    }
+
+    if (!rating || rating < 1 || rating > 5) {
+      throw new ApiError({ status: 400, message: "A valid star rating between 1 and 5 is required." });
+    }
+
+    const grievance = await Grievance.findById(id);
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    // Verify ownership (match citizen _id or fallback to mobile check if created by agent)
+    const isOwner = grievance.citizen?.toString() === citizen._id.toString();
+    const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
+
+    if (!isOwner && !isMobileMatch) {
+      throw new ApiError({ status: 403, message: "You are not authorized to review this grievance." });
+    }
+
+    // Validate Status (Feedback is only for resolved/closed tickets)
+    if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
+      throw new ApiError({ status: 400, message: "Feedback can only be submitted for RESOLVED or CLOSED grievances." });
+    }
+
+    // Prevent overriding existing feedback (immutable)
+    if (grievance.rating) {
+      throw new ApiError({ status: 400, message: "Feedback has already been submitted for this grievance and cannot be changed." });
+    }
+
+    grievance.rating = rating;
+    grievance.feedbackText = feedbackText;
+
+    await grievance.save();
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Feedback submitted successfully. Thank you!",
+    });
+  });
+
+  /**
+   * Update grievance details (by Officer)
+   */
+  static updateGrievanceByOfficer = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const grievance = await Grievance.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Grievance updated successfully.",
+    });
+  });
+
+  /**
+   * Transfer grievance to another officer
+   */
+  static transferGrievance = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { assignedOfficer } = req.body;
+
+    if (!assignedOfficer) {
+      throw new ApiError({ status: 400, message: "New assignedOfficer ID is required." });
+    }
+
+    const grievance = await Grievance.findByIdAndUpdate(
+      id,
+      { assignedOfficer },
+      { new: true, runValidators: true }
+    );
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Grievance transferred successfully.",
+    });
+  });
+
+  /**
+   * Change status of a grievance
+   */
+  static updateGrievanceStatus = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      throw new ApiError({ status: 400, message: "Status is required." });
+    }
+
+    const grievance = await Grievance.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: `Grievance status changed to ${status}.`,
+    });
+  });
+
+  /**
+   * Change priority of a grievance
+   */
+  static updateGrievancePriority = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { assignedPriority } = req.body;
+
+    if (!assignedPriority) {
+      throw new ApiError({ status: 400, message: "assignedPriority is required." });
+    }
+
+    const grievance = await Grievance.findByIdAndUpdate(
+      id,
+      { assignedPriority },
+      { new: true, runValidators: true }
+    );
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: `Grievance priority changed to ${assignedPriority}.`,
+    });
+  });
+
+  /**
+   * Upload Geotagged images for a grievance (by Officer)
+   */
+  static uploadGeotaggedImages = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
+      throw new ApiError({ status: 400, message: "No images provided." });
+    }
+
+    const grievance: any = await Grievance.findById(id).populate("classification.subService");
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    const isGeotagMandatory = grievance.classification?.subService?.geoTagged === true;
+
+    const newGeotaggedImages = [];
+
+    for (const file of req.files as Express.Multer.File[]) {
+      // Only process images
+      if (!file.mimetype.startsWith("image/")) {
+        throw new ApiError({ status: 400, message: `File ${file.originalname} is not a valid image.` });
+      }
+
+      // Extract GPS data using exifr
+      let gpsData;
+      try {
+        gpsData = await exifr.gps(file.buffer);
+      } catch (e) {
+        if (isGeotagMandatory) {
+          throw new ApiError({ status: 400, message: `Failed to parse EXIF data for ${file.originalname}. Geotagging is mandatory for this service.` });
+        }
+      }
+
+      if ((!gpsData || !gpsData.latitude || !gpsData.longitude) && isGeotagMandatory) {
+        throw new ApiError({ 
+          status: 400, 
+          message: `Image ${file.originalname} is not geotagged. This service strictly requires geotagged images. Please ensure location services are enabled on your camera app.` 
+        });
+      }
+
+      const ext = file.originalname.split('.').pop() || "jpg";
+      const folderId = grievance.citizen?.toString() || "agent-created";
+      const key = `grievances/${folderId}/geotag-${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
+      
+      const url = await StorageService.uploadFile(key, file.buffer, file.mimetype);
+
+      const imageRecord: any = {
+        url,
+        fileName: file.originalname,
+        uploadedAt: new Date(),
+      };
+
+      if (gpsData && gpsData.latitude && gpsData.longitude) {
+        imageRecord.coordinates = {
+          latitude: gpsData.latitude,
+          longitude: gpsData.longitude,
+        };
+      }
+
+      newGeotaggedImages.push(imageRecord);
+    }
+
+    if (!grievance.geotaggedImages) {
+      grievance.geotaggedImages = [];
+    }
+
+    grievance.geotaggedImages.push(...newGeotaggedImages);
+    await grievance.save();
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Geotagged images uploaded and verified successfully.",
     });
   });
 

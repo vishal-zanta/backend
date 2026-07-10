@@ -7,6 +7,16 @@ export interface IAttachment {
   uploadedAt: Date;
 }
 
+export interface IGeotaggedImage {
+  url: string;
+  fileName: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+  uploadedAt: Date;
+}
+
 export interface IGrievance extends Document {
   citizen: mongoose.Types.ObjectId;
   citizenInfo?: {
@@ -47,8 +57,10 @@ export interface IGrievance extends Document {
   };
 
     grievanceId?: string;
+    createdBy?: mongoose.Types.ObjectId;
     channel?: mongoose.Types.ObjectId;
     assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL";
+    assignedOfficer?: mongoose.Types.ObjectId;
     status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
     address?: {
       state?: string;
@@ -59,8 +71,10 @@ export interface IGrievance extends Document {
       landmark?: string;
     };
     escalationLevel?: number;
+    geotaggedImages?: IGeotaggedImage[];
   
   rating?: number;
+  feedbackText?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,6 +87,22 @@ const AttachmentSchema = new Schema<IAttachment>(
     },
     fileName: String,
     url: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
+const GeotaggedImageSchema = new Schema<IGeotaggedImage>(
+  {
+    url: String,
+    fileName: String,
+    coordinates: {
+      latitude: Number,
+      longitude: Number,
+    },
     uploadedAt: {
       type: Date,
       default: Date.now,
@@ -126,11 +156,11 @@ const GrievanceSchema = new Schema<IGrievance>(
       attachments: [AttachmentSchema],
     },
     impact: {
-      urgency: {
-        type: String,
-        enum: ["NORMAL", "URGENT", "CRITICAL"],
-        default: "NORMAL",
-      },
+      // urgency: {
+      //   type: String,
+      //   enum: ["NORMAL", "URGENT", "CRITICAL"],
+      //   default: "NORMAL",
+      // },
       affectedBeneficiary: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Option",
@@ -173,7 +203,12 @@ const GrievanceSchema = new Schema<IGrievance>(
       },
       assignedPriority: {
         type: String,
-        enum: ["NORMAL", "URGENT", "CRITICAL"],
+        enum: ["NORMAL", "URGENT", "CRITICAL", "PENDING"],
+        default: "PENDING",
+      },
+      assignedOfficer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
       },
       status: {
         type: String,
@@ -199,11 +234,19 @@ const GrievanceSchema = new Schema<IGrievance>(
         type: Number,
         default: 0,
       },
+      geotaggedImages: [GeotaggedImageSchema],
    
     rating: {
       type: Number,
       min: 1,
       max: 5,
+    },
+    feedbackText: {
+      type: String,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {

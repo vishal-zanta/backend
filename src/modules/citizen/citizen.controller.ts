@@ -17,9 +17,12 @@ export class CitizenController {
       throw new ApiError({ status: 400, message: "mobile, captchaId, and captchaValue are required" });
     }
 
-    // Verify Captcha (throws error if invalid)
+    // Verify Captcha
     try {
-      await CaptchaService.verifyCaptcha(captchaId, captchaValue);
+      const isValid = await CaptchaService.verifyCaptcha(captchaId, captchaValue);
+      if (!isValid) {
+        throw new Error("Invalid Captcha");
+      }
     } catch (error: any) {
       throw new ApiError({ status: 400, message: error.message || "Invalid Captcha" });
     }

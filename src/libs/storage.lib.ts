@@ -48,11 +48,6 @@ export class StorageService {
         finalBuffer = await sharp(fileBuffer)
           .webp({ quality: 90, nearLossless: true })
           .toBuffer();
-          
-        // Since it's webp now, we append .webp to the end of the key if it doesn't have it
-        if (!key.endsWith(".webp")) {
-          key = `${key}.webp`;
-        }
       } catch (error) {
         console.warn("[StorageService] Image compression failed, saving original file...", error);
       }
