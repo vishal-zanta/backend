@@ -6,6 +6,8 @@ import { ObjectId } from "mongoose";
 import { TimelineService } from "../timeline/timeline.service.js";
 import { User } from "../users/user.model.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
+import { SubService } from "../services/subService.model.js";
+import { FieldVisit } from "../fieldVisit/fieldVisit.model.js";
 
 // Helper to determine the Attachment schema 'type' from mimetype
 const getAttachmentType = (mimetype: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" => {
@@ -119,6 +121,22 @@ const officer:any=await User.findById(createdBy).populate("role").lean();
         description:timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, officer?.role?.level || "CITIZEN")
       }
     });
+
+    // Handle Field Visit Auto-Generation
+    if (classification?.subService) {
+      const subServiceDoc = await SubService.findById(classification.subService);
+      if (subServiceDoc && subServiceDoc.fieldVisit) {
+        const visitSeq = await getNextSequenceValue(`visit_${year}`);
+        const visitSeqString = String(visitSeq).padStart(4, "0");
+        const visitId = `FV-${year}-${visitSeqString}`;
+        
+        await FieldVisit.create({
+          visitId,
+          grievance: newGrievance._id,
+          status: 'PENDING'
+        });
+      }
+    }
 
     return newGrievance;
   }

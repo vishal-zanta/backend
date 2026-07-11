@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { GrievanceAudit } from "./grievanceAudit.model.js";
 
 export interface IAttachment {
   type: "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT";
@@ -253,5 +254,68 @@ const GrievanceSchema = new Schema<IGrievance>(
     timestamps: true,
   },
 );
+
+// Pre-save hook to capture changes before they are committed
+GrievanceSchema.pre("save", function () {
+  if (this.isNew) {
+    this.$locals.operation = "CREATE";
+    this.$locals.changes = this.toObject();
+  } else {
+    this.$locals.operation = "UPDATE";
+    const changes: any = {};
+    const modifiedPaths = this.modifiedPaths();
+    for (const path of modifiedPaths) {
+      if (path !== "updatedAt") {
+        changes[path] = this.get(path);
+      }
+    }
+    this.$locals.changes = changes;
+  }
+  
+});
+
+// Post-save hook to commit the audit log to DB
+GrievanceSchema.post("save", async function (doc, next) {
+  try {
+    const operation = this.$locals.operation || "UPDATE";
+    const changes = this.$locals.changes || {};
+
+    if (operation === "UPDATE" && Object.keys(changes).length === 0) {
+      return next();
+    }
+
+    await GrievanceAudit.create({
+      grievance: doc._id,
+      operation: operation as "CREATE" | "UPDATE",
+      changes: changes,
+    });
+  } catch (error) {
+    console.error("Audit Log Error (save):", error);
+  }
+  next();
+});
+
+// Post-findOneAndUpdate hook to capture bypass updates (like findByIdAndUpdate)
+GrievanceSchema.post("findOneAndUpdate", async function (doc, next) {
+  if (!doc) return next();
+  try {
+    const update = this.getUpdate() as any;
+    let changes = update;
+    
+    // Extract actual $set payload if it exists to keep logs clean
+    if (update && update.$set) {
+      changes = update.$set;
+    }
+
+    await GrievanceAudit.create({
+      grievance: doc._id,
+      operation: "UPDATE",
+      changes: changes,
+    });
+  } catch (err) {
+    console.error("Audit Log Error (findOneAndUpdate):", err);
+  }
+  next();
+});
 
 export const Grievance = mongoose.model<IGrievance>("Grievance", GrievanceSchema);

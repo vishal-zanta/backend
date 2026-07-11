@@ -13,6 +13,7 @@ import captchaRoutes from "../captcha/captcha.routes.js";
 import citizenRoutes from "../citizen/citizen.routes.js";
 import grievanceRoutes from "../grievance/grievance.routes.js";
 import optionsRoutes from "../options/option.routes.js";
+import fieldVisitRoutes from "../fieldVisit/fieldVisit.routes.js";
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use("/sla-configs", slaConfigRoutes);
 router.use("/officer-taggings", officerTaggingRoutes);
 router.use("/workflow-levels", workflowLevelRoutes);
 router.use("/grievances", grievanceRoutes);
+router.use("/visits", fieldVisitRoutes);
 
 export default router;
