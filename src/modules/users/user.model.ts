@@ -11,6 +11,7 @@ export interface IUser extends Document {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   isAdmin: boolean;
   escalatedCount: number;
+  lastLogin?: Date;
   district: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -65,6 +66,9 @@ const userSchema = new Schema<IUser>({
   escalatedCount: {
     type: Number,
     default: 0
+  },
+  lastLogin: {
+    type: Date
   }
 }, {
   timestamps: true

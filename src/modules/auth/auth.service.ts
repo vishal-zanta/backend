@@ -5,7 +5,7 @@ import config from "../../config/index.js";
 import { StatusCodes } from "http-status-codes";
 import { ApiError } from "../../middlewares/errorHandler.js";
 
-// const JWT_EXPIRES_IN = "7d";
+const JWT_EXPIRES_IN = "1d";
 
 
 
@@ -21,7 +21,7 @@ export function generateJwtToken(payload: Record<string, any>): string {
     (config as any).jwt?.secret ||
     process.env.JWT_SECRET;
 
-  // const expiresIn = JWT_EXPIRES_IN;
+  const expiresIn = JWT_EXPIRES_IN;
 
   if (!secret) {
     throw new ApiError({
@@ -30,5 +30,5 @@ export function generateJwtToken(payload: Record<string, any>): string {
     });
   }
 
-  return jwt.sign(payload, secret as string);
+  return jwt.sign(payload, secret as string, { expiresIn });
 }

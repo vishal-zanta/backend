@@ -18,6 +18,7 @@ interface Config {
   databaseUrl: string;
   jwtSecret: string;
   saltRounds: number;
+  googleRecaptchaSecret: string;
 }
 
 /**
@@ -37,6 +38,7 @@ const config: Config = {
   databaseUrl: process.env.DATABASE_URL || "",
   jwtSecret: process.env.JWT_SECRET || "",
   saltRounds: parseNumber(process.env.SALT_ROUNDS, 10),
+  googleRecaptchaSecret: process.env.GOOGLE_RECAPTCHA_SECRET ||"",
 };
 
 if (!config.databaseUrl) {

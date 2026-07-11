@@ -61,7 +61,11 @@ export class ServiceController {
     if (!service) {
       throw new ApiError({ status: 404, message: 'Service not found' });
     }
-    return new ApiResponse({ res, status: 200, message: 'Service deleted successfully' });
+
+    // Cascade deactivate all sub-services related to this service
+    await SubService.updateMany({ service: id }, { active: false });
+
+    return new ApiResponse({ res, status: 200, message: 'Service and its sub-services deleted successfully' });
   });
 
   // SubService Methods

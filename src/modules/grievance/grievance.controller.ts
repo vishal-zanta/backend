@@ -195,7 +195,7 @@ export class GrievanceController {
    * Get single grievance details for the logged-in citizen
    */
   static getCitizenGrievanceById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const citizen = req.citizen;
 
     if (!citizen) {
@@ -652,7 +652,7 @@ export class GrievanceController {
    * Get single grievance details (for Admin/General) without access restrictions
    */
   static getAdminGrievanceById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     const grievance = await Grievance.findById(id).populate({
       path: "classification.subService",
@@ -681,7 +681,7 @@ export class GrievanceController {
    * Get single grievance details for the logged-in officer
    */
   static getOfficerGrievanceById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const officerId = (req as any).user?.id || (req as any).user?._id;
 
     if (!officerId) {

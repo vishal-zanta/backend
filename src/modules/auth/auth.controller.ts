@@ -8,10 +8,18 @@ import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
 import { resetPasswordEmailTemplate } from '../../templates/resetPassword.template.js';
+import { CaptchaService } from '../captcha/captcha.service.js';
 
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password,token } = req.body;
+    const { email, password,token,captchaToken } = req.body;
+
+    // TODO: 
+//  const isCaptchaValid = await CaptchaService.verifyGoogleCapcha(captchaToken);
+    // if (!isCaptchaValid) {
+    //   throw new ApiError({ status: 400, message: 'Invalid captcha' });
+    // }
+
     if (token) {
       try {
         const decryptedEmail = EncryptionHelper.decrypt(token);
@@ -22,6 +30,7 @@ export class AuthController {
         }
 
         user.password = password;
+        user.lastLogin = new Date();
         await user.save();
 
         const userData = PasswordHelper.createUserPayload(user, user.role);
@@ -36,6 +45,9 @@ export class AuthController {
 
     const user = await User.findOne({ email, status: 'ACTIVE' }).populate('role');
     if (user && await PasswordHelper.compare(password, user.password)) {
+      user.lastLogin = new Date();
+      await user.save();
+      
       const userData = PasswordHelper.createUserPayload(user, user.role);
       return new ApiResponse({ res, status: 200, data: userData, message: 'Login successful' });
     }

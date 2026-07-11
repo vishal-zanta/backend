@@ -7,6 +7,7 @@ import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
 import { welcomeEmailTemplate } from '../../templates/welcomeEmail.template.js';
+import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
 
 function generatePrefix(designation: string): string {
   return designation
@@ -117,13 +118,46 @@ export class UserController {
       ];
     }
 
+    const untagged = req.query.untagged;
+    const subServices = req.query.subServices; 
+
+    if (untagged === 'true' || subServices) {
+      // Find matching taggings
+      let taggingQuery: any = { active: true };
+      
+      if (subServices) {
+        let subServiceArray: string[] = [];
+        
+         if (typeof subServices === 'string') {
+          subServiceArray = subServices.split(',');
+        }
+        
+        taggingQuery.services = { $in: subServiceArray };
+        
+        const matchedTaggings = await OfficerTagging.find(taggingQuery).select('officer');
+        const matchedOfficerIds = matchedTaggings.map(t => t.officer);
+        
+        query._id = { ...query._id, $in: matchedOfficerIds };
+      }
+      
+      if (untagged === 'true') {
+        const allTaggings = await OfficerTagging.find({ active: true, services: { $exists: true, $not: { $size: 0 } } }).select('officer');
+        const allTaggedOfficerIds = allTaggings.map(t => t.officer);
+        
+        // If we already have a $in query (from subServices), we merge them via $nin.
+        query._id = { ...query._id, $nin: allTaggedOfficerIds };
+      }
+    }
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
     const users = await User.find(query)
       .populate('role')
+      .populate('district')
       .select('-password')
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
       
