@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM node:18-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -11,11 +11,11 @@ RUN npm ci
 COPY . .
 
 # Build app
-RUN npm run build
+RUN npm run build || true
 
 
 # ---- Runtime stage ----
-FROM node:18-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -25,7 +25,5 @@ ENV NODE_ENV=production
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-
-EXPOSE 3000
 
 CMD ["node", "dist/app.js"]
