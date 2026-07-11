@@ -18,7 +18,7 @@ export class FieldVisitController {
     const officerId = req.user?.id;
     if (!officerId) throw new ApiError({ status: 401, message: 'Unauthorized' });
 
-    const { search, schedule, page = 1, limit = 10 } = req.query;
+    const { search, schedule,status, page = 1, limit = 10 } = req.query;
 
     const matchQuery: any = {};
     if (search && typeof search === 'string') {
@@ -48,6 +48,7 @@ export class FieldVisitController {
       },
       { $unwind: '$grievance' },
       { $match: { 'grievance.assignedOfficer': new mongoose.Types.ObjectId(officerId) } },
+      {$match: status ? { status } : {} },
       {
         $lookup: {
           from: 'subservices',
