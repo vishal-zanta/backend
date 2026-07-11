@@ -47,11 +47,12 @@ export class GrievanceService {
     // Handle File Uploads
     const attachments: IAttachment[] = [];
     if (files && Array.isArray(files)) {
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const ext = file.originalname.split('.').pop() || "bin";
-        // Create a unique S3-like key
+        // Create a strictly unique key by appending the loop index
         const folderId = citizen?._id ? citizen._id.toString() : "agent-created";
-        const key = `grievances/${folderId}/${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
+        const key = `grievances/${folderId}/${Date.now()}-${i}-${Math.floor(Math.random() * 10000)}.${ext}`;
         
         const url = await StorageService.uploadFile(key, file.buffer, file.mimetype);
         

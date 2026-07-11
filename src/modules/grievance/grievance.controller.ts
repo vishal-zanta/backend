@@ -649,7 +649,9 @@ export class GrievanceController {
 
     const newGeotaggedImages = [];
 
-    for (const file of req.files as Express.Multer.File[]) {
+    const files = req.files as Express.Multer.File[];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       // Only process images
       if (!file.mimetype.startsWith("image/")) {
         throw new ApiError({ status: 400, message: `File ${file.originalname} is not a valid image.` });
@@ -674,7 +676,7 @@ export class GrievanceController {
 
       const ext = file.originalname.split('.').pop() || "jpg";
       const folderId = grievance.citizen?.toString() || "agent-created";
-      const key = `grievances/${folderId}/geotag-${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
+      const key = `grievances/${folderId}/geotag-${Date.now()}-${i}-${Math.floor(Math.random() * 10000)}.${ext}`;
       
       const url = await StorageService.uploadFile(key, file.buffer, file.mimetype);
 

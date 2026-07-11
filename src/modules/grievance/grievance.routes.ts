@@ -7,7 +7,7 @@ import { authProtect } from "../../middlewares/authMiddleware.js";
 const router = Router();
 
 
-router.post("/citizen",  citizenAuthProtect,  upload.array("attachments", 5),  GrievanceController.createGrievance);
+router.post("/citizen",  citizenAuthProtect,  upload.any(),  GrievanceController.createGrievance);
 
 // Get all grievances for the logged-in citizen
 router.get("/citizen", citizenAuthProtect, GrievanceController.getCitizenGrievances);
@@ -35,7 +35,7 @@ router.get(
 );
 
 // Create a grievance by an officer on behalf of a citizen
-router.post("/officer/create",  authProtect,  upload.array("files", 5),  GrievanceController.createGrievanceByAgent);
+router.post("/officer/create",  authProtect,  upload.any(),  GrievanceController.createGrievanceByAgent);
 
 // Update entire grievance details by an officer
 router.put("/officer/:id", authProtect, GrievanceController.updateGrievanceByOfficer);
@@ -53,7 +53,7 @@ router.patch("/officer/:id/priority", authProtect, GrievanceController.updateGri
 router.post(
   "/officer/:id/geotagged-images",
   authProtect,
-  upload.array("files", 5), // allow up to 5 images
+  upload.any(), // allow any field names to avoid 'unexpected field'
   GrievanceController.uploadGeotaggedImages,
 );
 
