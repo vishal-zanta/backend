@@ -440,6 +440,19 @@ export class GrievanceController {
 
     await grievance.save();
 
+    await TimelineService.logEvent({
+      grievanceId: grievance._id as any,
+      type: "CITIZEN_FEEDBACK",
+      actor: {
+        id: citizen._id as any,
+        name: "CITIZEN",
+        role: "CITIZEN"
+      },
+      metadata: {
+        description: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
+      }
+    });
+
     return new ApiResponse({
       res,
       status: 200,
@@ -455,10 +468,38 @@ export class GrievanceController {
     const { id } = req.params;
     const updateData = req.body;
 
+    const oldGrievance = await Grievance.findById(id);
+    if (!oldGrievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    const oldPhotosCount = oldGrievance.geotaggedImages?.length || 0;
+    
     const grievance = await Grievance.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    const newPhotosCount = grievance.geotaggedImages?.length || 0;
+    if (newPhotosCount > oldPhotosCount && req.user) {
+      const addedPhotos = newPhotosCount - oldPhotosCount;
+      const lastPhoto = grievance.geotaggedImages?.[grievance.geotaggedImages.length - 1];
+      const lat = lastPhoto?.coordinates?.latitude || "N/A";
+      const lng = lastPhoto?.coordinates?.longitude || "N/A";
+      
+      await TimelineService.logEvent({
+        grievanceId: grievance._id as any,
+        type: "RESOLUTION_PHOTO",
+        actor: {
+          id: req.user.id as any,
+          name: "OFFICER", // Would normally lookup user
+          role: "OFFICER"
+        },
+        metadata: {
+          description: timelineTemplates.RESOLUTION_PHOTO(addedPhotos, lat, lng)
+        }
+      });
     }
 
     return new ApiResponse({
@@ -503,7 +544,7 @@ export class GrievanceController {
    */
   static updateGrievanceStatus = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, remarks } = req.body;
 
     if (!status) {
       throw new ApiError({ status: 400, message: "Status is required." });
@@ -517,6 +558,26 @@ export class GrievanceController {
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    if (req.user) {
+      if (status === "RESOLVED") {
+        await TimelineService.logEvent({
+          grievanceId: grievance._id as any,
+          type: "RESOLVED",
+          actor: { id: req.user.id as any, name: "OFFICER", role: "OFFICER" },
+          metadata: { description: timelineTemplates.RESOLVED(remarks || "Grievance resolved.") }
+        });
+      } else if (status === "CLOSED") {
+        // Find how many hours it took from creation to closed (approx)
+        const hours = Math.round((Date.now() - new Date(grievance.createdAt).getTime()) / (1000 * 60 * 60));
+        await TimelineService.logEvent({
+          grievanceId: grievance._id as any,
+          type: "COMPLAINT_CLOSED",
+          actor: { id: req.user.id as any, name: "OFFICER", role: "OFFICER" },
+          metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
+        });
+      }
     }
 
     return new ApiResponse({
