@@ -176,9 +176,9 @@ export class GrievanceController {
           select: "title titleHindi department"
         }
       })
+      .sort({ createdAt: -1 })
       .skip(pagination.offset)
-      .limit(pagination.limit)
-      .sort({ createdAt: -1 });
+      .limit(pagination.limit);
 
     return new ApiResponse({
       res,
@@ -206,6 +206,12 @@ export class GrievanceController {
       path: "classification.subService",
       populate: {
         path: "service"
+      }
+    }).populate({
+      path: "assignedOfficer",
+      select: "name role",
+      populate: {
+        path: "role"
       }
     });
 
@@ -285,9 +291,9 @@ export class GrievanceController {
           select: "title titleHindi department"
         }
       })
+      .sort({ createdAt: -1 })
       .skip(pagination.offset)
-      .limit(pagination.limit)
-      .sort({ createdAt: -1 });
+      .limit(pagination.limit);
 
     return new ApiResponse({
       res,
@@ -380,9 +386,9 @@ export class GrievanceController {
           select: "title titleHindi department"
         }
       })
+      .sort({ createdAt: -1 })
       .skip(pagination.offset)
-      .limit(pagination.limit)
-      .sort({ createdAt: -1 });
+      .limit(pagination.limit);
 
     return new ApiResponse({
       res,
@@ -720,6 +726,12 @@ export class GrievanceController {
     const grievance = await Grievance.findById(id).populate({
       path: "classification.subService",
       populate: { path: "service" }
+    }).populate({
+      path: "assignedOfficer",
+      select: "name role",
+      populate: {
+        path: "role"
+      }
     });
 
     if (!grievance) {
@@ -754,6 +766,12 @@ export class GrievanceController {
     const grievance = await Grievance.findById(id).populate({
       path: "classification.subService",
       populate: { path: "service" }
+    }).populate({
+      path: "assignedOfficer",
+      select: "name role",
+      populate: {
+        path: "role"
+      }
     });
 
     if (!grievance) {

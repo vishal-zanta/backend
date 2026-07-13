@@ -30,7 +30,7 @@ export class RoleController {
     const skip = (page - 1) * limit;
 
     const query = { active: true };
-    const roles = await Role.find(query).skip(skip).limit(limit);
+    const roles = await Role.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Role.countDocuments(query);
 
     return new ApiResponse({ 

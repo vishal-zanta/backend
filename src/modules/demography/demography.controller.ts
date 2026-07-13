@@ -32,7 +32,7 @@ export class DemographyController {
     const skip = (page - 1) * limit;
 
     const query = { active: true };
-    const demographies = await Demography.find(query).skip(skip).limit(limit);
+    const demographies = await Demography.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Demography.countDocuments(query);
 
     return new ApiResponse({ 

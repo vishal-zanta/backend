@@ -31,7 +31,7 @@ export class ComplaintSourceController {
     const skip = (page - 1) * limit;
 
     const query = { active: true };
-    const sources = await ComplaintSource.find(query).skip(skip).limit(limit);
+    const sources = await ComplaintSource.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await ComplaintSource.countDocuments(query);
 
     return new ApiResponse({ 
