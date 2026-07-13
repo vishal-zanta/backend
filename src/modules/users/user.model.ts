@@ -14,6 +14,7 @@ export interface IUser extends Document {
   lastLogin?: Date;
   district: mongoose.Types.ObjectId;
   adminLogout?: Date;
+  isBreak: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,6 +74,10 @@ const userSchema = new Schema<IUser>({
   },
   adminLogout: {
     type: Date
+  },
+  isBreak: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

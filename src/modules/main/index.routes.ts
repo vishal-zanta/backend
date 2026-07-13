@@ -15,6 +15,7 @@ import grievanceRoutes from "../grievance/grievance.routes.js";
 import optionsRoutes from "../options/option.routes.js";
 import fieldVisitRoutes from "../fieldVisit/fieldVisit.routes.js";
 import activityRoutes from "../activity/activity.routes.js";
+import breakRoutes from "../breaks/break.routes.js";
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use("/workflow-levels", workflowLevelRoutes);
 router.use("/grievances", grievanceRoutes);
 router.use("/visits", fieldVisitRoutes);
 router.use("/activity", activityRoutes);
+router.use("/breaks", breakRoutes);
 
 export default router;
