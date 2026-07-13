@@ -14,7 +14,7 @@ import { User } from "../modules/users/user.model.js";
 
   phone?: string;
   status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
-
+  adminLogout?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +32,7 @@ declare global {
 type TokenPayload = jwt.JwtPayload & {
   id?: string;
   userId?: string;
+  iat?: number;
 };
 
 /**
@@ -170,6 +171,18 @@ export const authProtect = async (
     }
 
     const user = await fetchUser(String(userId));
+
+    if (user.adminLogout && payload.iat) {
+      // Compare in seconds because JWT iat only has second precision
+      const adminLogoutSecs = Math.floor(user.adminLogout.getTime() / 1000);
+      if (adminLogoutSecs > payload.iat) {
+        throw new ApiError({
+          status: StatusCodes.UNAUTHORIZED,
+          message: "Session expired. Please login again.",
+        });
+      }
+    }
+
     req.user = user;
     next();
   } catch (error) {

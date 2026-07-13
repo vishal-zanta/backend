@@ -14,6 +14,7 @@ import citizenRoutes from "../citizen/citizen.routes.js";
 import grievanceRoutes from "../grievance/grievance.routes.js";
 import optionsRoutes from "../options/option.routes.js";
 import fieldVisitRoutes from "../fieldVisit/fieldVisit.routes.js";
+import activityRoutes from "../activity/activity.routes.js";
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use("/officer-taggings", officerTaggingRoutes);
 router.use("/workflow-levels", workflowLevelRoutes);
 router.use("/grievances", grievanceRoutes);
 router.use("/visits", fieldVisitRoutes);
+router.use("/activity", activityRoutes);
 
 export default router;

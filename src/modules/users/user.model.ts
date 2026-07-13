@@ -13,6 +13,7 @@ export interface IUser extends Document {
   escalatedCount: number;
   lastLogin?: Date;
   district: mongoose.Types.ObjectId;
+  adminLogout?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +69,9 @@ const userSchema = new Schema<IUser>({
     default: 0
   },
   lastLogin: {
+    type: Date
+  },
+  adminLogout: {
     type: Date
   }
 }, {

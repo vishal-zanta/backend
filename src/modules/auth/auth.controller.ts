@@ -139,6 +139,24 @@ export class AuthController {
     });
   });
 
- 
- 
+  // ================= LOGOUT =================
+  static logout = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.user as any;
+    
+    const user = await User.findById(id);
+    if (!user) {
+      throw new ApiError({ status: 404, message: 'User not found' });
+    }
+
+    // We reuse the adminLogout logic to invalidate tokens issued before this time
+    user.adminLogout = new Date();
+    await user.save();
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      message: 'Logged out successfully'
+    });
+  });
+
 }

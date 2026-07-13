@@ -10,5 +10,6 @@ router.post('/forgot-password', AuthController.forgotPassword);
 
 router.put("/user",authProtect,AuthController.updateProfile);
 router.get("/profile", authProtect,AuthController.getProfile);
+router.post("/logout", authProtect, AuthController.logout);
 
 export default router;
