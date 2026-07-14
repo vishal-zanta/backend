@@ -41,8 +41,9 @@ export class GrievanceService {
     citizenInfo: any;
     files?: Express.Multer.File[];
     createdBy?: ObjectId;
+    channel?: any;
   }) {
-    const { citizen, classification, evidence, impact, communication, address, citizenInfo, files, createdBy } = payload;
+    const { citizen, classification, evidence, impact, communication, address, citizenInfo, files, createdBy, channel } = payload;
 
     // Handle File Uploads
     const attachments: IAttachment[] = [];
@@ -99,7 +100,8 @@ export class GrievanceService {
       grievanceId,
       address,
       status: "OPEN",
-      createdBy
+      createdBy,
+      channel
     };
     
     if (citizen && citizen._id) {

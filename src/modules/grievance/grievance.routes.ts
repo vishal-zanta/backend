@@ -24,6 +24,9 @@ router.get("/all", authProtect, GrievanceController.getAllGrievances);
 // Get single grievance details for admin/general
 router.get("/all/:id", authProtect, GrievanceController.getAdminGrievanceById);
 
+// Get admin dashboard analytics
+router.get("/admin/dashboard-analytics", authProtect, GrievanceController.getAdminDashboardAnalytics);
+
 // Get officer dashboard analytics
 router.get("/officer/dashboard-analytics", authProtect, GrievanceController.getOfficerDashboardAnalytics);
 

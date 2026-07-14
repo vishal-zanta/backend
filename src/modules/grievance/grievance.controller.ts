@@ -26,6 +26,7 @@ export class GrievanceController {
     // Parse nested objects from form-data.
     // In form-data, objects like 'classification' are often sent as JSON strings.
     let classification, evidence, impact, communication, address, citizenInfo;
+    const channel = req.body.channel;
     console.log("Received form-data:", req.body);
     try {
       classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
@@ -51,6 +52,7 @@ export class GrievanceController {
       communication,
       address,
       citizenInfo,
+      channel,
       files: req.files as Express.Multer.File[] | undefined,
     });
 
@@ -70,6 +72,7 @@ export class GrievanceController {
     
     // Parse nested objects from form-data.
     let classification, evidence, impact, communication, address, citizenInfo;
+    const channel = req.body.channel;
     try {
       classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
       evidence = typeof req.body.evidence === "string" ? JSON.parse(req.body.evidence) : req.body.evidence;
@@ -106,6 +109,7 @@ export class GrievanceController {
       communication,
       address,
       citizenInfo,
+      channel,
       files: req.files as Express.Multer.File[] | undefined,
       createdBy: (req as any).user._id, // Officer/Agent creating the grievance
     });
@@ -241,6 +245,195 @@ export class GrievanceController {
       status: 200,
       data: responseData,
       message: "Grievance details retrieved successfully",
+    });
+  });
+
+  /**
+   * Get dashboard analytics for admin
+   */
+  static getAdminDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
+    const { filter = "week" } = req.query;
+
+    let currentStart = new Date();
+    let lastStart = new Date();
+    const now = new Date();
+
+    if (filter === "week") {
+      currentStart.setDate(now.getDate() - 7);
+      lastStart.setDate(now.getDate() - 14);
+    } else if (filter === "month") {
+      currentStart.setMonth(now.getMonth() - 1);
+      lastStart.setMonth(now.getMonth() - 2);
+    } else if (filter === "year") {
+      currentStart.setFullYear(now.getFullYear() - 1);
+      lastStart.setFullYear(now.getFullYear() - 2);
+    } else if (filter === "lifetime") {
+      currentStart = new Date(0);
+      lastStart = new Date(0);
+    } else {
+      currentStart.setDate(now.getDate() - 7);
+      lastStart.setDate(now.getDate() - 14);
+    }
+
+    const getMetrics = async (startDate: Date, endDate: Date) => {
+      const matchCondition = { createdAt: { $gte: startDate, $lt: endDate } };
+      const stats = await Grievance.aggregate([
+        { $match: matchCondition },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            active: {
+              $sum: { $cond: [{ $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]] }, 1, 0] }
+            },
+            resolved: {
+              $sum: { $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0] }
+            },
+            escalated: {
+              $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] }
+            },
+            slaCompliant: {
+              $sum: { $cond: [{ $in: ["$escalationLevel", [0, null]] }, 1, 0] }
+            },
+            ratingSum: {
+              $sum: { $cond: [{ $ifNull: ["$rating", false] }, "$rating", 0] }
+            },
+            ratingCount: {
+              $sum: { $cond: [{ $ifNull: ["$rating", false] }, 1, 0] }
+            }
+          }
+        }
+      ]);
+
+      const result = stats[0] || {
+        total: 0, active: 0, resolved: 0, escalated: 0,
+        slaCompliant: 0, ratingSum: 0, ratingCount: 0
+      };
+
+      return {
+        totalComplaints: result.total,
+        active: result.active,
+        resolved: result.resolved,
+        escalated: result.escalated,
+        slaCompliance: result.total > 0 ? Number(((result.slaCompliant / result.total) * 100).toFixed(1)) : 0,
+        satisfaction: result.ratingCount > 0 ? Number((result.ratingSum / result.ratingCount).toFixed(1)) : 0
+      };
+    };
+
+    const currentPeriod = await getMetrics(currentStart, now);
+    let previousPeriod = null;
+    if (filter !== "lifetime") {
+      previousPeriod = await getMetrics(lastStart, currentStart);
+    }
+
+    // Charts data only for current period
+    const formatStr = filter === "year" || filter === "lifetime" ? "%Y-%m" : "%Y-%m-%d";
+
+    const trendRaised = await Grievance.aggregate([
+      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: formatStr, date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    const trendResolved = await Grievance.aggregate([
+      { $match: { updatedAt: { $gte: currentStart, $lt: now }, status: { $in: ["RESOLVED", "CLOSED"] } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: formatStr, date: "$updatedAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    const bySubservice = await Grievance.aggregate([
+      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+      {
+        $group: {
+          _id: "$classification.subService",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: "subservices",
+          localField: "_id",
+          foreignField: "_id",
+          as: "subServiceDetails"
+        }
+      },
+      { $unwind: { path: "$subServiceDetails", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          name: "$subServiceDetails.name",
+          count: 1
+        }
+      }
+    ]);
+
+    const byDistrict = await Grievance.aggregate([
+      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+      {
+        $group: {
+          _id: { $ifNull: ["$address.district", "Unknown"] },
+          total: { $sum: 1 },
+          resolved: { $sum: { $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ["$status", "OPEN"] }, 1, 0] } },
+          inProgress: { $sum: { $cond: [{ $eq: ["$status", "IN_PROGRESS"] }, 1, 0] } },
+          escalated: { $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    const bySource = await Grievance.aggregate([
+      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+      {
+        $group: {
+          _id: { $ifNull: ["$channel", "Unknown"] },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: "complaintsources",
+          localField: "_id",
+          foreignField: "_id",
+          as: "channelDetails"
+        }
+      },
+      { $unwind: { path: "$channelDetails", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          name: { $ifNull: ["$channelDetails.title", "$_id"] },
+          count: 1
+        }
+      }
+    ]);
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        metrics: {
+          currentPeriod,
+          previousPeriod
+        },
+        charts: {
+          trend: {
+            raised: trendRaised,
+            resolved: trendResolved
+          },
+          bySubservice,
+          byDistrict,
+          bySource
+        }
+      },
+      message: "Admin dashboard analytics fetched successfully"
     });
   });
 
