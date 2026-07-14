@@ -6,6 +6,7 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import { ApiError } from "../../middlewares/errorHandler.js";
 import ApiResponse from "../../utils/apiResponse.js";
 import { PasswordHelper } from "../../utils/passwordHelper.js";
+import { Grievance } from "../grievance/grievance.model.js";
 export class CitizenController {
   /**
    * Validates Captcha and sends an OTP to the citizen's mobile number.
@@ -116,6 +117,59 @@ export class CitizenController {
       status: 200,
       data: citizen,
       message: "Profile updated successfully",
+    });
+  });
+
+  /**
+   * Retrieves dashboard analytics for the logged-in citizen.
+   */
+  static getDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
+    const citizen = req.citizen;
+
+    if (!citizen) {
+      throw new ApiError({ status: 401, message: "Unauthorized" });
+    }
+
+    const baseConditions: any[] = [
+      { citizen: citizen._id },
+      { "citizenInfo.mobile": citizen.mobile },
+    ];
+    if (citizen.alternateMobile) {
+      baseConditions.push({ "citizenInfo.mobile": citizen.alternateMobile });
+    }
+
+    const aggregation = await Grievance.aggregate([
+      { $match: { $or: baseConditions } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    let totalComplaints = 0;
+    let inProgress = 0;
+    let resolved = 0;
+    let escalated = 0;
+
+    aggregation.forEach(item => {
+      totalComplaints += item.count;
+      if (item._id === "IN_PROGRESS") inProgress = item.count;
+      if (item._id === "RESOLVED") resolved = item.count;
+      if (item._id === "ESCALATED") escalated = item.count;
+    });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        totalComplaints,
+        inProgress,
+        resolved,
+        escalated
+      },
+      message: "Dashboard analytics retrieved successfully"
     });
   });
 }

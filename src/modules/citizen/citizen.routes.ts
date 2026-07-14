@@ -11,5 +11,6 @@ router.post("/login", CitizenController.login);
 // Protected routes (requires JWT)
 router.get("/profile", citizenAuthProtect, CitizenController.getProfile);
 router.put("/profile", citizenAuthProtect, CitizenController.updateProfile);
+router.get("/dashboard-analytics", citizenAuthProtect, CitizenController.getDashboardAnalytics);
 
 export default router;

@@ -7,6 +7,8 @@ import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { getIO } from '../../config/socket.js';
 import { StorageService } from '../../libs/storage.lib.js';
+import { User } from '../users/user.model.js';
+import { buildPagination } from '../../utils/helpers.js';
 
 export class ChatController {
   
@@ -25,17 +27,23 @@ export class ChatController {
       throw new ApiError({ status: 400, message: 'Cannot chat with yourself' });
     }
 
+    const populateConfig = {
+      path: 'participants',
+      select: 'name email isBreak status role',
+      populate: { path: 'role' }
+    };
+
     // Check if conversation exists
     let conversation = await Conversation.findOne({
       participants: { $all: [currentUserId, targetUserId] }
-    }).populate('participants', 'name email isBreak status');
+    }).populate(populateConfig);
 
     if (!conversation) {
       conversation = new Conversation({
         participants: [currentUserId, targetUserId]
       });
       await conversation.save();
-      await conversation.populate('participants', 'name email isBreak status');
+      await conversation.populate(populateConfig);
     }
 
     return new ApiResponse({
@@ -47,22 +55,102 @@ export class ChatController {
   });
 
   /**
-   * List all conversations for the logged in user
+   * List all conversations for the logged in user with pagination
    */
   static getConversations = asyncHandler(async (req: Request, res: Response) => {
     const { id: currentUserId } = req.user as any;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
 
-    const conversations = await Conversation.find({
-      participants: currentUserId
-    })
-    .populate('participants', 'name email isBreak status')
-    .populate('lastMessage')
-    .sort({ updatedAt: -1 });
+    const totalConversations = await Conversation.countDocuments({ participants: currentUserId });
+
+    // We need existingParticipantIds to know how many "other users" exist
+    const allConversations = await Conversation.find({ participants: currentUserId }).select('participants');
+    const existingParticipantIds = new Set<string>();
+    allConversations.forEach((conv: any) => {
+      conv.participants.forEach((p: any) => {
+        if (p && p.toString() !== currentUserId.toString()) {
+          existingParticipantIds.add(p.toString());
+        }
+      });
+    });
+
+    const totalOtherUsers = await User.countDocuments({
+      _id: { $ne: currentUserId, $nin: Array.from(existingParticipantIds) },
+      status: 'ACTIVE'
+    });
+
+    const totalCount = totalConversations + totalOtherUsers;
+    const pagination = buildPagination({ page, limit, totalCount });
+
+    let paginatedConversations: any[] = [];
+    let dummyConversations: any[] = [];
+
+    if (offset < totalConversations) {
+      // Fetch actual conversations
+      paginatedConversations = await Conversation.find({
+        participants: currentUserId
+      })
+      .populate({
+        path: 'participants',
+        select: 'name email isBreak status role',
+        populate: { path: 'role' }
+      })
+      .populate('lastMessage')
+      .sort({ updatedAt: -1 })
+      .skip(offset)
+      .limit(limit);
+
+      const remainingLimit = limit - paginatedConversations.length;
+      if (remainingLimit > 0) {
+        // Fetch some users to fill the rest of the page
+        const otherUsers = await User.find({
+          _id: { $ne: currentUserId, $nin: Array.from(existingParticipantIds) },
+          status: 'ACTIVE'
+        })
+        .populate('role').select('name email isBreak status role')
+        .skip(0)
+        .limit(remainingLimit);
+
+        dummyConversations = otherUsers.map(user => ({
+          _id: `new_${user._id}`,
+          isNewConversation: true,
+          participants: [{ _id: currentUserId }, user],
+          unreadCounts: new Map(),
+          updatedAt: new Date(0)
+        }));
+      }
+    } else {
+      // Only fetch users
+      const userOffset = offset - totalConversations;
+      const otherUsers = await User.find({
+        _id: { $ne: currentUserId, $nin: Array.from(existingParticipantIds) },
+        status: 'ACTIVE'
+      })
+      .populate('role').select('name email isBreak status role')
+      .skip(userOffset)
+      .limit(limit);
+
+      dummyConversations = otherUsers.map(user => ({
+        _id: `new_${user._id}`,
+        isNewConversation: true,
+        participants: [{ _id: currentUserId }, user],
+        unreadCounts: new Map(),
+        updatedAt: new Date(0)
+      }));
+    }
+
+    const formattedConversations = paginatedConversations.map(c => c.toJSON ? c.toJSON() : c);
+    const finalConversations = [...formattedConversations, ...dummyConversations];
 
     return new ApiResponse({
       res,
       status: 200,
-      data: conversations,
+      data: {
+        docs: finalConversations,
+        pagination
+      },
       message: 'Conversations fetched successfully'
     });
   });
