@@ -2,8 +2,10 @@ import cors from "cors";
 
 import moment from "moment";
 import express from "express";
+import http from "http";
 import connectDB from "./db/mongo.js";
 import config from "./config/index.js";
+import { initSocket } from "./config/socket.js";
 import apiLogger from "./middlewares/logger.js";
 import type { Request, Response, NextFunction } from "express";
 import { handleErrorResponse } from "./middlewares/errorHandler.js";
@@ -76,6 +78,11 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   handleErrorResponse(res, err, req);
 });
 
-app.listen(port, () => {
+const server = http.createServer(app);
+
+// Initialize Socket.io
+initSocket(server);
+
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
