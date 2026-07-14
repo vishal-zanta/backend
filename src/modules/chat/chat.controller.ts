@@ -6,6 +6,7 @@ import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { getIO } from '../../config/socket.js';
+import { StorageService } from '../../libs/storage.lib.js';
 
 export class ChatController {
   
@@ -71,10 +72,14 @@ export class ChatController {
    */
   static sendMessage = asyncHandler(async (req: Request, res: Response) => {
     const { id: currentUserId } = req.user as any;
-    const { conversationId, content } = req.body;
+    const { conversationId, content, type = 'TEXT' } = req.body;
 
-    if (!conversationId || !content) {
-      throw new ApiError({ status: 400, message: 'Conversation ID and content are required' });
+    if (!conversationId) {
+      throw new ApiError({ status: 400, message: 'Conversation ID is required' });
+    }
+
+    if (!content && !req.file) {
+      throw new ApiError({ status: 400, message: 'Content or file is required' });
     }
 
     const conversation = await Conversation.findById(conversationId);
@@ -82,10 +87,34 @@ export class ChatController {
       throw new ApiError({ status: 403, message: 'Invalid conversation or access denied' });
     }
 
+    let fileUrl;
+    let fileName;
+    let finalType = type;
+
+    if (req.file) {
+      const ext = req.file.originalname.split('.').pop() || "bin";
+      const key = `chats/${conversationId}/file-${Date.now()}-${Math.floor(Math.random() * 10000)}.${ext}`;
+      fileUrl = await StorageService.uploadFile(key, req.file.buffer, req.file.mimetype);
+      fileName = req.file.originalname;
+
+      if (req.file.mimetype.startsWith('image/')) {
+        finalType = 'IMAGE';
+      } else if (req.file.mimetype.startsWith('video/')) {
+        finalType = 'VIDEO';
+      } else if (req.file.mimetype.startsWith('audio/')) {
+        finalType = 'AUDIO';
+      } else {
+        finalType = 'FILE';
+      }
+    }
+
     const message = new Message({
       conversation: conversationId,
       sender: currentUserId,
-      content,
+      content: content || "",
+      type: finalType,
+      fileUrl,
+      fileName,
       readBy: [currentUserId]
     });
 
@@ -177,6 +206,29 @@ export class ChatController {
       res,
       status: 200,
       message: 'Messages marked as read'
+    });
+  });
+
+  /**
+   * Get online status of a user
+   */
+  static getUserStatus = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.params as { userId: string };
+
+    if (!userId) {
+      throw new ApiError({ status: 400, message: 'User ID is required' });
+    }
+
+    const io = getIO();
+    // In Socket.io, users join a room with their userId when they connect
+    const room = io.sockets.adapter.rooms.get(userId);
+    const isOnline = room ? room.size > 0 : false;
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: { isOnline },
+      message: 'User status fetched successfully'
     });
   });
 }

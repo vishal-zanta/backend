@@ -3,7 +3,10 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IMessage extends Document {
   conversation: mongoose.Types.ObjectId;
   sender: mongoose.Types.ObjectId;
-  content: string;
+  type: "TEXT" | "IMAGE" | "FILE" | "VIDEO" | "AUDIO";
+  content?: string;
+  fileUrl?: string;
+  fileName?: string;
   readBy: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -20,9 +23,20 @@ const messageSchema = new Schema<IMessage>({
     ref: 'User',
     required: true
   },
+  type: {
+    type: String,
+    enum: ["TEXT", "IMAGE", "FILE", "VIDEO", "AUDIO"],
+    default: "TEXT"
+  },
   content: {
     type: String,
-    required: true
+    default: ""
+  },
+  fileUrl: {
+    type: String
+  },
+  fileName: {
+    type: String
   },
   readBy: [{
     type: mongoose.Schema.Types.ObjectId,
