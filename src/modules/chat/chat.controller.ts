@@ -253,17 +253,23 @@ export class ChatController {
       throw new ApiError({ status: 403, message: 'Invalid conversation or access denied' });
     }
 
+    const totalCount = await Message.countDocuments({ conversation: conversationId });
+    const pagination = buildPagination({ page, limit, totalCount });
+
     // Efficiently fetch messages sorted by newest first
     const messages = await Message.find({ conversation: conversationId })
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
+      .skip(pagination.offset)
+      .limit(pagination.limit)
       .populate('sender', 'name email');
 
     return new ApiResponse({
       res,
       status: 200,
-      data: messages.reverse(), // Send in chronological order
+      data: {
+        docs: messages.reverse(), // Send in chronological order
+        pagination
+      },
       message: 'Messages fetched successfully'
     });
   });

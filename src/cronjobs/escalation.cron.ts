@@ -5,6 +5,7 @@ import { User } from "../modules/users/user.model.js";
 import { TimelineService } from "../modules/timeline/timeline.service.js";
 import { timelineTemplates } from "../modules/timeline/timeline.template.js";
 import { Role } from "../modules/roles/role.model.js";
+import { GrievanceAnalyticLog } from "../modules/grievance/grievanceAnalyticLog.model.js";
 
 export const checkAndEscalateGrievances = async () => {
   try {
@@ -118,6 +119,29 @@ export const checkAndEscalateGrievances = async () => {
               description:timelineTemplates.ESCALATED(currentRoleSla.slaHours,nextLevelName?.level!,"system")
             }
           });
+
+          // Log to analytic tracker (two separate logs: one for breach, one for assignment)
+          await GrievanceAnalyticLog.insertMany([
+            {
+              grievance: grievance._id,
+              action: "ESCALATED",
+              metadata: {
+                breachedOfficer: grievance.assignedOfficer,
+                timeTakenBeforeEscalationMs: timePassedMs,
+                timeTakenBeforeEscalationHours: Math.round(timePassedMs / (1000 * 60 * 60)),
+                slaHoursAllowed: cumulativeSlaHours
+              }
+            },
+            {
+              grievance: grievance._id,
+              action: "ASSIGNED",
+              assignedTo: nextOfficer._id,
+              metadata: {
+                previousOfficer: grievance.assignedOfficer,
+                assignedBy: "SYSTEM_CRON"
+              }
+            }
+          ]);
           
           console.log(`[Cron] Grievance ${grievance.grievanceId} escalated to ${nextOfficer.name} (Level ${grievance.escalationLevel})`);
         }

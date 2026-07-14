@@ -12,6 +12,7 @@ import { SubService } from "../services/subService.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 import { TimelineService } from "../timeline/timeline.service.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
+import { GrievanceAnalyticLog } from "./grievanceAnalyticLog.model.js";
 
 export class GrievanceController {
   
@@ -307,6 +308,82 @@ export class GrievanceController {
   });
 
   /**
+   * Get dashboard analytics for an officer
+   */
+  static getOfficerDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
+    const officerId = (req as any).user.id || (req as any).user._id;
+    const { filter = "week" } = req.query;
+
+    let currentStart = new Date();
+    let lastStart = new Date();
+    const now = new Date();
+
+    if (filter === "week") {
+      currentStart.setDate(now.getDate() - 7);
+      lastStart.setDate(now.getDate() - 14);
+    } else if (filter === "month") {
+      currentStart.setMonth(now.getMonth() - 1);
+      lastStart.setMonth(now.getMonth() - 2);
+    } else if (filter === "year") {
+      currentStart.setFullYear(now.getFullYear() - 1);
+      lastStart.setFullYear(now.getFullYear() - 2);
+    } else {
+      currentStart.setDate(now.getDate() - 7);
+      lastStart.setDate(now.getDate() - 14);
+    }
+
+    const getMetrics = async (startDate: Date, endDate: Date) => {
+      const assignedCount = await Grievance.countDocuments({
+        assignedOfficer: officerId,
+        createdAt: { $gte: startDate, $lt: endDate }
+      });
+
+      const pendingCount = await Grievance.countDocuments({
+        assignedOfficer: officerId,
+        status: { $nin: ["RESOLVED", "CLOSED"] },
+        createdAt: { $gte: startDate, $lt: endDate }
+      });
+
+      const resolvedCount = await Grievance.countDocuments({
+        assignedOfficer: officerId,
+        status: { $in: ["RESOLVED"] },
+        updatedAt: { $gte: startDate, $lt: endDate }
+      });
+
+      const breachedCount = await GrievanceAnalyticLog.countDocuments({
+        action: "ESCALATED",
+        "metadata.breachedOfficer": officerId,
+        createdAt: { $gte: startDate, $lt: endDate }
+      });
+
+      return { assignedCount, pendingCount, resolvedCount, breachedCount };
+    };
+
+    const currentMetrics = await getMetrics(currentStart, now);
+    const lastMetrics = await getMetrics(lastStart, currentStart);
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        currentPeriod: {
+          totalAssigned: currentMetrics.assignedCount,
+          pending: currentMetrics.pendingCount,
+          resolved: currentMetrics.resolvedCount,
+          slaBreached: currentMetrics.breachedCount
+        },
+        previousPeriod: {
+          totalAssigned: lastMetrics.assignedCount,
+          pending: lastMetrics.pendingCount,
+          resolved: lastMetrics.resolvedCount,
+          slaBreached: lastMetrics.breachedCount
+        }
+      },
+      message: "Officer dashboard analytics fetched successfully"
+    });
+  });
+
+  /**
    * Get all grievances assigned to the logged-in officer
    */
   static getOfficerGrievances = asyncHandler(async (req: Request, res: Response) => {
@@ -527,6 +604,12 @@ export class GrievanceController {
       throw new ApiError({ status: 400, message: "New assignedOfficer ID is required." });
     }
 
+    const oldGrievance = await Grievance.findById(id);
+    if (!oldGrievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+    const previousOfficer = oldGrievance.assignedOfficer;
+
     const grievance = await Grievance.findByIdAndUpdate(
       id,
       { assignedOfficer },
@@ -535,6 +618,18 @@ export class GrievanceController {
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    if (req.user) {
+      await GrievanceAnalyticLog.create({
+        grievance: grievance._id,
+        action: "ASSIGNED",
+        actionBy: (req as any).user.id || (req as any).user._id,
+        assignedTo: assignedOfficer,
+        metadata: {
+          previousOfficer
+        }
+      });
     }
 
     return new ApiResponse({
@@ -556,6 +651,11 @@ export class GrievanceController {
       throw new ApiError({ status: 400, message: "Status is required." });
     }
 
+    const oldGrievance = await Grievance.findById(id);
+    if (!oldGrievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
     const grievance = await Grievance.findByIdAndUpdate(
       id,
       { status },
@@ -571,7 +671,7 @@ export class GrievanceController {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "RESOLVED",
-          actor: { id: req.user.id as any, name: "OFFICER", role: "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: "OFFICER", role: "OFFICER" },
           metadata: { description: timelineTemplates.RESOLVED(remarks || "Grievance resolved.") }
         });
       } else if (status === "CLOSED") {
@@ -580,7 +680,7 @@ export class GrievanceController {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "COMPLAINT_CLOSED",
-          actor: { id: req.user.id as any, name: "OFFICER", role: "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: "OFFICER", role: "OFFICER" },
           metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
         });
       }
