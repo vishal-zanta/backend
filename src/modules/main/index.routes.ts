@@ -17,6 +17,7 @@ import fieldVisitRoutes from "../fieldVisit/fieldVisit.routes.js";
 import activityRoutes from "../activity/activity.routes.js";
 import breakRoutes from "../breaks/break.routes.js";
 import chatRoutes from "../chat/chat.routes.js";
+import misRoutes from "../mis/mis.routes.js";
 
 const router = Router();
 
@@ -38,5 +39,6 @@ router.use("/visits", fieldVisitRoutes);
 router.use("/activity", activityRoutes);
 router.use("/breaks", breakRoutes);
 router.use("/chat", chatRoutes);
+router.use("/mis", misRoutes);
 
 export default router;
