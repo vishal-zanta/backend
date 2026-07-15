@@ -10,6 +10,26 @@ import {
 
 export class MisController {
   /**
+   * KPI tiles for Admin MIS page (independent of report filters).
+   * GET /api/v1/mis/stats
+   */
+  static getStats = asyncHandler(async (_req: Request, res: Response) => {
+    try {
+      const data = await MisService.getStats();
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        message: "MIS stats fetched successfully",
+        data,
+      });
+    } catch (err) {
+      console.error("MIS stats error:", err);
+      throw new ApiError({ status: 500, message: "Failed to fetch MIS stats" });
+    }
+  });
+
+  /**
    * Single MIS reports endpoint.
    * Query: report (required), district, dateRange, fromDate, toDate
    */

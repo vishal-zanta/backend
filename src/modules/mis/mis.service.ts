@@ -806,6 +806,38 @@ export class MisService {
     return REPORT_DATA_KEYS[report];
   }
 
+  /**
+   * KPI tiles for Admin MIS page — sourced from Grievance model.
+   *
+   * - totalReportsGenerated: lifetime grievance count
+   * - thisMonth: grievances created in current calendar month
+   * - statutoryReports: ESCALATED grievances (SLA / statutory escalation)
+   * - pendingReports: OPEN + REOPENED (not yet actioned)
+   */
+  static async getStats() {
+    const monthStart = moment().startOf("month").toDate();
+    const monthEnd = moment().endOf("month").toDate();
+
+    const [totalReportsGenerated, thisMonth, statutoryReports, pendingReports] =
+      await Promise.all([
+        Grievance.countDocuments({}),
+        Grievance.countDocuments({
+          createdAt: { $gte: monthStart, $lte: monthEnd },
+        }),
+        Grievance.countDocuments({ status: "ESCALATED" }),
+        Grievance.countDocuments({
+          status: { $in: ["OPEN", "REOPENED"] },
+        }),
+      ]);
+
+    return {
+      totalReportsGenerated: totalReportsGenerated || 0,
+      thisMonth: thisMonth || 0,
+      statutoryReports: statutoryReports || 0,
+      pendingReports: pendingReports || 0,
+    };
+  }
+
   static async getReport(params: MisQueryParams) {
     const {
       report,

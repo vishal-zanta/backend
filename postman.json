@@ -1054,6 +1054,18 @@
       "name": "MIS Reports",
       "item": [
         {
+          "name": "Get MIS Stats (KPI Tiles)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/mis/stats",
+              "host": ["{{base_url}}"],
+              "path": ["mis", "stats"]
+            }
+          }
+        },
+        {
           "name": "Get MIS Report - Summary",
           "request": {
             "method": "GET",
