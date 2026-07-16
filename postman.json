@@ -1,1209 +1,3041 @@
 {
-  "info": {
-    "name": "Bihar CRM Backend API2",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:3000/api/v1",
-      "type": "string"
-    },
-    {
-      "key": "auth_token",
-      "value": "your_jwt_token_here",
-      "type": "string"
-    }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{auth_token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "item": [
-    {
-      "name": "Roles",
-      "item": [
-        {
-          "name": "Create Role",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/roles",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "roles"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"designationEnglish\": \"Clerk\",\n  \"designationHindi\": \"क्लर्क\",\n  \"level\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Roles",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/roles",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "roles"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Role",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/roles/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "roles"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"level\": 2\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Role",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/roles/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "roles"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Users",
-      "item": [
-        {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/users",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"1234567890\",\n  \"role\": \"ROLE_ID\",\n  \"district\": \"DISTRICT_ID\",\n  \"password\": \"password123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Users",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/users",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/users/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Smith\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete User",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/users/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Complaint Sources",
-      "item": [
-        {
-          "name": "Create Source",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/complaint-sources",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "complaint-sources"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"WhatsApp\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Sources",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/complaint-sources",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "complaint-sources"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Source",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/complaint-sources/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "complaint-sources"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"IVR\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Source",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/complaint-sources/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "complaint-sources"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Services",
-      "item": [
-        {
-          "name": "Create Service",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Public Works\",\n  \"titleHindi\": \"सार्वजनिक कार्य\",\n  \"department\": \"PWD\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Services",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Service",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"department\": \"PWD Updated\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Service",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Sub-Services",
-      "item": [
-        {
-          "name": "Create Sub-Service",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services/sub",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services",
-                "sub"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Pothole\",\n  \"titleHindi\": \"गड्ढा\",\n  \"sla\": 48,\n  \"geoTagged\": true,\n  \"fieldVisit\": true,\n  \"service\": \"SERVICE_ID\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Sub-Services",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services/sub",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services",
-                "sub"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Sub-Service",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services/sub/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services",
-                "sub"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"sla\": 24\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Sub-Service",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/services/sub/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "services",
-                "sub"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Demography (Districts)",
-      "item": [
-        {
-          "name": "Create Demography",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Patna\",\n  \"nameHindi\": \"पटना\",\n  \"division\": \"Patna\",\n  \"zone\": \"South Bihar\",\n  \"population\": 2442383,\n  \"urban\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Demographies",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Demography",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"population\": 2500000\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Demography",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "ULBs",
-      "item": [
-        {
-          "name": "Create ULB",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography/ulb",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography",
-                "ulb"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Patna Municipal Corporation\",\n  \"nameHindi\": \"पटना नगर निगम\",\n  \"wards\": 75,\n  \"district\": \"DISTRICT_ID\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get ULBs",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography/ulb",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography",
-                "ulb"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update ULB",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography/ulb/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography",
-                "ulb"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"wards\": 80\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete ULB",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/demography/ulb/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "demography",
-                "ulb"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "SLA Configs",
-      "item": [
-        {
-          "name": "Create SLA Config",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/sla-configs",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "sla-configs"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"subService\": \"SUBSERVICE_ID\",\n  \"escalations\": [\n    {\n      \"role\": \"ROLE_ID_1\",\n      \"slaHours\": 24\n    },\n    {\n      \"role\": \"ROLE_ID_2\",\n      \"slaHours\": 48\n    }\n  ],\n  \"officer\": false\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get SLA Configs",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/sla-configs",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "sla-configs"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update SLA Config",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/sla-configs/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "sla-configs"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"active\": false,\n  \"officer\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete SLA Config",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/sla-configs/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "sla-configs"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Officer Tagging",
-      "item": [
-        {
-          "name": "Create Officer Tagging",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/officer-taggings",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "officer-taggings"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"officer\": \"USER_ID\",\n  \"services\": [\n    \"SUBSERVICE_ID_1\"\n  ],\n  \"wards\": [\n    \"Ward 1\"\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Officer Taggings",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/officer-taggings",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "officer-taggings"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Officer Tagging",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/officer-taggings/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "officer-taggings"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"wards\": [\n    \"Ward 1\",\n    \"Ward 2\"\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Officer Tagging",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/officer-taggings/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "officer-taggings"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Workflow Levels",
-      "item": [
-        {
-          "name": "Create Workflow Level",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/workflow-levels",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "workflow-levels"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"role\": \"ROLE_ID\",\n  \"description\": \"First Level\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Workflow Levels",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/workflow-levels",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "workflow-levels"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Workflow Level",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/workflow-levels/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "workflow-levels"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"description\": \"Updated First Level\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Workflow Level",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/workflow-levels/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "workflow-levels"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "INSERT_ID_HERE"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Bulk Update Orders",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/workflow-levels/bulk-order",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "workflow-levels",
-                "bulk-order"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"LEVEL_ID_1\",\n      \"order\": 1\n    },\n    {\n      \"id\": \"LEVEL_ID_2\",\n      \"order\": 2\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "MIS Reports",
-      "item": [
-        {
-          "name": "Get MIS Stats (KPI Tiles)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/stats",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "stats"]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Summary",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=summary&district=all&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "summary" },
-                { "key": "district", "value": "all" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Officer Ranking",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=officer&district=all&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "officer" },
-                { "key": "district", "value": "all" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Service Performance",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=service&district=all&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "service" },
-                { "key": "district", "value": "all" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Urban / ULB",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=urban&district=all&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "urban" },
-                { "key": "district", "value": "all" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Rural Blocks",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=rural&district=Patna&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "rural" },
-                { "key": "district", "value": "Patna" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - IVR Stats",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=ivr&district=all&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "ivr" },
-                { "key": "district", "value": "all" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Agent Performance",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=agent&district=all&dateRange=fy",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "agent" },
-                { "key": "district", "value": "all" },
-                { "key": "dateRange", "value": "fy" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get MIS Report - Custom Date Range",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/mis/reports?report=officer&district=Patna&dateRange=custom&fromDate=2026-01-01&toDate=2026-07-06",
-              "host": ["{{base_url}}"],
-              "path": ["mis", "reports"],
-              "query": [
-                { "key": "report", "value": "officer" },
-                { "key": "district", "value": "Patna" },
-                { "key": "dateRange", "value": "custom" },
-                { "key": "fromDate", "value": "2026-01-01" },
-                { "key": "toDate", "value": "2026-07-06" }
-              ]
-            }
-          }
-        }
-      ]
-    }
-  ]
+	"info": {
+		"_postman_id": "f662e2ac-2610-42ad-8341-d3edb5f36071",
+		"name": "Bihar CRM Backend API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43317562",
+		"_collection_link": "https://warped-water-732885.postman.co/workspace/My-Workspace~eb87bfdc-2e63-451a-8609-80e6fa7bbc9a/collection/43317562-f662e2ac-2610-42ad-8341-d3edb5f36071?action=share&source=collection_link&creator=43317562"
+	},
+	"item": [
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth (DONE)",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"",
+									"    const response = pm.response.json();",
+									"",
+									"    if (response.data && response.data.token) {",
+									"        pm.environment.set(\"token\", response.data.token);",
+									"        console.log(\"Token saved:\", response.data.token);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"1234\"\n\n// \"email\": \"niraha90611@bevriz.com\",\n//   \"password\": \"asdfasdf\"\n   \n//   \"token\":\"\"  required when user forgot and redirect to forget password page for reset password\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/forgot-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Name\",\n  \"password\":\"1234\" // only if need to chng password\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users (DONE)",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users?search=nira",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "nira",
+									"description": "Search by name or email"
+								},
+								{
+									"key": "role",
+									"value": "",
+									"description": "Filter by role ID",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"fipanor105+55@duvips.com\",\n  \"phone\": \"1234567891\",\n  \"password\":\"123\",\n  \"role\": \"6a4cd6f9ac4068b43cf42d6e\",\n  \"district\": \"6a4cd6f9ac4068b43cf42d6f\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Doe\",\n  \"status\": \"SUSPENDED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "USER_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "USER_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles (DONE)",
+			"item": [
+				{
+					"name": "Get Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"designationEnglish\": \"New Role\",\n  \"designationHindi\": \"नया पद\",\n  \"level\": \"L3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"level\": \"L4\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/roles/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"roles",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ROLE_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/roles/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"roles",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ROLE_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Complaint Sources (DONE)",
+			"item": [
+				{
+					"name": "Create Complaint Source",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"IVR\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/complaint-sources",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"complaint-sources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Complaint Sources",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/complaint-sources",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"complaint-sources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Complaint Source",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"WhatsApp\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/complaint-sources/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"complaint-sources",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Complaint Source",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/complaint-sources/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"complaint-sources",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sub-Services (DONE)",
+			"item": [
+				{
+					"name": "Create Sub-Service",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Pothole Repair\",\n  \"titleHindi\": \"गड्ढा मरम्मत\",\n  \"sla\": 48,\n  \"geoTagged\": true,\n  \"fieldVisit\": true,\n  \"service\": \"6a4dd4bcc4997b14929505d8\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services/sub",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								"sub"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sub-Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/sub",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								"sub"
+							],
+							"query": [
+								{
+									"key": "serviceId",
+									"value": "INSERT_SERVICE_ID_HERE",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Sub-Service",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sla\": 24\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services/sub/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								"sub",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Sub-Service",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/sub/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								"sub",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Services (DONE)",
+			"item": [
+				{
+					"name": "Create Service",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Public Works\",\n  \"titleHindi\": \"सार्वजनिक कार्य\",\n  \"department\": \"PWD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Service",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Public Works Updated\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Service",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"services",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SLA Configs (DONE)",
+			"item": [
+				{
+					"name": "Create SLA Config",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"subService\": \"6a4dd4ddc4997b14929505d9\",\n  \"escalations\": [\n    {\n      \"role\": \"6a4cd6f9ac4068b43cf42d6e\",\n      \"slaHours\": 12\n    },\n    {\n      \"role\": \"6a4cd6f9ac4068b43cf42d6f\",\n      \"slaHours\": 12\n    }\n  ],\n  \"officer\":true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sla-configs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sla-configs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get SLA Configs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sla-configs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sla-configs"
+							],
+							"query": [
+								{
+									"key": "subServiceId",
+									"value": "INSERT_SUBSERVICE_ID_HERE",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update SLA Config",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"active\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sla-configs/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sla-configs",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete SLA Config",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sla-configs/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sla-configs",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a4dd5ef20bab8e6d698e710"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ULBs (DONE)",
+			"item": [
+				{
+					"name": "Create ULB",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Patna Municipal Corporation\",\n  \"nameHindi\": \"पटना नगर निगम\",\n  \"wards\": 75,\n  \"district\": \"6a4de44dba63bfc9458dea34\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/demography/ulb",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography",
+								"ulb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ULBs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/demography/ulb",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography",
+								"ulb"
+							],
+							"query": [
+								{
+									"key": "districtId",
+									"value": "INSERT_DISTRICT_ID_HERE",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update ULB",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"wards\": 80\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/demography/ulb/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography",
+								"ulb",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete ULB",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/demography/ulb/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography",
+								"ulb",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Demography (Districts) (DONE)",
+			"item": [
+				{
+					"name": "Create Demography",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Patna\",\n  \"nameHindi\": \"पटना\",\n  \"division\": \"Patna\",\n  \"zone\": \"South Bihar\",\n  \"population\": 2442383,\n  \"urban\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/demography",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Demographies",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/demography",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Demography",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"population\": 2500000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/demography/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Demography",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/demography/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"demography",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "INSERT_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Officer Tagging (DONE)",
+			"item": [
+				{
+					"name": "Create Officer Tagging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"officer\": \"6a4cd8a079068ed6b9ce9990\",\n  \"services\": [\n    \"6a4dd4ddc4997b14929505d9\"\n  ],\n  \"wards\": [\n    \"Ward 1\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/officer-taggings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"officer-taggings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Officer Taggings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/officer-taggings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"officer-taggings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Officer Tagging",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"wards\": [\n    \"Ward 1\",\n    \"Ward 2\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/officer-taggings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"officer-taggings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Officer Tagging",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/officer-taggings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"officer-taggings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workflow Levels (DONE)",
+			"item": [
+				{
+					"name": "Create Workflow Level",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"ROLE_ID\",\n  \"description\": \"First Level\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/workflow-levels",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflow-levels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workflow Levels",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/workflow-levels",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflow-levels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Workflow Level",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated First Level\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/workflow-levels",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflow-levels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Workflow Level",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/workflow-levels",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflow-levels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Update Orders",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"updates\": [\n    {\n      \"id\": \"LEVEL_ID_1\",\n      \"order\": 1\n    },\n    {\n      \"id\": \"LEVEL_ID_2\",\n      \"order\": 2\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/workflow-levels/bulk-order",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflow-levels",
+								"bulk-order"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "captcha (DONE)",
+			"item": [
+				{
+					"name": "get captcha",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/captcha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"captcha"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "citizen",
+			"item": [
+				{
+					"name": "sent otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mobile\":\"8307753758\",\n    \"captchaId\":\"4727845a\",\n    \"captchaValue\":\"rxiDQn\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/citizen/send-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"citizen",
+								"send-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "feedback of complain",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \n     \"rating\":5,\n \"feedbackText\":\"test feed back\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/citizen/:id/feedback",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"citizen",
+								":id",
+								"feedback"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a4f9af5f59fc5d979dfe9f5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add complain",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "classification[subService]",
+									"value": "6a4dd4ddc4997b14929505d9",
+									"type": "text"
+								},
+								{
+									"key": "classification.scheme",
+									"value": "PMAY Urban",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "classification[nature]",
+									"value": "6a4f8beef1d6b486f5b8e31a",
+									"description": "type  \"type\": \"grievanceNature\", options used ",
+									"type": "text"
+								},
+								{
+									"key": "classification[subject]",
+									"value": "pot hole is on road side",
+									"type": "text"
+								},
+								{
+									"key": "evidence[details]",
+									"value": "I applied for the scheme six months ago but have not received the subsidy.",
+									"type": "text"
+								},
+								{
+									"key": "evidence[occurrenceDate]",
+									"value": "2026-06-20",
+									"type": "text"
+								},
+								{
+									"key": "evidence[frequency]",
+									"value": "6a4f8f1af1d6b486f5b8e321",
+									"description": " \"type\":\"evidenceFrequency\"",
+									"type": "text"
+								},
+								{
+									"key": "impact[affectedBeneficiary]",
+									"value": "686d12345c2f9d0012345674",
+									"description": "\"type\": \"publicImpact\",",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[seniorCitizen]]",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[woman]]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[personWithDisability]]",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[economicallyWeakerSection]]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "communication[preferredMode]",
+									"value": "686d12345c2f9d0012345676",
+									"type": "text"
+								},
+								{
+									"key": "communication[feedbackConsent]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "communication[satisfactionSurveyConsent]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "address[state]",
+									"value": "Haryana",
+									"type": "text"
+								},
+								{
+									"key": "address[district]",
+									"value": "district",
+									"type": "text"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": "/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-09 17-46-58.png"
+								},
+								{
+									"key": "channel",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/citizen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"citizen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"",
+									"    const response = pm.response.json();",
+									"",
+									"    if (response.data && response.data.token) {",
+									"        pm.environment.set(\"ctoken\", response.data.token);",
+									"        console.log(\"Token saved:\", response.data.token);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n     \"mobile\":\"8307753758\",\n     \"otp\":\"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/citizen/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"citizen",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/citizen/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"citizen",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get dashboard-analytics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/citizen/dashboard-analytics",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"citizen",
+								"dashboard-analytics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get complain by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/citizen/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"citizen",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a5083001e0714b852cf8685"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get complains",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/citizen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"citizen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n       \n        \"email\": \"tkb8059@gmail.com\",\n        \"preferredLanguage\": \"English\",\n        \"name\":\"tarun kumar\"\n       \n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/citizen/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"citizen",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{ctoken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "options",
+			"item": [
+				{
+					"name": "get options types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/options/types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"options",
+								"types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get options",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/options",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add options",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\":\"Community\",\n    \"type\":\"publicImpact\"\n}\n// (Self / Family / Community",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/options",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\":\"Complaint\",\n    \"type\":\"grievanceNature\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/options/6a4f8beef1d6b486f5b8e31a",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"options",
+								"6a4f8beef1d6b486f5b8e31a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete option",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/options/6a4f8beef1d6b486f5b8e31a",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"options",
+								"6a4f8beef1d6b486f5b8e31a"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Grievance",
+			"item": [
+				{
+					"name": "get all complaints for cce and admin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/grievances/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all complaints for cce and admin details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/grievances/all/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"all",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a50e80b76f00e6705796f4e"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all complaints for officer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get officer dashboard analitics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/dashboard-analytics?filter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								"dashboard-analytics"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": null,
+									"description": "week,month,year"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get admin dashboard analitics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/grievances/admin/dashboard-analytics?filter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"admin",
+								"dashboard-analytics"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": null,
+									"description": "week,month,year,lifetime"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get complaints details for officer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/detail/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								"detail",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transfer to officer",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"assignedOfficer\":\"6a4cd72ecca0894bf179398e\" //officer id \n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/:id/transfer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								":id",
+								"transfer"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a521675c910af693ff8b8c9"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add geo tagged images",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": "/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-10 13-09-37.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/:id/geotagged-images",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								":id",
+								"geotagged-images"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a5083001e0714b852cf8685"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\":\"RESOLVED\", //officer id\n    // \"remarks\":\"\"  only when its completed or resolved\n }\n\n//  \"OPEN\",\n//           \"IN_PROGRESS\",\n//           \"RESOLVED\",\n//           \"CLOSED\",\n//           \"REOPENED\",\n//           \"ESCALATED\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/:id/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a5083001e0714b852cf8685"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update priority",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"assignedPriority\":\"NORMAL\"\n }\n\n// [\"NORMAL\", \"URGENT\", \"CRITICAL\", \"PENDING\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/:id/priority",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								":id",
+								"priority"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a5083001e0714b852cf8685"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add complain",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "classification[subService]",
+									"value": "6a4dd4ddc4997b14929505d9",
+									"type": "text"
+								},
+								{
+									"key": "classification.scheme",
+									"value": "PMAY Urban",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "classification[nature]",
+									"value": "6a4f8beef1d6b486f5b8e31a",
+									"description": "type  \"type\": \"grievanceNature\", options used ",
+									"type": "text"
+								},
+								{
+									"key": "classification[subject]",
+									"value": "pot hole is on road side",
+									"type": "text"
+								},
+								{
+									"key": "evidence[details]",
+									"value": "I applied for the scheme six months ago but have not received the subsidy.",
+									"type": "text"
+								},
+								{
+									"key": "evidence[occurrenceDate]",
+									"value": "2026-06-20",
+									"type": "text"
+								},
+								{
+									"key": "evidence[frequency]",
+									"value": "6a4f8f1af1d6b486f5b8e321",
+									"description": " \"type\":\"evidenceFrequency\"",
+									"type": "text"
+								},
+								{
+									"key": "impact[urgency]",
+									"value": "URGENT",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "impact[affectedBeneficiary]",
+									"value": "686d12345c2f9d0012345674",
+									"description": "\"type\": \"publicImpact\",",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[seniorCitizen]]",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[woman]]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[personWithDisability]]",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[economicallyWeakerSection]]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "impact.publicImpact",
+									"value": "686d12345c2f9d0012345674",
+									"description": "\"type\": \"publicImpact\",",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "communication[preferredMode]",
+									"value": "686d12345c2f9d0012345676",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "communication[feedbackConsent]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "communication[satisfactionSurveyConsent]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "previousReferenceGrievanceId",
+									"value": "686d12345c2f9d0012345677",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "address[state]",
+									"value": "Haryana",
+									"type": "text"
+								},
+								{
+									"key": "address[district]",
+									"value": "district",
+									"type": "text"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [
+										"/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-10 13-09-05.png",
+										"/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-10 13-09-37.png",
+										"/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-11 15-18-02.png",
+										"/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-11 16-36-58.png"
+									]
+								},
+								{
+									"key": "citizenInfo[mobile]",
+									"value": "8307753758",
+									"type": "text"
+								},
+								{
+									"key": "channel",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update complain",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "classification[subService]",
+									"value": "6a4dd4ddc4997b14929505d9",
+									"type": "text"
+								},
+								{
+									"key": "classification.scheme",
+									"value": "PMAY Urban",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "classification[nature]",
+									"value": "6a4f8beef1d6b486f5b8e31a",
+									"description": "type  \"type\": \"grievanceNature\", options used ",
+									"type": "text"
+								},
+								{
+									"key": "classification[subject]",
+									"value": "pot hole is on road side",
+									"type": "text"
+								},
+								{
+									"key": "evidence[details]",
+									"value": "I applied for the scheme six months ago but have not received the subsidy.",
+									"type": "text"
+								},
+								{
+									"key": "evidence[occurrenceDate]",
+									"value": "2026-06-20",
+									"type": "text"
+								},
+								{
+									"key": "evidence[frequency]",
+									"value": "6a4f8f1af1d6b486f5b8e321",
+									"description": " \"type\":\"evidenceFrequency\"",
+									"type": "text"
+								},
+								{
+									"key": "impact[urgency]",
+									"value": "URGENT",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "impact[affectedBeneficiary]",
+									"value": "686d12345c2f9d0012345674",
+									"description": "\"type\": \"publicImpact\",",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[seniorCitizen]]",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[woman]]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[personWithDisability]]",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "impact[vulnerability[economicallyWeakerSection]]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "impact.publicImpact",
+									"value": "686d12345c2f9d0012345674",
+									"description": "\"type\": \"publicImpact\",",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "communication[preferredMode]",
+									"value": "686d12345c2f9d0012345676",
+									"type": "text"
+								},
+								{
+									"key": "communication[feedbackConsent]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "communication[satisfactionSurveyConsent]",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "previousReferenceGrievanceId",
+									"value": "686d12345c2f9d0012345677",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "address[state]",
+									"value": "Haryana",
+									"type": "text"
+								},
+								{
+									"key": "address[district]",
+									"value": "district",
+									"type": "text"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": "/home/h-57/Pictures/Screenshots/Screenshot from 2026-07-09 17-46-58.png"
+								},
+								{
+									"key": "citizenInfo[",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/grievances/officer/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"grievances",
+								"officer",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a509af811f548ddbe21ab2f"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "visits",
+			"item": [
+				{
+					"name": "get visists",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "search",
+								"value": "",
+								"type": "text"
+							},
+							{
+								"key": "schedule",
+								"value": "",
+								"description": "date of day for get that day",
+								"type": "text"
+							},
+							{
+								"key": "page",
+								"value": "1",
+								"type": "text"
+							},
+							{
+								"key": "limit",
+								"value": "10",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/visits",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update status/shedule",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "search",
+								"value": "",
+								"type": "text"
+							},
+							{
+								"key": "schedule",
+								"value": "",
+								"description": "date of day for get that day",
+								"type": "text"
+							},
+							{
+								"key": "page",
+								"value": "1",
+								"type": "text"
+							},
+							{
+								"key": "limit",
+								"value": "10",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\n\"status\":\"SCHEDULED\", //enum: ['PENDING', 'SCHEDULED', 'COMPLETED', 'CANCELLED', 'IN_PROGRESS'],\n\"schedule\": \"2026-06-30\" \n // \"remarks\":\"\"  only when its completed\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/visits/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"visits",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a521675c910af693ff8b8cc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "activities",
+			"item": [
+				{
+					"name": "add activity",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activity/pulse",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activity",
+								"pulse"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get count of acitve officers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activity/active-users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activity",
+								"active-users"
+							],
+							"query": [
+								{
+									"key": "roleLevel",
+									"value": "ADMIN",
+									"disabled": true
+								},
+								{
+									"key": "countOnly",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "admin- logout users",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activity/admin-logout/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activity",
+								"admin-logout",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "6a4cd72ecca0894bf179398e"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "break",
+			"item": [
+				{
+					"name": "add / end break",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/breaks/toggle",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"breaks",
+								"toggle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get break status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/breaks/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"breaks",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "chats",
+			"item": [
+				{
+					"name": "get conversation",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "page",
+								"value": "1",
+								"type": "text"
+							},
+							{
+								"key": "limit",
+								"value": "20",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/chat/conversations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"conversations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get online status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chat/status/:userid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"status",
+								":userid"
+							],
+							"variable": [
+								{
+									"key": "userid",
+									"value": "6a523f56478b1301a8b5e00b"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get conversation messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chat/messages/6a55cf96f2d9fd522fe8f610?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"messages",
+								"6a55cf96f2d9fd522fe8f610"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mark read msseages",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chat/messages/:id/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"messages",
+								":id",
+								"read"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6a55cf96f2d9fd522fe8f610"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add convestation with user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"targetUserId\":\"6a523f56478b1301a8b5e00b\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chat/conversation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"conversation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "send messages",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token2}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "conversationId",
+									"value": "6a55cf96f2d9fd522fe8f610",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "hai this msg",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "",
+									"description": "\"TEXT\" | \"IMAGE\" | \"FILE\" | \"VIDEO\" | \"AUDIO\"",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "file",
+									"description": "single support",
+									"type": "file",
+									"src": "/home/h-57/Downloads/1780471789461-1774441161240-Screenshot 2026-03-20 151640.png_large-1.webp.webp"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chat/message",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"message"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "YOUR_JWT_TOKEN",
+			"type": "string"
+		}
+	]
 }

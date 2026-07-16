@@ -88,7 +88,7 @@ export class DemographyController {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const ulbs = await Ulb.find(query).populate('district').skip(skip).limit(limit);
+    const ulbs = await Ulb.find(query).populate('district').sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Ulb.countDocuments(query);
 
     return new ApiResponse({ 

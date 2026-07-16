@@ -32,7 +32,7 @@ export class ServiceController {
     const skip = (page - 1) * limit;
 
     const query = { active: true };
-    const services = await Service.find(query).populate('subservices').skip(skip).limit(limit);
+    const services = await Service.find(query).populate('subservices').sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Service.countDocuments(query);
 
     return new ApiResponse({ 

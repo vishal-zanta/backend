@@ -9,7 +9,7 @@ export interface IUser extends Document {
   phone: string;
   role: mongoose.Types.ObjectId;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
-  isAdmin: boolean;
+  // isAdmin: boolean;
   escalatedCount: number;
   lastLogin?: Date;
   district: mongoose.Types.ObjectId;
