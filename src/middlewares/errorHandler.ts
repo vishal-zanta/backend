@@ -20,26 +20,35 @@ export const handleErrorResponse = (
   let errorMessage = error?.response?.data?.message || error?.message;
   let status = error?.status || StatusCodes.INTERNAL_SERVER_ERROR;
 
-  const isDbError = 
-    error?.name === 'MongoServerError' || 
-    error?.name === 'MongooseError' || 
-    error?.name === 'CastError' || 
-    error?.name === 'ValidationError' ||
-    (errorMessage && errorMessage.toLowerCase().includes('mongo'));
-
   if (config.nodeEnv === 'development') {
     console.error(errorMessage);
     console.error(error?.stack);
   }
 
-  if (isDbError) {
-    errorMessage = "Internal Server Error";
-    status = StatusCodes.INTERNAL_SERVER_ERROR;
+  if (error?.name === 'ValidationError') {
+    errorMessage = "Invalid input data provided. Please check your request.";
+    status = StatusCodes.BAD_REQUEST;
+  } else if (error?.name === 'CastError') {
+    errorMessage = "Invalid identifier format provided.";
+    status = StatusCodes.BAD_REQUEST;
+  } else if (error?.code === 11000) {
+    errorMessage = "This record already exists.";
+    status = StatusCodes.CONFLICT;
+  } else {
+    const isDbError = 
+      error?.name === 'MongoServerError' || 
+      error?.name === 'MongooseError' || 
+      (errorMessage && errorMessage.toLowerCase().includes('mongo'));
+
+    if (isDbError || status === StatusCodes.INTERNAL_SERVER_ERROR) {
+      errorMessage = "Something went wrong, please try after some time";
+      status = StatusCodes.INTERNAL_SERVER_ERROR;
+    }
   }
 
   new ApiResponse({
     res,
     status,
-    message: errorMessage || "Internal Server Error",
+    message: errorMessage || "Something went wrong, please try after some time",
   });
 };

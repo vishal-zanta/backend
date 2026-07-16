@@ -370,7 +370,8 @@ export class GrievanceController {
       { $unwind: { path: "$subServiceDetails", preserveNullAndEmptyArrays: true } },
       {
         $project: {
-          name: "$subServiceDetails.name",
+          name: "$subServiceDetails.title",
+          titleHindi: "$subServiceDetails.titleHindi",
           count: 1
         }
       }
