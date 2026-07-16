@@ -58,7 +58,7 @@ export class AuthController {
  static getProfile = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.user as any;
 
-    const user = await User.findById(id).select('-password');
+    const user = await User.findById(id).select('-password').populate('role');
 
     if (!user) {
       throw new ApiError({ status: 404, message: 'User not found' });

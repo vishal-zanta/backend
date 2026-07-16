@@ -24,7 +24,7 @@ function generatePrefix(designation: string): string {
 
 export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["name", "email", "phone", "role", "district","password"], req.body);
+    validateRequestFields(["name", "email", "phone", "role","password"], req.body);
 
     const { name, email, phone, role, district, password } = req.body;
 

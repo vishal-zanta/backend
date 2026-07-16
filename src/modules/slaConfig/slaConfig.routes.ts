@@ -7,9 +7,9 @@ const router = Router();
 
 router.use(authProtect);
 
-router.post('/', checkPermission("ALL"), SlaConfigController.createConfig);
+router.post('/', checkPermission("SLA_CONFIGURATION"), SlaConfigController.createConfig);
 router.get('/', SlaConfigController.getConfigs);
-router.put('/:id', checkPermission("ALL"), SlaConfigController.updateConfig);
-router.delete('/:id', checkPermission("ALL"), SlaConfigController.deleteConfig);
+router.put('/:id', checkPermission("SLA_CONFIGURATION"), SlaConfigController.updateConfig);
+router.delete('/:id', checkPermission("SLA_CONFIGURATION"), SlaConfigController.deleteConfig);
 
 export default router;

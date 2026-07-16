@@ -7,9 +7,9 @@ const router = Router();
 
 router.use(authProtect);
 
-router.post('/', checkPermission("ALL"), UserController.createUser);
-router.get('/', checkPermission("ALL"), UserController.getUsers);
-router.put('/:id', checkPermission("ALL"), UserController.updateUser);
-router.delete('/:id', checkPermission("ALL"), UserController.deleteUser);
+router.post('/', checkPermission("USER_MANAGEMENT"), UserController.createUser);
+router.get('/',  UserController.getUsers);
+router.put('/:id', checkPermission("USER_MANAGEMENT"), UserController.updateUser);
+router.delete('/:id', checkPermission("USER_MANAGEMENT"), UserController.deleteUser);
 
 export default router;

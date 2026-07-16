@@ -4,11 +4,12 @@ import { upload } from "../../middlewares/uploadMiddleware.js";
 import { citizenAuthProtect } from "../../middlewares/citizen.middleware.js";
 import { authProtect } from "../../middlewares/authMiddleware.js";
 import { checkPermission } from "../../middlewares/permissionMiddleware.js";
+import { createLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = Router();
 
 
-router.post("/citizen",  citizenAuthProtect,  upload.any(),  GrievanceController.createGrievance);
+router.post("/citizen",  citizenAuthProtect, createLimiter, upload.any(),  GrievanceController.createGrievance);
 
 // Get all grievances for the logged-in citizen
 router.get("/citizen", citizenAuthProtect, GrievanceController.getCitizenGrievances);
@@ -42,7 +43,7 @@ router.get(
 );
 
 // Create a grievance by an officer on behalf of a citizen
-router.post("/officer/create",  authProtect,checkPermission("CREATE_GRIEVANCE"),  upload.any(),  GrievanceController.createGrievanceByAgent);
+router.post("/officer/create",  authProtect,checkPermission("CREATE_GRIEVANCE"), upload.any(),  GrievanceController.createGrievanceByAgent);
 
 // Update entire grievance details by an officer
 router.put("/officer/:id", authProtect,checkPermission("UPDATE_GRIEVANCE"), GrievanceController.updateGrievanceByOfficer);

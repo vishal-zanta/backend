@@ -7,10 +7,10 @@ const router = Router();
 
 router.use(authProtect);
 
-router.post('/bulk-order', checkPermission("ALL"), WorkflowLevelController.bulkUpdateOrder);
-router.post('/', checkPermission("ALL"), WorkflowLevelController.createLevel);
+router.post('/bulk-order', checkPermission("WORKFLOW_MANAGEMENT"), WorkflowLevelController.bulkUpdateOrder);
+router.post('/', checkPermission("WORKFLOW_MANAGEMENT"), WorkflowLevelController.createLevel);
 router.get('/', WorkflowLevelController.getLevels);
-router.put('/:id', checkPermission("ALL"), WorkflowLevelController.updateLevel);
-router.delete('/:id', checkPermission("ALL"), WorkflowLevelController.deleteLevel);
+router.put('/:id', checkPermission("WORKFLOW_MANAGEMENT"), WorkflowLevelController.updateLevel);
+router.delete('/:id', checkPermission("WORKFLOW_MANAGEMENT"), WorkflowLevelController.deleteLevel);
 
 export default router;

@@ -7,9 +7,9 @@ const router = Router();
 
 router.use(authProtect);
 
-router.post('/', checkPermission("ALL"), OfficerTaggingController.createTagging);
+router.post('/', checkPermission("OFFICER_TAGGING"), OfficerTaggingController.createTagging);
 router.get('/', OfficerTaggingController.getTaggings);
-router.put('/:id', checkPermission("ALL"), OfficerTaggingController.updateTagging);
-router.delete('/:id', checkPermission("ALL"), OfficerTaggingController.deleteTagging);
+router.put('/:id', checkPermission("OFFICER_TAGGING"), OfficerTaggingController.updateTagging);
+router.delete('/:id', checkPermission("OFFICER_TAGGING"), OfficerTaggingController.deleteTagging);
 
 export default router;

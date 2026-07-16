@@ -7,9 +7,9 @@ const router = Router();
 
 router.use(authProtect);
 
-router.post('/', checkPermission("ALL"), RoleController.createRole);
+router.post('/', checkPermission("ROLE_MANAGEMENT"), RoleController.createRole);
 router.get('/', RoleController.getRoles);
-router.put('/:id', checkPermission("ALL"), RoleController.updateRole);
-router.delete('/:id', checkPermission("ALL"), RoleController.deleteRole);
+router.put('/:id', checkPermission("ROLE_MANAGEMENT"), RoleController.updateRole);
+router.delete('/:id', checkPermission("ROLE_MANAGEMENT"), RoleController.deleteRole);
 
 export default router;

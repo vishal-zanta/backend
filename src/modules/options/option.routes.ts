@@ -12,8 +12,8 @@ router.get("/", OptionController.getOptions);
 router.use(authProtect);
 
 router.get("/types", OptionController.getTypes); 
-router.post("/",checkPermission("ALL"), OptionController.createOption); 
-router.put("/:id",checkPermission("ALL"), OptionController.updateOption);
-router.delete("/:id",checkPermission("ALL"), OptionController.deleteOption);
+router.post("/",checkPermission("ALL"),checkPermission("OPTION_MANAGEMENT"), OptionController.createOption); 
+router.put("/:id",checkPermission("ALL"),checkPermission("OPTION_MANAGEMENT"), OptionController.updateOption);
+router.delete("/:id",checkPermission("ALL"),checkPermission("OPTION_MANAGEMENT"), OptionController.deleteOption);
 
 export default router;

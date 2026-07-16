@@ -9,9 +9,9 @@ const router = Router();
 router.post('/pulse', authProtect, ActivityController.pulse);
 
 // Endpoint for admins to get active users 
-router.get('/active-users', authProtect,checkPermission("ALL"), ActivityController.getActiveUsers);
+router.get('/active-users', authProtect,checkPermission("VIEW_ACTIVE_USERS"), ActivityController.getActiveUsers);
 
 // Endpoint for admins to logout a specific user
-router.post('/admin-logout/:userId', authProtect,checkPermission("ALL"), ActivityController.adminLogoutUser);
+router.post('/admin-logout/:userId', authProtect,checkPermission("LOGOUT_USERS"), ActivityController.adminLogoutUser);
 
 export default router;

@@ -13,12 +13,16 @@ import { handleErrorResponse } from "./middlewares/errorHandler.js";
 
 // Routes
 import indexRoutes from "./modules/main/index.routes.js";
+import { globalLimiter } from "./middlewares/rateLimiter.js";
 
 // Cronjobs
 import { initCronJobs } from "./cronjobs/escalation.cron.js";
 
 const app = express();
 const port = config.port;
+
+// Trust the reverse proxy (required for express-rate-limit when behind Nginx, AWS, Cloudflare, etc.)
+app.set("trust proxy", 1);
 
 app.use(cors({
     origin: "*",
@@ -37,6 +41,9 @@ connectDB();
 
 // Initialize Cron Jobs
 initCronJobs();
+
+// Global Rate Limiter
+app.use(globalLimiter);
 
 // Routes
 app.use("/api/v1", indexRoutes);

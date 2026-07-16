@@ -8,8 +8,8 @@ const router = Router();
 router.get('/', ComplaintSourceController.getSources);
 
 router.use(authProtect);
-router.post('/', checkPermission("ALL"), ComplaintSourceController.createSource);
-router.put('/:id', checkPermission("ALL"), ComplaintSourceController.updateSource);
-router.delete('/:id', checkPermission("ALL"), ComplaintSourceController.deleteSource);
+router.post('/', checkPermission("SOURCE_MANAGEMENT"), ComplaintSourceController.createSource);
+router.put('/:id', checkPermission("SOURCE_MANAGEMENT"), ComplaintSourceController.updateSource);
+router.delete('/:id', checkPermission("SOURCE_MANAGEMENT"), ComplaintSourceController.deleteSource);
 
 export default router;

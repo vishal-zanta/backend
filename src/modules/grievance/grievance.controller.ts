@@ -13,6 +13,7 @@ import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 import { TimelineService } from "../timeline/timeline.service.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
 import { GrievanceAnalyticLog } from "./grievanceAnalyticLog.model.js";
+import { ComplaintSource } from "../complaintSource/complaintSource.model.js";
 
 export class GrievanceController {
   
@@ -26,7 +27,8 @@ export class GrievanceController {
     // Parse nested objects from form-data.
     // In form-data, objects like 'classification' are often sent as JSON strings.
     let classification, evidence, impact, communication, address, citizenInfo;
-    const channel = req.body.channel;
+    const dbWebsiteSourceId=await ComplaintSource.findOne({title:RegExp("^website$", "i")})
+    const channel = dbWebsiteSourceId;
     console.log("Received form-data:", req.body);
     try {
       classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
@@ -134,6 +136,7 @@ export class GrievanceController {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
+    const status=(req.query.status as string) ||null
 
     // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
     const baseConditions = [
@@ -166,13 +169,18 @@ export class GrievanceController {
       ];
       delete query.$or; // Remove the top-level $or since it's now inside $and
     }
+    if (status) {
+  query.status = {
+    $in: status.split(",")
+  };
+}
 
     const totalCount = await Grievance.countDocuments(query);
     const pagination = buildPagination({ page, limit, totalCount });
 
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt")
+      .select("grievanceId classification.subService address status assignedPriority createdAt feedbackText rating")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -181,6 +189,7 @@ export class GrievanceController {
           select: "title titleHindi department"
         }
       })
+      .populate("address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -218,7 +227,7 @@ export class GrievanceController {
       populate: {
         path: "role"
       }
-    });
+    }).populate("address.district", "name nameHindi");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -388,6 +397,26 @@ export class GrievanceController {
           inProgress: { $sum: { $cond: [{ $eq: ["$status", "IN_PROGRESS"] }, 1, 0] } },
           escalated: { $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] } }
         }
+      },
+      {
+        $lookup: {
+          from: "demographies",
+          localField: "_id",
+          foreignField: "_id",
+          as: "districtDetails"
+        }
+      },
+      { $unwind: { path: "$districtDetails", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 1,
+          name: { $ifNull: ["$districtDetails.name", "$_id"] },
+          total: 1,
+          resolved: 1,
+          pending: 1,
+          inProgress: 1,
+          escalated: 1
+        }
       }
     ]);
 
@@ -486,6 +515,7 @@ export class GrievanceController {
           select: "title titleHindi department"
         }
       })
+      .populate("address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -657,6 +687,7 @@ export class GrievanceController {
           select: "title titleHindi department"
         }
       })
+      .populate("address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -1041,7 +1072,7 @@ export class GrievanceController {
       populate: {
         path: "role"
       }
-    });
+    }).populate("address.district", "name nameHindi");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1081,7 +1112,7 @@ export class GrievanceController {
       populate: {
         path: "role"
       }
-    });
+    }).populate("address.district", "name nameHindi");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });

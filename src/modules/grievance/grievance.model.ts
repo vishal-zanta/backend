@@ -65,7 +65,7 @@ export interface IGrievance extends Document {
     status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
     address?: {
       state?: string;
-      district?: string;
+      district: mongoose.Types.ObjectId;
       subdivision?: string;
       villageOrWard?: string;
       pinCode?: string;
@@ -225,7 +225,11 @@ const GrievanceSchema = new Schema<IGrievance>(
       },
       address: {
         state: String,
-        district: String,
+        district: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Demography',
+          required: true
+        },
         subdivision: String,
         villageOrWard: String,
         pinCode: String,

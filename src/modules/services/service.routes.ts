@@ -10,13 +10,13 @@ router.get('/sub', ServiceController.getSubServices);
 router.use(authProtect);
 
 // Service Routes
-router.post('/', checkPermission("ALL"), ServiceController.createService);
-router.put('/:id', checkPermission("ALL"), ServiceController.updateService);
-router.delete('/:id', checkPermission("ALL"), ServiceController.deleteService);
+router.post('/', checkPermission("SERVICE_MANAGEMENT"), ServiceController.createService);
+router.put('/:id', checkPermission("SERVICE_MANAGEMENT"), ServiceController.updateService);
+router.delete('/:id', checkPermission("SERVICE_MANAGEMENT"), ServiceController.deleteService);
 
 // Sub-Service Routes
-router.post('/sub', checkPermission("ALL"), ServiceController.createSubService);
-router.put('/sub/:id', checkPermission("ALL"), ServiceController.updateSubService);
-router.delete('/sub/:id', checkPermission("ALL"), ServiceController.deleteSubService);
+router.post('/sub', checkPermission("SERVICE_MANAGEMENT"), ServiceController.createSubService);
+router.put('/sub/:id', checkPermission("SERVICE_MANAGEMENT"), ServiceController.updateSubService);
+router.delete('/sub/:id', checkPermission("SERVICE_MANAGEMENT"), ServiceController.deleteSubService);
 
 export default router;

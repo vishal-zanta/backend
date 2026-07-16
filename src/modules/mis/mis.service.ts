@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import moment from "moment";
 import { Grievance } from "../grievance/grievance.model.js";
 import { User } from "../users/user.model.js";
@@ -129,10 +130,14 @@ function buildBaseMatch(district: string | undefined, bounds: DateBounds): Recor
   };
 
   if (district && district.toLowerCase() !== "all") {
-    match["address.district"] = {
-      $regex: `^${escapeRegex(district.trim())}$`,
-      $options: "i",
-    };
+    if (mongoose.Types.ObjectId.isValid(district.trim())) {
+      match["address.district"] = new mongoose.Types.ObjectId(district.trim());
+    } else {
+      match["address.district"] = {
+        $regex: `^${escapeRegex(district.trim())}$`,
+        $options: "i",
+      };
+    }
   }
 
   return match;
@@ -182,9 +187,18 @@ async function getSummaryReport(match: Record<string, unknown>) {
     },
     { $sort: { total: -1 } },
     {
+      $lookup: {
+        from: "demographies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "districtDetails"
+      }
+    },
+    { $unwind: { path: "$districtDetails", preserveNullAndEmptyArrays: true } },
+    {
       $project: {
         _id: 0,
-        district: "$_id",
+        district: { $ifNull: ["$districtDetails.name", "$_id"] },
         total: 1,
         resolved: 1,
         pending: 1,
