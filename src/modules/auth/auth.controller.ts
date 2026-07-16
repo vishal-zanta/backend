@@ -52,7 +52,7 @@ export class AuthController {
       return new ApiResponse({ res, status: 200, data: userData, message: 'Login successful' });
     }
 
-    throw new ApiError({ status: 401, message: 'Invalid credentials' });
+    throw new ApiError({ status: 400, message: 'Invalid credentials' });
   });
 
  static getProfile = asyncHandler(async (req: Request, res: Response) => {

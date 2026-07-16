@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ServiceController } from './service.controller.js';
 import { authProtect } from '../../middlewares/authMiddleware.js';
-import { rbacMiddlewareForAdmin } from '../../middlewares/rbacMiddleware.js';
+import { checkPermission } from '../../middlewares/permissionMiddleware.js';
 
 const router = Router();
 
@@ -10,13 +10,13 @@ router.get('/sub', ServiceController.getSubServices);
 router.use(authProtect);
 
 // Service Routes
-router.post('/', rbacMiddlewareForAdmin, ServiceController.createService);
-router.put('/:id', rbacMiddlewareForAdmin, ServiceController.updateService);
-router.delete('/:id', rbacMiddlewareForAdmin, ServiceController.deleteService);
+router.post('/', checkPermission("ALL"), ServiceController.createService);
+router.put('/:id', checkPermission("ALL"), ServiceController.updateService);
+router.delete('/:id', checkPermission("ALL"), ServiceController.deleteService);
 
 // Sub-Service Routes
-router.post('/sub', rbacMiddlewareForAdmin, ServiceController.createSubService);
-router.put('/sub/:id', rbacMiddlewareForAdmin, ServiceController.updateSubService);
-router.delete('/sub/:id', rbacMiddlewareForAdmin, ServiceController.deleteSubService);
+router.post('/sub', checkPermission("ALL"), ServiceController.createSubService);
+router.put('/sub/:id', checkPermission("ALL"), ServiceController.updateSubService);
+router.delete('/sub/:id', checkPermission("ALL"), ServiceController.deleteSubService);
 
 export default router;

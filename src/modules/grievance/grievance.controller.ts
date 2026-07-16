@@ -779,6 +779,21 @@ export class GrievanceController {
       });
     }
 
+    if (oldGrievance.status !== grievance.status && req.user) {
+      await TimelineService.logEvent({
+        grievanceId: grievance._id as any,
+        type: "STATUS_CHANGE" as any, // assuming type might need adding or it accepts string
+        actor: {
+          id: req.user.id as any,
+          name: "OFFICER",
+          role: "OFFICER"
+        },
+        metadata: {
+          description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", grievance.status || "UNKNOWN")
+        }
+      });
+    }
+
     return new ApiResponse({
       res,
       status: 200,
@@ -865,7 +880,7 @@ export class GrievanceController {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "RESOLVED",
-          actor: { id: (req as any).user.id as any, name: "OFFICER", role: "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
           metadata: { description: timelineTemplates.RESOLVED(remarks || "Grievance resolved.") }
         });
       } else if (status === "CLOSED") {
@@ -874,7 +889,7 @@ export class GrievanceController {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "COMPLAINT_CLOSED",
-          actor: { id: (req as any).user.id as any, name: "OFFICER", role: "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
           metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
         });
       }

@@ -5,6 +5,9 @@ export const timelineTemplates = {
   PRIORITY_SET: (priority: string) =>
     `Priority set to ${priority}`,
 
+  STATUS_CHANGE: (oldStatus: string, newStatus: string) =>
+    `Status changed from ${oldStatus} to ${newStatus}`,
+
   ASSIGNED: (assigneeRole: string, assigneeName: string) =>
     `Assigned to ${assigneeRole} — ${assigneeName}`,
 
