@@ -13,7 +13,7 @@ import { handleErrorResponse } from "./middlewares/errorHandler.js";
 
 // Routes
 import indexRoutes from "./modules/main/index.routes.js";
-import { globalLimiter } from "./middlewares/rateLimiter.js";
+// import { globalLimiter } from "./middlewares/rateLimiter.js";
 
 // Cronjobs
 import { initCronJobs } from "./cronjobs/escalation.cron.js";
@@ -43,7 +43,7 @@ connectDB();
 initCronJobs();
 
 // Global Rate Limiter
-app.use(globalLimiter);
+// app.use(globalLimiter);
 
 // Routes
 app.use("/api/v1", indexRoutes);

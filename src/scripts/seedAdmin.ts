@@ -16,9 +16,9 @@ const seedAdmin = async () => {
       await User.create({
         name: 'Super Admin',
         email: 'admin@example.com',
+        userCode:"Admin01",
         phone: '0000000000',
         password: 'admin', // This will be hashed automatically by the pre-save hook
-        isAdmin: true,
       });
 
       console.log('Default admin created successfully.');
