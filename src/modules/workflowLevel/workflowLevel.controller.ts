@@ -8,7 +8,7 @@ import { validateRequestFields } from '../../utils/helpers.js';
 
 export class WorkflowLevelController {
   static createLevel = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["role", "description"], req.body);
+    validateRequestFields(["role"], req.body);
     
     const { role, description } = req.body;
 

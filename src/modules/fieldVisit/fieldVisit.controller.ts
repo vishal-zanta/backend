@@ -93,7 +93,16 @@ export class FieldVisitController {
                 'grievance.citizenInfo': 1,
                 'grievance.geotaggedImages': 1
               }
+            },
+            {$lookup:{
+                   from: 'demographies',
+          localField: 'grievance.address.district',
+          foreignField: '_id',
+          as: 'grievance.address.district'
+
             }
+          },
+          {$unwind:"$grievance.address.district"}
           ]
         }
       }
