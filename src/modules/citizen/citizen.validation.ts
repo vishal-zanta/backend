@@ -20,6 +20,8 @@ export const loginSchema = z.object({
 
 export const updateProfileSchema = z.object({
   fullName: z.string().min(3, "Name cannot be empty").optional(),
-  email: z.email("Invalid email format").optional(),
+  email:z.string().nullable().optional().refine((val) => !val || z.string().email().safeParse(val).success, {
+      message: "Invalid email address",
+    }),
   preferredLanguage: z.string().optional(),
 });
