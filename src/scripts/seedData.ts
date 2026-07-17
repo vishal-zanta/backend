@@ -9,17 +9,18 @@ import { Demography } from "../modules/demography/demography.model.js";
 import { Ulb } from "../modules/demography/ulb.model.js";
 
 const rolesData = [
-  { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" },
-  { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" },
-  { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone" },
-  { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB" },
-  { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division" },
-  { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA" },
-  { designationEnglish: "Customer Care Executive", designationHindi: "ग्राहक सेवा कार्यपालक", level: "CCE" },
+  // { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" },
+  // { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" },
+  // { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone" },
+  // { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB" },
+  // { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division" },
+  // { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA" },
+  { designationEnglish: "Call Center Executive", designationHindi: "ग्राहक सेवा कार्यपालक", level: "CCE" },
   { designationEnglish: "Call Centre Supervisor", designationHindi: "कॉल सेंटर पर्यवेक्षक", level: "Supervisor" },
     { designationEnglish: 'Admin', designationHindi: 'Admin', level: 'Admin',"permissions":["ALL"] }
 
 ];
+// Supervisor,CCE,Admin
 
 const complaintSourcesData = [
   "Website",

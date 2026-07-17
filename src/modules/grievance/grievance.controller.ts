@@ -527,8 +527,14 @@ export class GrievanceController {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
+    const status = (req.query.status as string) || null;
 
     const query: any = {};
+    if (status) {
+      query.status = {
+        $in: status.split(",")
+      };
+    }
 
     if (search) {
       const searchRegex = new RegExp(search, "i");
@@ -674,6 +680,7 @@ export class GrievanceController {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
+    const status = (req.query.status as string) || null;
 
     // Load Officer Tagging to see what services they handle
     let taggedServiceIds: any[] = [];
@@ -698,6 +705,12 @@ export class GrievanceController {
     const query: any = {
       $or: baseConditions
     };
+
+    if (status) {
+      query.status = {
+        $in: status.split(",")
+      };
+    }
 
     if (search) {
       const searchRegex = new RegExp(search, "i");

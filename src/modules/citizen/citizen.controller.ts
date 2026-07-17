@@ -101,7 +101,7 @@ export class CitizenController {
       citizen.fullName = fullName;
     }
     if (email !== undefined) {
-      const existCitizen = await CitizenService.getCitizen(email);
+      const existCitizen = await CitizenService.getCitizen(email as string);
       if (existCitizen && existCitizen.id !== citizen?._id.toString()) {
         throw new ApiError({ status: 409, message: "Email already in use" });
       }

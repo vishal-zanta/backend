@@ -18,6 +18,7 @@ import activityRoutes from "../activity/activity.routes.js";
 import breakRoutes from "../breaks/break.routes.js";
 import chatRoutes from "../chat/chat.routes.js";
 import misRoutes from "../mis/mis.routes.js";
+import shiftRoutes from "../shift/shift.routes.js";
 
 const router = Router();
 
@@ -40,5 +41,6 @@ router.use("/activity", activityRoutes);
 router.use("/breaks", breakRoutes);
 router.use("/chat", chatRoutes);
 router.use("/mis", misRoutes);
+router.use("/shifts", shiftRoutes);
 
 export default router;
