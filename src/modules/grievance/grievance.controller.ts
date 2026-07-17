@@ -14,8 +14,53 @@ import { TimelineService } from "../timeline/timeline.service.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
 import { GrievanceAnalyticLog } from "./grievanceAnalyticLog.model.js";
 import { ComplaintSource } from "../complaintSource/complaintSource.model.js";
+import { createGrievanceSchema, createGrievanceByAgentSchema, submitFeedbackSchema } from "./grievance.validation.js";
+import { Option } from "../options/option.model.js";
+import { Demography } from "../demography/demography.model.js";
 
 export class GrievanceController {
+  private static async validateReferences(data: any) {
+    const checks: Promise<any>[] = [];
+    
+    if (data.classification?.subService) {
+      checks.push(SubService.exists({ _id: data.classification.subService }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.subService: Reference does not exist" });
+      }));
+    }
+    if (data.classification?.nature) {
+      checks.push(Option.exists({ _id: data.classification.nature }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.nature: Reference does not exist" });
+      }));
+    }
+    if (data.evidence?.frequency) {
+      checks.push(Option.exists({ _id: data.evidence.frequency }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid evidence.frequency: Reference does not exist" });
+      }));
+    }
+    if (data.address?.district) {
+      checks.push(Demography.exists({ _id: data.address.district }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid address.district: Reference does not exist" });
+      }));
+    }
+    if (data.impact?.affectedBeneficiary) {
+      checks.push(Option.exists({ _id: data.impact.affectedBeneficiary }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid impact.affectedBeneficiary: Reference does not exist" });
+      }));
+    }
+    if (data.impact?.publicImpact) {
+      checks.push(Option.exists({ _id: data.impact.publicImpact }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid impact.publicImpact: Reference does not exist" });
+      }));
+    }
+    if (data.communication?.preferredMode) {
+      checks.push(ComplaintSource.exists({ _id: data.communication.preferredMode }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid communication.preferredMode: Reference does not exist" });
+      }));
+    }
+
+    await Promise.all(checks);
+  }
+
   
   static createGrievance = asyncHandler(async (req: Request, res: Response) => {
     const citizen = req.citizen;
@@ -41,9 +86,17 @@ export class GrievanceController {
       throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
     }
 
-    if (!classification || !evidence) {
-      throw new ApiError({ status: 400, message: "classification and evidence are required." });
+    // Force the mobile number to be the logged-in citizen's real mobile
+    if (!citizenInfo) citizenInfo = {};
+    citizenInfo.mobile = citizen.mobile;
+
+    const parsedBody = { classification, evidence, impact, communication, address, citizenInfo };
+    const validation = createGrievanceSchema.safeParse(parsedBody);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
     }
+
+    await GrievanceController.validateReferences(parsedBody);
 
     // Hand off to the newly created service for core business logic
     const newGrievance = await GrievanceService.createGrievance({
@@ -86,13 +139,13 @@ export class GrievanceController {
       throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
     }
 
-    if (!classification || !evidence) {
-      throw new ApiError({ status: 400, message: "classification and evidence are required." });
+    const parsedBody = { classification, evidence, impact, communication, address, citizenInfo };
+    const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
     }
 
-    if (!citizenInfo?.mobile) {
-      throw new ApiError({ status: 400, message: "citizenInfo.mobile is required when creating a grievance on behalf of a citizen." });
-    }
+    await GrievanceController.validateReferences(parsedBody);
 
     // Attempt to link to an existing Citizen profile if one exists for this mobile number
     let citizen;
@@ -506,7 +559,7 @@ export class GrievanceController {
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt")
+      .select("grievanceId classification.subService address status assignedPriority createdAt citizenInfo")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -708,15 +761,15 @@ export class GrievanceController {
    */
   static submitFeedback = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { rating, feedbackText } = req.body;
+    const validation = submitFeedbackSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+    }
+    const { rating, feedbackText } = validation.data;
     const citizen = req.citizen;
 
     if (!citizen) {
       throw new ApiError({ status: 401, message: "Unauthorized." });
-    }
-
-    if (!rating || rating < 1 || rating > 5) {
-      throw new ApiError({ status: 400, message: "A valid star rating between 1 and 5 is required." });
     }
 
     const grievance = await Grievance.findById(id);

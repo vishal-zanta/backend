@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { sendOtpSchema, loginSchema, updateProfileSchema } from "./citizen.validation.js";
 import { CitizenService } from "./citizen.service.js";
 import { CaptchaService } from "../captcha/captcha.service.js";
 import { OtpService } from "../otp/otp.service.js";
@@ -12,11 +13,11 @@ export class CitizenController {
    * Validates Captcha and sends an OTP to the citizen's mobile number.
    */
   static sendOtp = asyncHandler(async (req: Request, res: Response) => {
-    const { mobile, captchaId, captchaValue } = req.body;
-
-    if (!mobile || !captchaId || !captchaValue) {
-      throw new ApiError({ status: 400, message: "mobile, captchaId, and captchaValue are required" });
+    const validation = sendOtpSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
     }
+    const { mobile, captchaId, captchaValue } = validation.data;
 
     // Verify Captcha
     try {
@@ -45,11 +46,11 @@ export class CitizenController {
    * Returns a JWT token valid for 1 day.
    */
   static login = asyncHandler(async (req: Request, res: Response) => {
-    const { mobile, otp } = req.body;
-
-    if (!mobile || !otp) {
-      throw new ApiError({ status: 400, message: "mobile and otp are required" });
+    const validation = loginSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
     }
+    const { mobile, otp } = validation.data;
 
     // Verify OTP (throws error if invalid)
     try {
@@ -89,16 +90,17 @@ export class CitizenController {
    * Updates the logged-in citizen's name, email, and preferredLanguage.
    */
   static updateProfile = asyncHandler(async (req: Request, res: Response) => {
-    const { name, email, preferredLanguage } = req.body;
+    const validation = updateProfileSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+    }
+    const { fullName, email, preferredLanguage } = validation.data;
     const citizen = req.citizen!;
 
-    if (name !== undefined) {
-      citizen.fullName = name;
+    if (fullName !== undefined) {
+      citizen.fullName = fullName;
     }
     if (email !== undefined) {
-      if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-        throw new ApiError({ status: 400, message: "Invalid email format" });
-      }
       const existCitizen = await CitizenService.getCitizen(email);
       if (existCitizen && existCitizen.id !== citizen?._id.toString()) {
         throw new ApiError({ status: 409, message: "Email already in use" });

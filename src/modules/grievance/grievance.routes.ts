@@ -27,13 +27,13 @@ router.get("/all", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceContro
 router.get("/all/:id", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceController.getAdminGrievanceById);
 
 // Get admin dashboard analytics
-router.get("/admin/dashboard-analytics", authProtect,checkPermission("ALL"), GrievanceController.getAdminDashboardAnalytics);
+router.get("/admin/dashboard-analytics", authProtect,checkPermission("ADMIN_DASHBOARD"), GrievanceController.getAdminDashboardAnalytics);
 
 // Get officer dashboard analytics
-router.get("/officer/dashboard-analytics", authProtect, GrievanceController.getOfficerDashboardAnalytics);
+router.get("/officer/dashboard-analytics", authProtect,checkPermission("OFFICER_DASHBOARD"), GrievanceController.getOfficerDashboardAnalytics);
 
 // Get all grievances assigned to the logged-in officer
-router.get("/officer", authProtect, GrievanceController.getOfficerGrievances);
+router.get("/officer", authProtect,checkPermission("MY_COMPLAINT"), GrievanceController.getOfficerGrievances);
 
 // Get single grievance details for logged-in officer
 router.get(
