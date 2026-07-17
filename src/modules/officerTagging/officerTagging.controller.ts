@@ -9,9 +9,9 @@ import { validateRequestFields } from '../../utils/helpers.js';
 
 export class OfficerTaggingController {
   static createTagging = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["officer", "services", "wards"], req.body);
+    validateRequestFields(["officer", "services", "wards","service","district"], req.body);
     
-    const { officer, services, wards } = req.body;
+    const { officer, services, wards,service,district } = req.body;
 
     const userExists = await User.findById(officer);
     if (!userExists) {
@@ -31,6 +31,8 @@ export class OfficerTaggingController {
       if (!existingTagging.active) {
         existingTagging.services = services;
         existingTagging.wards = wards;
+        existingTagging.service = service;
+        existingTagging.district = district;
         existingTagging.active = true;
         await existingTagging.save();
         return new ApiResponse({ res, status: 201, data: existingTagging, message: 'Officer Tagging created successfully' });
@@ -58,6 +60,8 @@ export class OfficerTaggingController {
         }
       })
       .populate('services', 'title titleHindi')
+      .populate('service', 'title titleHindi department')
+      .populate('district', 'name nameHindi')
       .skip(skip)
       .limit(limit);
       
@@ -73,7 +77,7 @@ export class OfficerTaggingController {
 
   static updateTagging = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { services, wards } = req.body;
+    const { services, wards, service, district } = req.body;
     
     const tagging = await OfficerTagging.findById(id);
     if (!tagging) {
@@ -90,6 +94,14 @@ export class OfficerTaggingController {
 
     if (wards) {
       tagging.wards = wards;
+    }
+
+    if (service) {
+      tagging.service = service;
+    }
+
+    if (district) {
+      tagging.district = district;
     }
 
     await tagging.save();

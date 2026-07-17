@@ -91,7 +91,8 @@ export class FieldVisitController {
                 'grievance.classification': 1,
                 'grievance.address': 1,
                 'grievance.citizenInfo': 1,
-                'grievance.geotaggedImages': 1
+                'grievance.geotaggedImages': 1,
+                'grievance.createdAt':1
               }
             },
             {$lookup:{
@@ -137,14 +138,17 @@ export class FieldVisitController {
       throw new ApiError({ status: 404, message: 'Field visit not found' });
     }
 
+    const eventsToLog: string[] = [];
+
     if (status && visit.status !== status) {
       visit.logs.push({
-        changedBy: new  mongoose.Types.ObjectId(officerId),
+        changedBy: new mongoose.Types.ObjectId(officerId),
         action: 'STATUS_CHANGED',
         oldValue: visit.status,
         newValue: status,
         changedAt: new Date()
       });
+      eventsToLog.push(`Field visit status changed to ${status}`);
       visit.status = status;
     }
 
@@ -158,35 +162,33 @@ export class FieldVisitController {
           newValue: newSchedule,
           changedAt: new Date()
         });
+        eventsToLog.push(`Field visit scheduled for ${newSchedule.toLocaleDateString()}`);
         visit.schedule = newSchedule;
       }
     }
 
-    let shouldLogTimeline = false;
-    if ((status === 'COMPLETED' && visit.status !== 'COMPLETED' && (remark || visit.remark)) || 
-        (remark && visit.remark !== remark && (status === 'COMPLETED' || visit.status === 'COMPLETED'))) {
-      shouldLogTimeline = true;
-    }
-
-    if (remark) {
+    if (remark && visit.remark !== remark) {
+      eventsToLog.push(`Field visit remarks updated: ${remark}`);
       visit.remark = remark;
     }
 
-    if (shouldLogTimeline && officerId) {
+    if (eventsToLog.length > 0 && officerId) {
       const officer = await User.findById(officerId).populate('role');
       if (officer) {
-        await TimelineService.logEvent({
-          grievanceId: visit.grievance as any,
-          type: "FIELD_VISIT",
-          actor: {
-            id: officer._id ,
-            name: officer.name || 'Officer',
-            role: (officer.role as any)?.level || 'OFFICER'
-          },
-          metadata: {
-            description: timelineTemplates.FIELD_VISIT(visit.remark || 'Field visit completed.')
-          }
-        });
+        for (const desc of eventsToLog) {
+          await TimelineService.logEvent({
+            grievanceId: visit.grievance as any,
+            type: "FIELD_VISIT",
+            actor: {
+              id: officer._id ,
+              name: officer.name || 'Officer',
+              role: (officer.role as any)?.level || 'OFFICER'
+            },
+            metadata: {
+              description: timelineTemplates.FIELD_VISIT(desc)
+            }
+          });
+        }
       }
     }
 

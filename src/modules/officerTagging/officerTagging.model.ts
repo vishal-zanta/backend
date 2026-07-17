@@ -3,6 +3,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IOfficerTagging extends Document {
   officer: mongoose.Types.ObjectId;
   services: mongoose.Types.ObjectId[];
+  service: mongoose.Types.ObjectId[];
+  district: mongoose.Types.ObjectId;
   wards: string[];
   active: boolean;
   createdAt: Date;
@@ -15,6 +17,14 @@ const officerTaggingSchema = new Schema<IOfficerTagging>({
     ref: 'User',
     required: true,
     unique: true
+  },
+  service:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service'
+  }],
+  district:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Demography'
   },
   services: [{
     type: mongoose.Schema.Types.ObjectId,

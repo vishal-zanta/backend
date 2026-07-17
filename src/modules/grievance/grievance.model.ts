@@ -76,6 +76,7 @@ export interface IGrievance extends Document {
   
   rating?: number;
   feedbackText?: string;
+  reOpenReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -240,20 +241,22 @@ const GrievanceSchema = new Schema<IGrievance>(
         default: 0,
       },
       geotaggedImages: [GeotaggedImageSchema],
-   
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
+      rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+      },
+      feedbackText: {
+        type: String,
+      },
+      reOpenReason: {
+        type: String,
+      },
+      createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     },
-    feedbackText: {
-      type: String,
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  },
   {
     timestamps: true,
   },

@@ -20,6 +20,9 @@ router.get("/citizen/:id", citizenAuthProtect, GrievanceController.getCitizenGri
 // Submit feedback for a resolved grievance
 router.post("/citizen/:id/feedback", citizenAuthProtect, GrievanceController.submitFeedback);
 
+// Reopen a resolved/closed grievance
+router.post("/citizen/:id/reopen", citizenAuthProtect, GrievanceController.reopenGrievance);
+
 // Get all grievances (for agents/admins)
 router.get("/all", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceController.getAllGrievances);
 

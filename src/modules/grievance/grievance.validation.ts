@@ -11,15 +11,28 @@ const optionalBoolean = z.preprocess(
   z.boolean().optional()
 );
 
+// Helpers to sanitize text inputs by trimming leading/trailing spaces 
+// and replacing multiple consecutive spaces with a single space.
+const requiredText = (msg: string) => 
+  z.string({ message: msg })
+   .trim()
+   .min(1, msg)
+   .transform(val => val.replace(/\s+/g, ' '));
+
+const optionalText = z.string()
+  .trim()
+  .transform(val => val.replace(/\s+/g, ' '))
+  .optional();
+
 export const createGrievanceSchema = z.object({
   classification: z.object({
     subService: mongoId,
-    scheme: z.string().optional(),
+    scheme: optionalText,
     nature: mongoId,
-    subject: z.string({ message: "classification.subject is required" }),
+    subject: optionalText,
   }, { message: "classification is required" }),
   evidence: z.object({
-    details: z.string().optional(),
+    details: optionalText,
     occurrenceDate: z.string().or(z.date()).optional(), 
     frequency: mongoId,
   }, { message: "evidence is required" }),
@@ -39,31 +52,32 @@ export const createGrievanceSchema = z.object({
     satisfactionSurveyConsent: optionalBoolean,
   }).optional(),
   address: z.object({
-    state: z.string().optional(),
+    state: optionalText,
     district: mongoId,
-    subdivision: z.string().optional(),
-    villageOrWard: z.string().optional(),
-    pinCode: z.string().optional(),
-    landmark: z.string().optional(),
+    subdivision: optionalText,
+    villageOrWard: optionalText,
+    pinCode: optionalText,
+    landmark: optionalText,
   }).optional(),
   citizenInfo: z.object({
-    fullName: z.string().optional(),
-    mobile: z.string().optional(),
-    alternateMobile: z.string().optional(),
-    email: z.email("Invalid email format").optional().or(z.literal("")),
-    preferredLanguage: z.string().optional(),
+    fullName: optionalText,
+    mobile: z.string().trim().optional(),
+    alternateMobile: z.string().trim().optional(),
+    email: z.string().trim().email("Invalid email format").optional().or(z.literal("")),
+    preferredLanguage: optionalText,
   }).optional(),
 });
 
 export const createGrievanceByAgentSchema = createGrievanceSchema.extend({
   citizenInfo: z.object({
     mobile: z.string({ message: "citizenInfo.mobile is required when creating a grievance on behalf of a citizen." })
+      .trim()
       .length(10, "Mobile number must be exactly 10 digits")
       .regex(/^[0-9]+$/, "Mobile number must contain only digits"),
-    fullName: z.string().optional(),
-    alternateMobile: z.string().optional(),
-    email: z.string().email("Invalid email format").optional().or(z.literal("")),
-    preferredLanguage: z.string().optional(),
+    fullName: optionalText,
+    alternateMobile: z.string().trim().optional(),
+    email: z.string().trim().email("Invalid email format").optional().or(z.literal("")),
+    preferredLanguage: optionalText,
   })
 });
 
@@ -71,5 +85,9 @@ export const submitFeedbackSchema = z.object({
   rating: z.coerce.number({ message: "A valid star rating between 1 and 5 is required." })
     .min(1, "A valid star rating between 1 and 5 is required.")
     .max(5, "A valid star rating between 1 and 5 is required."),
-  feedbackText: z.string().optional(),
+  feedbackText: optionalText,
+});
+
+export const reopenGrievanceSchema = z.object({
+  reOpenReason: requiredText("Reason for reopening is strictly mandatory and cannot be empty spaces."),
 });

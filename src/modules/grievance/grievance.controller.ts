@@ -14,7 +14,9 @@ import { TimelineService } from "../timeline/timeline.service.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
 import { GrievanceAnalyticLog } from "./grievanceAnalyticLog.model.js";
 import { ComplaintSource } from "../complaintSource/complaintSource.model.js";
-import { createGrievanceSchema, createGrievanceByAgentSchema, submitFeedbackSchema } from "./grievance.validation.js";
+import { createGrievanceSchema, createGrievanceByAgentSchema, submitFeedbackSchema, reopenGrievanceSchema } from "./grievance.validation.js";
+import { User } from "../users/user.model.js";
+import { FieldVisit } from '../fieldVisit/fieldVisit.model.js';
 import { Option } from "../options/option.model.js";
 import { Demography } from "../demography/demography.model.js";
 
@@ -528,12 +530,21 @@ export class GrievanceController {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
     const status = (req.query.status as string) || null;
+    const feedback = req.query.feedback as string;
 
     const query: any = {};
     if (status) {
       query.status = {
         $in: status.split(",")
       };
+    }
+
+    if (feedback === 'true') {
+      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
+      query.rating = { $ne: null };
+    } else if (feedback === 'false') {
+      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
+      query.rating = null;
     }
 
     if (search) {
@@ -681,29 +692,10 @@ export class GrievanceController {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
     const status = (req.query.status as string) || null;
-
-    // Load Officer Tagging to see what services they handle
-    let taggedServiceIds: any[] = [];
-    try {
-    
-      const tag = await OfficerTagging.findOne({ officer: officerId, active: true });
-      if (tag && tag.services) {
-        taggedServiceIds = tag.services;
-      }
-    } catch (e) {
-      console.error("Failed to load officer tags", e);
-    }
-
-    const baseConditions: any[] = [
-      { assignedOfficer: officerId }
-    ];
-
-    if (taggedServiceIds.length > 0) {
-      baseConditions.push({ "classification.subService": { $in: taggedServiceIds } });
-    }
+    const feedback = req.query.feedback as string;
 
     const query: any = {
-      $or: baseConditions
+      assignedOfficer: officerId 
     };
 
     if (status) {
@@ -712,32 +704,31 @@ export class GrievanceController {
       };
     }
 
+    if (feedback === 'true') {
+      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
+      query.rating = { $ne: null };
+    } else if (feedback === 'false') {
+      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
+      query.rating = null;
+    }
+
     if (search) {
       const searchRegex = new RegExp(search, "i");
       let searchSubServiceIds: any[] = [];
       
       try {
-       
         const matchingSubServices = await SubService.find({ name: searchRegex }).select("_id");
         searchSubServiceIds = matchingSubServices.map(s => s._id);
       } catch (e) {}
 
-      const searchQuery: any = {
-        $or: [
-          { grievanceId: searchRegex },
-          { "citizenInfo.mobile": searchRegex },
-        ]
-      };
+      query.$or = [
+        { grievanceId: searchRegex },
+        { "citizenInfo.mobile": searchRegex },
+      ];
 
       if (searchSubServiceIds.length > 0) {
-        searchQuery.$or.push({ "classification.subService": { $in: searchSubServiceIds } });
+        query.$or.push({ "classification.subService": { $in: searchSubServiceIds } });
       }
-
-      query.$and = [
-        { $or: baseConditions },
-        searchQuery
-      ];
-      delete query.$or;
     }
 
     const totalCount = await Grievance.countDocuments(query);
@@ -836,6 +827,77 @@ export class GrievanceController {
   });
 
   /**
+   * Reopen a grievance (Citizen)
+   */
+  static reopenGrievance = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const validation = reopenGrievanceSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+    }
+    const { reOpenReason } = validation.data;
+    const citizen = req.citizen;
+
+    if (!citizen) {
+      throw new ApiError({ status: 401, message: "Unauthorized." });
+    }
+
+    const grievance = await Grievance.findById(id);
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    // Verify ownership
+    const isOwner = grievance.citizen?.toString() === citizen._id.toString();
+    const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
+
+    if (!isOwner && !isMobileMatch) {
+      throw new ApiError({ status: 403, message: "Forbidden. You are not authorized to reopen this grievance." });
+    }
+
+    // Enforce status constraint
+    if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
+      throw new ApiError({ status: 400, message: "Only RESOLVED or CLOSED grievances can be reopened." });
+    }
+
+    // Enforce 7-day constraint based on updatedAt (when status was likely resolved/closed)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    if (new Date(grievance.updatedAt) < sevenDaysAgo) {
+      throw new ApiError({ status: 400, message: "Grievance can only be reopened within 7 days of being resolved or closed." });
+    }
+
+    const oldStatus = grievance.status;
+
+    grievance.status = "REOPENED";
+    grievance.reOpenReason = reOpenReason;
+    await grievance.save();
+
+    // Log to timeline
+    await TimelineService.logEvent({
+      grievanceId: grievance._id as any,
+      type: "STATUS_CHANGE" as any,
+      actor: {
+        id: citizen._id as any,
+        name: "CITIZEN",
+        role: "CITIZEN"
+      },
+      metadata: {
+        description: timelineTemplates.STATUS_CHANGE(oldStatus, "REOPENED") + ` Reason: ${reOpenReason}`
+      }
+    });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Grievance reopened successfully.",
+    });
+  });
+
+  /**
    * Update grievance details (by Officer)
    */
   static updateGrievanceByOfficer = asyncHandler(async (req: Request, res: Response) => {
@@ -845,6 +907,18 @@ export class GrievanceController {
     const oldGrievance = await Grievance.findById(id);
     if (!oldGrievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    if (updateData.status === 'RESOLVED') {
+      const hasPhotos = (oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0) || (updateData.geotaggedImages && updateData.geotaggedImages.length > 0);
+      if (!hasPhotos) {
+        throw new ApiError({ status: 400, message: "Cannot resolve grievance: At least one photo of the resolution is required." });
+      }
+
+      const completedVisit = await FieldVisit.findOne({ grievance: id, status: 'COMPLETED' });
+      if (!completedVisit) {
+        throw new ApiError({ status: 400, message: "Cannot resolve grievance: A completed field visit is required before resolution." });
+      }
     }
 
     const oldPhotosCount = oldGrievance.geotaggedImages?.length || 0;
@@ -962,6 +1036,18 @@ export class GrievanceController {
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
 
+    if (status === "RESOLVED") {
+      const hasPhotos = oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0;
+      if (!hasPhotos) {
+        throw new ApiError({ status: 400, message: "Cannot resolve grievance: At least one photo of the resolution is required." });
+      }
+
+      const completedVisit = await FieldVisit.findOne({ grievance: id, status: 'COMPLETED' });
+      if (!completedVisit) {
+        throw new ApiError({ status: 400, message: "Cannot resolve grievance: A completed field visit is required before resolution." });
+      }
+    }
+
     const grievance = await Grievance.findByIdAndUpdate(
       id,
       { status },
@@ -988,6 +1074,13 @@ export class GrievanceController {
           type: "COMPLAINT_CLOSED",
           actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
           metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
+        });
+      } else if (oldGrievance.status !== status) {
+        await TimelineService.logEvent({
+          grievanceId: grievance._id as any,
+          type: "STATUS_CHANGE" as any,
+          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
+          metadata: { description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status) }
         });
       }
     }

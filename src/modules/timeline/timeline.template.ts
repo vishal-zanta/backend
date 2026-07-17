@@ -6,7 +6,7 @@ export const timelineTemplates = {
     `Priority set to ${priority}`,
 
   STATUS_CHANGE: (oldStatus: string, newStatus: string) =>
-    `Status changed from ${oldStatus} to ${newStatus}`,
+    `Status changed to ${newStatus}`,
 
   ASSIGNED: (assigneeRole: string, assigneeName: string) =>
     `Assigned to ${assigneeRole} — ${assigneeName}`,
