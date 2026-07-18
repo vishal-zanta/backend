@@ -34,6 +34,7 @@ const TimelineSchema = new Schema<ITimeline>(
         "RESOLUTION_PHOTO",
         "CITIZEN_FEEDBACK",
         "COMPLAINT_CLOSED",
+        "STATUS_CHANGE",
       ],
     },
     actor: {

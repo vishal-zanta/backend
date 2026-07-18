@@ -1301,9 +1301,12 @@ export class GrievanceController {
     }
 
     const timeline = await TimelineService.getTimelineHistory(id);
+    const fieldVisits = await FieldVisit.find({ grievance: id }).sort({ createdAt: -1 });
+
     const responseData = {
       ...grievance.toJSON(),
       timeline,
+      fieldVisits,
     };
 
     return new ApiResponse({
