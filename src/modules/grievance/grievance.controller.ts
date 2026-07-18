@@ -1278,25 +1278,14 @@ export class GrievanceController {
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
 
-    // Load Officer Tagging
-    let taggedServiceIds: string[] = [];
-    try {
-      const tag = await OfficerTagging.findOne({ officer: officerId, active: true });
-      if (tag && tag.services) {
-        taggedServiceIds = tag.services.map((s: any) => s.toString());
-      }
-    } catch (e) {
-      console.error("Failed to load officer tags", e);
-    }
+    
 
-    const grievanceSubServiceId = grievance.classification?.subService?._id?.toString() || (grievance.classification?.subService as any)?.toString();
-    const assignedOfficerId = grievance.assignedOfficer?.toString();
+    const assignedOfficerId = grievance.assignedOfficer?._id.toString();
 
     // Verify ownership: either explicitly assigned OR subService falls under their tags
     const isOwner = 
-      (assignedOfficerId === officerId.toString()) || 
-      (grievanceSubServiceId && taggedServiceIds.includes(grievanceSubServiceId));
-
+      (assignedOfficerId === officerId.toString())
+// console.log(assignedOfficerId,officerId)
     if (!isOwner) {
       throw new ApiError({ status: 403, message: "Access denied. This grievance is not assigned to you." });
     }

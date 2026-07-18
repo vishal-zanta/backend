@@ -173,7 +173,7 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, phone, role, status, district } = req.body;
+    const { name, phone, role, status, district,password } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -185,6 +185,7 @@ export class UserController {
     if (role) user.role = role;
     if (status !== undefined) user.status = status;
     if (district) user.district = district;
+    if(password) user.password = password;
 
     await user.save();
     
