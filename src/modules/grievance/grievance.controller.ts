@@ -1167,8 +1167,9 @@ export class GrievanceController {
       try {
         gpsData = await exifr.gps(file.buffer);
       } catch (e) {
+        console.error("Error reading geotags from image", e)
         if (isGeotagMandatory) {
-          throw new ApiError({ status: 400, message: `Failed to parse EXIF data for ${file.originalname}. Geotagging is mandatory for this service.` });
+          throw new ApiError({ status: 400, message: `Geotagging is mandatory for this service failed to read coordinates.` });
         }
       }
 
