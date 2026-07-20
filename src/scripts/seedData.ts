@@ -311,6 +311,7 @@ const runSeed = async () => {
     const l2Role = await Role.findOne({ level: "L2" });
     const cceRole = await Role.findOne({ level: "CCE" });
     const supervisorRole = await Role.findOne({ level: "Supervisor" });
+    const adminRole = await Role.findOne({ level: "Admin" });
     const patnaDistrict = await Demography.findOne({ name: "Patna" });
     const streetLightService = await Service.findOne({ title: "Street Lighting" });
     const subServices = await SubService.find({ service: streetLightService?._id });
@@ -346,6 +347,9 @@ const runSeed = async () => {
       }
       if (supervisorRole) {
         await createOfficer("SUP_001", "Supervisor Patna", "supervisor@example.com", "9999999994", supervisorRole._id as mongoose.Types.ObjectId);
+      }
+      if (adminRole) {
+        await createOfficer("ADMIN_001", "System Admin", "admin@example.com", "9999999995", adminRole._id as mongoose.Types.ObjectId);
       }
 
       const tagOfficer = async (officerId: mongoose.Types.ObjectId) => {
@@ -395,8 +399,8 @@ const runSeed = async () => {
           grievance = await Grievance.create({
             citizenInfo: {
               fullName: `Tarun Kumar ${i}`,
-              mobile: `083077537${5 + i}`,
-              alternateMobile: `083077537${5 + i}`,
+              mobile: `830775537${5 + i}`,
+              alternateMobile: `830775537${5 + i}`,
               email: `tkb8059${i}@gmail.com`,
               preferredLanguage: "English"
             },

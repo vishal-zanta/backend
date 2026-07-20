@@ -64,6 +64,7 @@ export const citizenAuthProtect = async (
     }
 citizen.mobile = citizen.mobile.slice(-10);
 citizen.alternateMobile = citizen?.alternateMobile?.slice(-10);
+req.citizen = citizen;
     next();
   } catch (error) {
     next(error);
