@@ -21,7 +21,7 @@ const workflowLevelSchema = new Schema<IWorkflowLevel>({
   },
   description: {
     type: String,
-    required: true
+    // required: true
   },
   active: {
     type: Boolean,

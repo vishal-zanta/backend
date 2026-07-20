@@ -12,6 +12,8 @@ import { User } from "../modules/users/user.model.js";
 import { OfficerTagging } from "../modules/officerTagging/officerTagging.model.js";
 import { Grievance } from "../modules/grievance/grievance.model.js";
 import { FieldVisit } from "../modules/fieldVisit/fieldVisit.model.js";
+import { TimelineService } from "../modules/timeline/timeline.service.js";
+import { timelineTemplates } from "../modules/timeline/timeline.template.js";
 
 const rolesData = [
   { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" },
@@ -441,6 +443,18 @@ const runSeed = async () => {
               newValue: "SCHEDULED",
               changedAt: new Date()
             }]
+          });
+
+          await TimelineService.logEvent({
+            grievanceId: grievance._id as any,
+            type: "COMPLAINT_REGISTERED",
+            actor: {
+              name: "System",
+              role: "System",
+            },
+            metadata: {
+              description: timelineTemplates.COMPLAINT_REGISTERED(gId, complaintSource.title)
+            }
           });
         }
       }

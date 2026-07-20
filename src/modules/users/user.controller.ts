@@ -120,23 +120,34 @@ export class UserController {
 
     const untagged = req.query.untagged;
     const subServices = req.query.subServices; 
+    const wards = req.query.wards ; 
 
-    if (untagged === 'true' || subServices) {
+    if (untagged === 'true' || subServices || wards) {
       // Find matching taggings
       let taggingQuery: any = { active: true };
+      let performTaggingQuery = false;
       
       if (subServices) {
         let subServiceArray: string[] = [];
-        
-         if (typeof subServices === 'string') {
+        if (typeof subServices === 'string') {
           subServiceArray = subServices.split(',');
         }
-        
         taggingQuery.services = { $in: subServiceArray };
-        
+        performTaggingQuery = true;
+      }
+
+      if (wards) {
+        let wardsArray: string[] = [];
+        if (typeof wards === 'string') {
+          wardsArray = wards.split(",");
+        }
+        taggingQuery.wards = { $in: wardsArray };
+        performTaggingQuery = true;
+      }
+
+      if (performTaggingQuery) {
         const matchedTaggings = await OfficerTagging.find(taggingQuery).select('officer');
         const matchedOfficerIds = matchedTaggings.map(t => t.officer);
-        
         query._id = { ...query._id, $in: matchedOfficerIds };
       }
       
@@ -144,7 +155,7 @@ export class UserController {
         const allTaggings = await OfficerTagging.find({ active: true, services: { $exists: true, $not: { $size: 0 } } }).select('officer');
         const allTaggedOfficerIds = allTaggings.map(t => t.officer);
         
-        // If we already have a $in query (from subServices), we merge them via $nin.
+        // If we already have a $in query (from subServices or wards), we merge them via $nin.
         query._id = { ...query._id, $nin: allTaggedOfficerIds };
       }
     }
@@ -199,6 +210,9 @@ export class UserController {
     if (!user) {
       throw new ApiError({ status: 404, message: 'User not found' });
     }
+
+    // Inactivate the user's tagging
+    await OfficerTagging.findOneAndUpdate({ officer: id }, { active: false });
 
     return new ApiResponse({ res, status: 200, message: 'User deleted successfully' });
   });

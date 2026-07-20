@@ -1012,6 +1012,25 @@ export class GrievanceController {
       });
     }
 
+    const newOfficer = await User.findById(assignedOfficer).populate("role");
+    let description = "Grievance transferred.";
+    if (newOfficer) {
+      const roleName = (newOfficer.role as any)?.designationEnglish || "Officer";
+      description = timelineTemplates.ASSIGNED(roleName, newOfficer.name);
+    }
+
+    await TimelineService.logEvent({
+      grievanceId: grievance._id as any,
+      type: "TRANSFERRED",
+      actor: {
+        name: (req as any).user?.name || "System",
+        role: (req as any).user?.role?.designationEnglish || "System",
+      },
+      metadata: {
+        description
+      }
+    });
+
     return new ApiResponse({
       res,
       status: 200,
