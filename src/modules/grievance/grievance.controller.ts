@@ -168,7 +168,7 @@ export class GrievanceController {
       citizenInfo,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
-      createdBy: (req as any).user._id, // Officer/Agent creating the grievance
+      createdBy: (req as any).user.id, // Officer/Agent creating the grievance
     });
 
     return new ApiResponse({

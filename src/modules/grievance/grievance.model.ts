@@ -60,9 +60,9 @@ export interface IGrievance extends Document {
     grievanceId: string;
     createdBy?: mongoose.Types.ObjectId;
     channel?: mongoose.Types.ObjectId;
-    assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL";
+    assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL"|"PENDING";
     assignedOfficer?: mongoose.Types.ObjectId;
-    status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
+    status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED" ;
     address?: {
       state?: string;
       district: mongoose.Types.ObjectId;

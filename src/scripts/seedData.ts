@@ -7,14 +7,19 @@ import { SubService } from "../modules/services/subService.model.js";
 import { ComplaintSource } from "../modules/complaintSource/complaintSource.model.js";
 import { Demography } from "../modules/demography/demography.model.js";
 import { Ulb } from "../modules/demography/ulb.model.js";
+import { Option } from "../modules/options/option.model.js";
+import { User } from "../modules/users/user.model.js";
+import { OfficerTagging } from "../modules/officerTagging/officerTagging.model.js";
+import { Grievance } from "../modules/grievance/grievance.model.js";
+import { FieldVisit } from "../modules/fieldVisit/fieldVisit.model.js";
 
 const rolesData = [
-  // { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" },
-  // { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" },
-  // { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone" },
-  // { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB" },
-  // { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division" },
-  // { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA" },
+  { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" },
+  { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" },
+  { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone" },
+  { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB" },
+  { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division" },
+  { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA" },
   { designationEnglish: "Call Center Executive", designationHindi: "ग्राहक सेवा कार्यपालक", level: "CCE" },
   { designationEnglish: "Call Centre Supervisor", designationHindi: "कॉल सेंटर पर्यवेक्षक", level: "Supervisor" },
     { designationEnglish: 'Admin', designationHindi: 'Admin', level: 'Admin',"permissions":["ALL"] }
@@ -130,6 +135,95 @@ const ulbData = [
   { name: "Purnia Municipal Corporation", nameHindi: "पूर्णिया नगर निगम", districtName: "Purnia", wards: 45, population: 280583 }
 ];
 
+const options=[{
+  
+  "title": "one-time",
+  "type": "Evidence Frequency",
+  "value": "one_time",
+  "active": true
+ 
+},
+{
+  
+  "title": "recurring",
+  "type": "Evidence Frequency",
+  "value": "recurring",
+  "active": true
+ 
+},
+{
+ 
+  "title": "Self",
+  "type": "Affected Beneficiaries",
+  "value": "self",
+  "active": true
+ 
+},
+{
+  
+  "title": "Family",
+  "type": "Affected Beneficiaries",
+  "value": "family",
+  "active": true
+  
+},
+{
+  
+  "title": "Community",
+  "type": "Public Impact",
+  "value": "community",
+  "active": true
+  
+},
+{
+ 
+  "title": "systemic",
+  "type": "Public Impact",
+  "value": "systemic",
+  "active": true
+ 
+},
+{
+
+  "title": "Complaint",
+  "type": "Grievance Nature",
+  "value": "complaint",
+  "active": true
+  
+},
+{
+
+  "title": "Request",
+  "type": "Grievance Nature",
+  "value": "request",
+  "active": true
+  
+},
+{
+ 
+  "title": "Enquiry",
+  "type": "Grievance Nature",
+  "value": "enquiry",
+  "active": true
+  
+},
+{
+
+  "title": "Suggestion",
+  "type": "Grievance Nature",
+  "value": "suggestion",
+  "active": true
+ 
+},
+{
+  
+  "title": "Community",
+  "type": "Affected Beneficiaries",
+  "value": "community",
+  "active": true
+ 
+}]
+
 const runSeed = async () => {
   try {
     await connectDB();
@@ -200,6 +294,159 @@ const runSeed = async () => {
     }
     console.log("ULBs seeded.");
 
+    // 6. Seed Options
+    for (const opt of options) {
+      await Option.findOneAndUpdate(
+        { type: opt.type, value: opt.value },
+        { $set: opt },
+        { upsert: true, new: true }
+      );
+    }
+    console.log("Options seeded.");
+
+    // 7. Seed Officers and OfficerTagging
+    const l1Role = await Role.findOne({ level: "L1" });
+    const l2Role = await Role.findOne({ level: "L2" });
+    const cceRole = await Role.findOne({ level: "CCE" });
+    const supervisorRole = await Role.findOne({ level: "Supervisor" });
+    const patnaDistrict = await Demography.findOne({ name: "Patna" });
+    const streetLightService = await Service.findOne({ title: "Street Lighting" });
+    const subServices = await SubService.find({ service: streetLightService?._id });
+
+    if (l1Role && l2Role && patnaDistrict && streetLightService && subServices.length > 0) {
+      const createOfficer = async (userCode: string, name: string, email: string, phone: string, roleId: mongoose.Types.ObjectId) => {
+        let user = await User.findOne({ email });
+        if (!user) {
+          user = new User({
+            userCode,
+            name,
+            email,
+            phone,
+            password: "1234",
+            role: roleId,
+            district: patnaDistrict._id,
+            status: "ACTIVE"
+          });
+          await user.save();
+        } else {
+          user.password = "1234";
+          user.role = roleId as any;
+          await user.save();
+        }
+        return user;
+      };
+
+      const l1User = await createOfficer("L1_001", "L1 Officer Patna", "l1@example.com", "9999999991", l1Role._id as mongoose.Types.ObjectId);
+      const l2User = await createOfficer("L2_001", "L2 Officer Patna", "l2@example.com", "9999999992", l2Role._id as mongoose.Types.ObjectId);
+      
+      if (cceRole) {
+        await createOfficer("CCE_001", "CCE Patna", "cce@example.com", "9999999993", cceRole._id as mongoose.Types.ObjectId);
+      }
+      if (supervisorRole) {
+        await createOfficer("SUP_001", "Supervisor Patna", "supervisor@example.com", "9999999994", supervisorRole._id as mongoose.Types.ObjectId);
+      }
+
+      const tagOfficer = async (officerId: mongoose.Types.ObjectId) => {
+        await OfficerTagging.findOneAndUpdate(
+          { officer: officerId },
+          {
+            $set: {
+              officer: officerId,
+              service: [streetLightService._id],
+              services: subServices.map(s => s._id),
+              district: patnaDistrict._id,
+              active: true
+            }
+          },
+          { upsert: true, new: true }
+        );
+      };
+
+      await tagOfficer(l1User._id as mongoose.Types.ObjectId);
+      await tagOfficer(l2User._id as mongoose.Types.ObjectId);
+
+      console.log("Officers and Tagging seeded.");
+    }
+
+    // 8. Seed Grievances & FieldVisits
+    const getOptionId = async (type: string, value: string) => {
+      const opt = await Option.findOne({ type, value });
+      return opt?._id;
+    };
+    
+    const natureId = await getOptionId("Grievance Nature", "complaint");
+    const frequencyId = await getOptionId("Evidence Frequency", "one_time");
+    const beneficiaryId = await getOptionId("Affected Beneficiaries", "self");
+    const complaintSource = await ComplaintSource.findOne({ title: "Website" });
+    const allSubServices = await SubService.find().limit(5);
+    const l1UserGrievance = await User.findOne({ email: "l1@example.com" });
+    const l2UserGrievance = await User.findOne({ email: "l2@example.com" });
+    const districtPatna = await Demography.findOne({ name: "Patna" });
+
+    if (natureId && frequencyId && beneficiaryId && complaintSource && l1UserGrievance && l2UserGrievance && districtPatna && allSubServices.length > 0) {
+      for (let i = 0; i < 5; i++) {
+        const subSvc = allSubServices[i % allSubServices.length];
+        const gId = `BR-2026-00002${3 + i}`;
+        
+        let grievance = await Grievance.findOne({ grievanceId: gId });
+        if (!grievance) {
+          grievance = await Grievance.create({
+            citizenInfo: {
+              fullName: `Tarun Kumar ${i}`,
+              mobile: `083077537${5 + i}`,
+              alternateMobile: `083077537${5 + i}`,
+              email: `tkb8059${i}@gmail.com`,
+              preferredLanguage: "English"
+            },
+            classification: {
+              subService: subSvc._id,
+              nature: natureId,
+              subject: `Grievance about ${subSvc.title}`
+            },
+            evidence: {
+              occurrenceDate: new Date(),
+              frequency: frequencyId,
+              attachments: []
+            },
+            impact: {
+              affectedBeneficiary: beneficiaryId
+            },
+            communication: {
+              satisfactionSurveyConsent: true
+            },
+            grievanceId: gId,
+            channel: complaintSource._id,
+            assignedPriority: "PENDING",
+            status: "OPEN",
+            address: {
+              state: "Bihar",
+              district: districtPatna._id,
+              subdivision: "Munger Sadar",
+              pinCode: "800001"
+            },
+            escalationLevel: 1,
+            createdBy: l2UserGrievance._id,
+            assignedOfficer: l1UserGrievance._id,
+            geotaggedImages: []
+          });
+          
+          await FieldVisit.create({
+            visitId: `FV-${gId}`,
+            grievance: grievance._id,
+            status: "SCHEDULED",
+            schedule: new Date(Date.now() + 86400000), // Next day
+            remark: "Initial visit scheduled",
+            logs: [{
+              action: "CREATED",
+              newValue: "SCHEDULED",
+              changedAt: new Date()
+            }]
+          });
+        }
+      }
+      console.log("5 Grievances and Field Visits seeded.");
+    }
+
     console.log("Seeding complete!");
     process.exit(0);
   } catch (error) {
@@ -209,3 +456,5 @@ const runSeed = async () => {
 };
 
 runSeed();
+
+    // npx tsx src/scripts/seedData.ts

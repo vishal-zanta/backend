@@ -45,6 +45,7 @@ export class GrievanceService {
   }) {
     const { citizen, classification, evidence, impact, communication, address, citizenInfo, files, createdBy, channel } = payload;
 
+    // console.log("createdby ",createdBy)
     // Handle File Uploads
     const attachments: IAttachment[] = [];
     if (files && Array.isArray(files)) {
@@ -117,7 +118,7 @@ const officer:any=await User.findById(createdBy).populate("role").lean();
       type:"COMPLAINT_REGISTERED",
       actor:{
         id: createdBy|| citizen?._id,
-        name: officer?.name || "CITIZEN" || "System",
+        name: officer?.name || "CITIZEN" ,
         role: officer?.role?.level || "CITIZEN",
       },
       metadata:{
