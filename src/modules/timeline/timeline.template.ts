@@ -9,7 +9,7 @@ export const timelineTemplates = {
     `Status changed to ${newStatus}`,
 
   ASSIGNED: (assigneeRole: string, assigneeName: string) =>
-    `Assigned to ${assigneeRole} — ${assigneeName}`,
+    `Assigned to ${assigneeRole} - ${assigneeName}`,
 
   SMS_SENT: (phone: string) =>
     `Notification sent to ${phone}`,
@@ -18,7 +18,7 @@ export const timelineTemplates = {
     `${remarks}`,
 
   ESCALATED: (slaHours: number | string, level: string, assigneeName: string) =>
-    `SLA breached (${slaHours}h). Auto-escalated to ${level} — ${assigneeName}`,
+    `SLA breached (${slaHours}h). Auto-escalated to ${level} - ${assigneeName}`,
 
   RESOLVED: (remarks: string) =>
     `Issue addressed. ${remarks}`,
@@ -27,7 +27,7 @@ export const timelineTemplates = {
     `${photoCount} photo(s) uploaded with geo-tag (${latitude}, ${longitude})`,
 
   CITIZEN_FEEDBACK: (rating: number | string, feedback: string) =>
-    `Rating: ${rating}/5 — ${feedback}`,
+    `Rating: ${rating}/5 - ${feedback}`,
 
   COMPLAINT_CLOSED: (afterHours: number | string) =>
     `Auto-closed after ${afterHours}h of resolution with no dispute`,

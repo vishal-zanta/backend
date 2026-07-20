@@ -430,7 +430,7 @@ const runSeed = async () => {
               subdivision: "Munger Sadar",
               pinCode: "800001"
             },
-            escalationLevel: 1,
+            escalationLevel: 0,
             createdBy: l2UserGrievance._id,
             assignedOfficer: l1UserGrievance._id,
             geotaggedImages: []
@@ -458,6 +458,18 @@ const runSeed = async () => {
             },
             metadata: {
               description: timelineTemplates.COMPLAINT_REGISTERED(gId, complaintSource.title)
+            }
+          });
+
+          await TimelineService.logEvent({
+            grievanceId: grievance._id as any,
+            type: "ASSIGNED",
+            actor: {
+              name: "System",
+              role: "System",
+            },
+            metadata: {
+              description: timelineTemplates.ASSIGNED(l1Role.designationEnglish, l1UserGrievance.name)
             }
           });
         }

@@ -12,7 +12,7 @@ export const checkAndEscalateGrievances = async () => {
     // 1. Fetch complaints that are NOT closed or resolved
     const activeGrievances = await Grievance.find({
       status: { $nin: ["CLOSED", "RESOLVED"] },
-    });
+    }).populate("assignedOfficer");
 
     if (!activeGrievances.length) return;
 
@@ -22,30 +22,43 @@ export const checkAndEscalateGrievances = async () => {
 
     // Fetch all SLA configs 
     const allSlaConfigs = await SlaConfig.find({ active: true });
+    // console.log(allSlaConfigs, "allSlaConfigs")
     const slaConfigMap = new Map();
     for (const config of allSlaConfigs) {
       slaConfigMap.set(config.subService.toString(), config);
     }
 
     for (const grievance of activeGrievances) {
+      console.log("complain",grievance.grievanceId)
       const subServiceId = grievance.classification?.subService?.toString();
+      console.log(subServiceId,"subServiceId")
       if (!subServiceId) continue;
 
       const slaConfig = slaConfigMap.get(subServiceId);
+      console.log(slaConfig,"slaConfig")
+
       if (!slaConfig || !slaConfig.escalations || slaConfig.escalations.length === 0) continue;
 
-      const currentLevelIndex = grievance.escalationLevel || 0;
-      
+      let currentLevelIndex = grievance.escalationLevel || 0;
+      const assignedUser = grievance.assignedOfficer as any;
+      if (assignedUser && assignedUser.role) {
+        const roleIdStr = assignedUser.role.toString();
+        const foundIndex = workflowLevels.findIndex(wl => wl.role.toString() === roleIdStr);
+        if (foundIndex !== -1) {
+          currentLevelIndex = foundIndex;
+        }
+      }
+      console.log(currentLevelIndex,workflowLevels.length - 1,"currentLevelIndex")
       // If already at or beyond max level, we can't escalate further
       if (currentLevelIndex >= workflowLevels.length - 1) continue;
 
       const currentWorkflowLevel = workflowLevels[currentLevelIndex];
-
+console.log(currentWorkflowLevel,"currentWorkflowLevel")
       // Find the SLA hours for the CURRENT role
       const currentRoleSla = slaConfig.escalations.find(
         (esc: any) => esc.role.toString() === currentWorkflowLevel.role.toString()
       );
-
+console.log(currentRoleSla,"currentRoleSla")
       if (!currentRoleSla) continue;
 
       // Calculate cumulative SLA up to the current level because "time per officer" is additive
@@ -56,9 +69,12 @@ export const checkAndEscalateGrievances = async () => {
         const stepSla = slaConfig.escalations.find((e: any) => e.role.toString() === stepRole);
         if (stepSla) cumulativeSlaHours += stepSla.slaHours;
       }
+      console.log(cumulativeSlaHours, "cumulativeSlaHours")
       
       const slaMs = cumulativeSlaHours * 60 * 60 * 1000;
       const timePassedMs = Date.now() - grievance.createdAt.getTime();
+
+      console.log(`timePassedMs: ${timePassedMs}ms (${Math.round(timePassedMs/1000/60)} mins), slaMs: ${slaMs}ms (${cumulativeSlaHours} hours)`);
 
       if (timePassedMs > slaMs) {
         // SLA Breached! Find the NEXT valid role in the workflow that is ALSO in the SlaConfig (OPTIMIZATION 3)
@@ -151,7 +167,6 @@ export const checkAndEscalateGrievances = async () => {
     console.error("[Cron Error] checkAndEscalateGrievances:", error);
   }
 };
-// TODO:need some changes and observations
 export const initCronJobs = () => {
   console.log("[Cron] Initializing background jobs...");
   // Run every 1 minute (60,000 ms)
