@@ -62,8 +62,7 @@ export const citizenAuthProtect = async (
         message: "Citizen not found",
       });
     }
-citizen.mobile = citizen.mobile.slice(-10);
-citizen.alternateMobile = citizen?.alternateMobile?.slice(-10);
+
 req.citizen = citizen;
     next();
   } catch (error) {

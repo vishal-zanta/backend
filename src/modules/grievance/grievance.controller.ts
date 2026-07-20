@@ -192,15 +192,16 @@ export class GrievanceController {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
     const status=(req.query.status as string) ||null
-
+const citizenMobile = citizen.mobile.slice(-10);
+const alternateMobile = citizen?.alternateMobile?.slice(-10);
     // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
     const baseConditions = [
       { citizen: citizen._id },
-      { "citizenInfo.mobile": citizen.mobile },
+      { "citizenInfo.mobile": citizenMobile },
     ];
     // If the citizen has an alternate mobile on their profile, we can match that too
-    if (citizen.alternateMobile) {
-      baseConditions.push({ "citizenInfo.mobile": citizen.alternateMobile });
+    if (alternateMobile) {
+      baseConditions.push({ "citizenInfo.mobile": alternateMobile });
     }
 
     const query: any = {
@@ -287,12 +288,13 @@ export class GrievanceController {
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
-
+const citizenMobile = citizen.mobile.slice(-10);
+const alternateMobile = citizen?.alternateMobile?.slice(-10);
     // Verify ownership
     const isOwner = 
       (grievance.citizen && grievance.citizen.toString() === citizen._id.toString()) ||
-      (grievance.citizenInfo?.mobile === citizen.mobile) ||
-      (citizen.alternateMobile && grievance.citizenInfo?.mobile === citizen.alternateMobile);
+      (grievance.citizenInfo?.mobile === citizenMobile) ||
+      (citizen.alternateMobile && grievance.citizenInfo?.mobile === alternateMobile);
 
     if (!isOwner) {
       throw new ApiError({ status: 403, message: "Access denied. You do not own this grievance." });
