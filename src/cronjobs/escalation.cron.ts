@@ -6,6 +6,7 @@ import { TimelineService } from "../modules/timeline/timeline.service.js";
 import { timelineTemplates } from "../modules/timeline/timeline.template.js";
 import { Role } from "../modules/roles/role.model.js";
 import { GrievanceAnalyticLog } from "../modules/grievance/grievanceAnalyticLog.model.js";
+import { OfficerTagging } from "../modules/officerTagging/officerTagging.model.js";
 
 export const checkAndEscalateGrievances = async () => {
   try {
@@ -115,13 +116,36 @@ console.log(currentRoleSla,"currentRoleSla")
         const nextRoleId = nextWorkflowLevel.role;
         const nextLevelName = await Role.findById(nextRoleId);
 
-        // Limit users to 10 to keep the query extremely fast and memory-efficient
-        const availableOfficers = await User.find({ 
-          role: nextRoleId, 
-          status: 'ACTIVE' 
-        })
-        .sort({ escalatedCount: 1 })
-        .limit(10);
+        const eligibleUsers = await User.find({ role: nextRoleId, status: 'ACTIVE' }).select('_id');
+        const userIds = eligibleUsers.map(u => u._id);
+
+        if (userIds.length === 0) continue;
+
+        const tagQuery: any = {
+          officer: { $in: userIds },
+          services: subServiceId,
+          active: true
+        };
+        
+        const ward = grievance.address?.villageOrWard;
+        if (ward) {
+          tagQuery.wards = ward;
+        }
+        
+        const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
+        
+        let availableOfficers = [];
+        if (eligibleTags.length > 0) {
+          const taggedUserIds = eligibleTags.map((t: any) => t.officer);
+          availableOfficers = await User.find({ _id: { $in: taggedUserIds }, status: 'ACTIVE' })
+            .sort({ escalatedCount: 1 })
+            .limit(10);
+        } else {
+          // Fallback if no tagging found for this level (e.g. state level officers might not be tagged by ward)
+          availableOfficers = await User.find({ _id: { $in: userIds }, status: 'ACTIVE' })
+            .sort({ escalatedCount: 1 })
+            .limit(10);
+        }
 
         if (availableOfficers.length > 0) {
           const nextOfficer = availableOfficers[0];
