@@ -17,6 +17,8 @@ export interface IUser extends Document {
   isBreak: boolean;
   createdAt: Date;
   updatedAt: Date;
+  loginId?: string;
+  isPasswordResetMandatory: boolean;
 }
 
 const userSchema = new Schema<IUser>({
@@ -32,15 +34,15 @@ const userSchema = new Schema<IUser>({
   },
   email: {
     type: String,
-    required: true,
     unique: true,
+    sparse: true,
     trim: true,
     lowercase: true
   },
   phone:{
     type: String,
-    required: true,
     unique: true,
+    sparse: true,
     trim: true
   },
   password: {
@@ -78,12 +80,25 @@ const userSchema = new Schema<IUser>({
   isBreak: {
     type: Boolean,
     default: false
+  },
+  loginId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  isPasswordResetMandatory: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
 });
 
 userSchema.pre('save', async function() {
+  if (this.isNew && !this.loginId) {
+    // Generate an 8-character uppercase alphanumeric ID
+    this.loginId = Math.random().toString(36).substring(2, 10).toUpperCase();
+  }
   if (!this.isModified('password')) return;
   this.password = await PasswordHelper.hash(this.password);
 });

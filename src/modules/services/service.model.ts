@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IService extends Document {
   title: string;
   titleHindi: string;
-  department: string;
+  department: mongoose.Types.ObjectId;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -22,9 +22,9 @@ const serviceSchema = new Schema<IService>({
     trim: true
   },
   department: {
-    type: String,
-    required: true,
-    trim: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    required: true
   },
   active: {
     type: Boolean,

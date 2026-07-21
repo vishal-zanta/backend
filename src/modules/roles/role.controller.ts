@@ -7,7 +7,7 @@ import { validateRequestFields } from '../../utils/helpers.js';
 
 export class RoleController {
   static createRole = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["designationEnglish", "designationHindi", "level"], req.body);
+    validateRequestFields(["designationEnglish", "designationHindi", "level", "department"], req.body);
     
     const existingRole = await Role.findOne({ designationEnglish: req.body.designationEnglish });
     if (existingRole) {
@@ -30,7 +30,7 @@ export class RoleController {
     const skip = (page - 1) * limit;
 
     const query = { active: true };
-    const roles = await Role.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const roles = await Role.find(query).populate('department').sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Role.countDocuments(query);
 
     return new ApiResponse({ 

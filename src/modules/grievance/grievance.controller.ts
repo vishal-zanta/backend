@@ -19,6 +19,7 @@ import { User } from "../users/user.model.js";
 import { FieldVisit } from '../fieldVisit/fieldVisit.model.js';
 import { Option } from "../options/option.model.js";
 import { Demography } from "../demography/demography.model.js";
+import { AuditService } from "../audit/audit.service.js";
 
 export class GrievanceController {
   private static async validateReferences(data: any) {
@@ -112,6 +113,9 @@ export class GrievanceController {
       channel,
       files: req.files as Express.Multer.File[] | undefined,
     });
+
+    // Log the grievance creation audit
+    AuditService.logGrievanceCreation(req, newGrievance._id as any);
 
     return new ApiResponse({
       res,
@@ -283,7 +287,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi");
+    }).populate("address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1253,7 +1257,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi");
+    }).populate("address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1293,7 +1297,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi");
+    }).populate("address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });

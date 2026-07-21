@@ -12,7 +12,8 @@ import { CaptchaService } from '../captcha/captcha.service.js';
 
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password,token,captchaToken } = req.body;
+    const { email, loginId, password, token, captchaToken } = req.body;
+    const identifier = email || loginId;
 
     // TODO: 
 //  const isCaptchaValid = await CaptchaService.verifyGoogleCapcha(captchaToken);
@@ -41,15 +42,30 @@ export class AuthController {
     }
     
 
-    validateRequestFields(["email","password"], req.body);
+    if (!identifier || !password) {
+      throw new ApiError({ status: 400, message: 'Email/LoginId and password are required' });
+    }
 
-    const user = await User.findOne({ email, status: 'ACTIVE' }).populate('role');
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { loginId: identifier }],
+      status: 'ACTIVE'
+    }).populate('role');
+
     if (user && await PasswordHelper.compare(password, user.password)) {
       user.lastLogin = new Date();
       await user.save();
       
       const userData = PasswordHelper.createUserPayload(user, user.role);
-      return new ApiResponse({ res, status: 200, data: userData, message: 'Login successful' });
+      
+      return new ApiResponse({ 
+        res, 
+        status: 200, 
+        data: {
+          ...userData,
+          isPasswordResetMandatory: user.isPasswordResetMandatory
+        }, 
+        message: 'Login successful' 
+      });
     }
 
     throw new ApiError({ status: 400, message: 'Invalid credentials' });
@@ -94,6 +110,7 @@ export class AuthController {
 
     if (password) {
       user.password = password;
+      user.isPasswordResetMandatory = false;
     }
 
     await user.save();

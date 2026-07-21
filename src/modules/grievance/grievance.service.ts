@@ -8,6 +8,8 @@ import { User } from "../users/user.model.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
 import { SubService } from "../services/subService.model.js";
 import { FieldVisit } from "../fieldVisit/fieldVisit.model.js";
+import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
+import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 
 // Helper to determine the Attachment schema 'type' from mimetype
 const getAttachmentType = (mimetype: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" => {
@@ -28,6 +30,72 @@ const getStateCode = (stateName?: string): string => {
 };
 
 export class GrievanceService {
+  /**
+   * Determine the best officer to assign to a grievance based on workflow levels,
+   * tagged sub-services, and wards (round-robin).
+   */
+  static async autoAssignOfficer(subServiceId: string, ward?: string): Promise<string | null> {
+    try {
+      const workflowLevels = await WorkflowLevel.find({ active: true }).sort({ order: 1 });
+      if (workflowLevels.length === 0) return null;
+      
+      for (const level of workflowLevels) {
+        const roleId = level.role;
+        
+        const eligibleUsers = await User.find({ role: roleId, status: 'ACTIVE' }).select('_id');
+        const userIds = eligibleUsers.map(u => u._id);
+
+        if (userIds.length === 0) continue;
+
+        const tagQuery: any = {
+          officer: { $in: userIds },
+          services: subServiceId,
+          active: true
+        };
+        
+        if (ward) {
+          tagQuery.wards = ward;
+        }
+        
+        const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
+        
+        if (eligibleTags.length === 0) continue;
+
+        const officerIds = [...new Set(eligibleTags.map(t => t.officer.toString()))].sort();
+        
+        const lastGrievanceQuery: any = {
+          "classification.subService": subServiceId,
+          assignedOfficer: { $in: eligibleTags.map(t => t.officer) }
+        };
+        if (ward) {
+          lastGrievanceQuery["address.villageOrWard"] = ward;
+        }
+        
+        const lastGrievance = await Grievance.findOne(lastGrievanceQuery)
+          .sort({ createdAt: -1 })
+          .select('assignedOfficer');
+          
+        let assignedOfficerId = officerIds[0];
+        
+        if (lastGrievance && lastGrievance.assignedOfficer) {
+          const lastOfficerId = lastGrievance.assignedOfficer.toString();
+          const lastIndex = officerIds.indexOf(lastOfficerId);
+          if (lastIndex !== -1) {
+            const nextIndex = (lastIndex + 1) % officerIds.length;
+            assignedOfficerId = officerIds[nextIndex];
+          }
+        }
+        
+        return assignedOfficerId;
+      }
+      
+      return null;
+    } catch (assignError) {
+      console.error("Auto-assign error:", assignError);
+      return null;
+    }
+  }
+
   /**
    * Core logic for creating a Grievance with files.
    */
@@ -109,22 +177,50 @@ export class GrievanceService {
       payloadToCreate.citizen = citizen._id;
     }
 
+    // Auto Assignment Logic
+    const subServiceId = classification?.subService;
+    if (subServiceId) {
+      const ward = address?.villageOrWard;
+      const assignedOfficerId = await GrievanceService.autoAssignOfficer(subServiceId, ward);
+      if (assignedOfficerId) {
+        payloadToCreate.assignedOfficer = assignedOfficerId;
+      }
+    }
+
     const newGrievance = await Grievance.create(payloadToCreate);
 
-const officer:any=await User.findById(createdBy).populate("role").lean();
+    const officer:any = await User.findById(createdBy).populate("role").lean();
 
     await TimelineService.logEvent({
       grievanceId: newGrievance._id,
       type:"COMPLAINT_REGISTERED",
       actor:{
-        id: createdBy|| citizen?._id,
-        name: officer?.name || "CITIZEN" ,
+        id: createdBy || citizen?._id,
+        name: officer?.name || "CITIZEN",
         role: officer?.role?.level || "CITIZEN",
       },
       metadata:{
         description:timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, officer?.role?.level || "CITIZEN")
       }
     });
+
+    if (newGrievance.assignedOfficer) {
+      const assignedUser: any = await User.findById(newGrievance.assignedOfficer).populate("role").lean();
+      if (assignedUser) {
+        await TimelineService.logEvent({
+          grievanceId: newGrievance._id,
+          type: "ASSIGNED",
+          actor: {
+            id: createdBy || citizen?._id,
+            name: officer?.name || "SYSTEM",
+            role: officer?.role?.level || "SYSTEM",
+          },
+          metadata: {
+            description: timelineTemplates.ASSIGNED(assignedUser?.role?.level || "Officer", assignedUser.name)
+          }
+        });
+      }
+    }
 
     // Handle Field Visit Auto-Generation
     if (classification?.subService) {

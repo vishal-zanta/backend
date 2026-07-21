@@ -5,6 +5,7 @@ export interface IRole extends Document {
   designationHindi: string;
   level: string;
   active: boolean;
+  department: mongoose.Types.ObjectId;
   permissions: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +35,11 @@ const roleSchema = new Schema<IRole>({
   active: {
     type: Boolean,
     default: true
+  },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    required: true
   }
 }, {
   timestamps: true

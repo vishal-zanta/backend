@@ -24,11 +24,18 @@ function generatePrefix(designation: string): string {
 
 export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["name", "email", "phone", "role","password"], req.body);
+    validateRequestFields(["name", "role", "password"], req.body);
 
     const { name, email, phone, role, district, password } = req.body;
 
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    let existingUser = null;
+    if (email || phone) {
+      const orConditions = [];
+      if (email) orConditions.push({ email });
+      if (phone) orConditions.push({ phone });
+      existingUser = await User.findOne({ $or: orConditions });
+    }
+
     if (existingUser && existingUser.status !== 'INACTIVE') {
       throw new ApiError({ status: 400, message: 'User with this email or phone already exists' });
     }
@@ -76,19 +83,21 @@ export class UserController {
       });
     }
 
-    // Send email with credentials
-    await EmailService.sendEmail({
-      to: email,
-      subject: "Welcome! Your Account Credentials",
-      html: welcomeEmailTemplate({
-        name,
-        roleEnglish: assignedRole.designationEnglish,
-        roleHindi: assignedRole.designationHindi,
-        userCode,
-        email,
-        password
-      })
-    });
+    // Send email with credentials only if email is provided
+    if (email) {
+      await EmailService.sendEmail({
+        to: email,
+        subject: "Welcome! Your Account Credentials",
+        html: welcomeEmailTemplate({
+          name,
+          roleEnglish: assignedRole.designationEnglish,
+          roleHindi: assignedRole.designationHindi,
+          userCode,
+          email,
+          password
+        })
+      });
+    }
 
     // Don't send password back in API response
     const userResponse = user.toObject();
@@ -184,7 +193,7 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, phone, role, status, district,password } = req.body;
+    const { name, phone, role, status, district, password } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -196,7 +205,7 @@ export class UserController {
     if (role) user.role = role;
     if (status !== undefined) user.status = status;
     if (district) user.district = district;
-    if(password) user.password = password;
+    if (password) user.password = password;
 
     await user.save();
     
