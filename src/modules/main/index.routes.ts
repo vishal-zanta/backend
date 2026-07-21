@@ -20,6 +20,8 @@ import chatRoutes from "../chat/chat.routes.js";
 import misRoutes from "../mis/mis.routes.js";
 import shiftRoutes from "../shift/shift.routes.js";
 import departmentRoutes from "../departments/department.routes.js";
+import notificationRoutes from "../notifications/notification.routes.js";
+import skillRoutes from "../skills/skill.routes.js";
 
 const router = Router();
 
@@ -44,5 +46,7 @@ router.use("/chat", chatRoutes);
 router.use("/mis", misRoutes);
 router.use("/shifts", shiftRoutes);
 router.use("/departments", departmentRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/skills", skillRoutes);
 
 export default router;

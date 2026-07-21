@@ -79,6 +79,17 @@ export class WorkflowLevelController {
     return new ApiResponse({ res, status: 200, data: workflow, message: 'Workflow fetched successfully' });
   });
 
+  static getWorkflowByDepartment = asyncHandler(async (req: Request, res: Response) => {
+    const { departmentId } = req.params;
+    const workflow = await WorkflowLevel.findOne({ department: departmentId }).populate('department').populate('levels.role');
+    
+    if (!workflow) {
+      throw new ApiError({ status: 404, message: 'Workflow for this department not found' });
+    }
+
+    return new ApiResponse({ res, status: 200, data: workflow, message: 'Workflow fetched successfully' });
+  });
+
   static deleteWorkflow = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const workflow = await WorkflowLevel.findByIdAndUpdate(id, { active: false }, { new: true });

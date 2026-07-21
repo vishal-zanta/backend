@@ -19,6 +19,8 @@ export interface IUser extends Document {
   updatedAt: Date;
   loginId?: string;
   isPasswordResetMandatory: boolean;
+  skills?: mongoose.Types.ObjectId[];
+  preferredLanguages?: string[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -89,7 +91,14 @@ const userSchema = new Schema<IUser>({
   isPasswordResetMandatory: {
     type: Boolean,
     default: true
-  }
+  },
+  skills: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Skill'
+  }],
+  preferredLanguages: [{
+    type: String
+  }]
 }, {
   timestamps: true
 });

@@ -9,6 +9,7 @@ router.use(authProtect);
 
 router.post('/', checkPermission("WORKFLOW_MANAGEMENT"), WorkflowLevelController.saveWorkflow);
 router.get('/', WorkflowLevelController.getWorkflows);
+router.get('/department/:departmentId', WorkflowLevelController.getWorkflowByDepartment);
 router.get('/:id', WorkflowLevelController.getWorkflowById);
 router.delete('/:id', checkPermission("WORKFLOW_MANAGEMENT"), WorkflowLevelController.deleteWorkflow);
 

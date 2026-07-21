@@ -29,7 +29,12 @@ export class RoleController {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const query = { active: true };
+    const departmentId = req.query.department as string;
+
+    const query: any = { active: true };
+    if (departmentId) {
+      query.department = departmentId;
+    }
     const roles = await Role.find(query).populate('department').sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Role.countDocuments(query);
 

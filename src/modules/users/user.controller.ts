@@ -7,6 +7,7 @@ import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
 import { welcomeEmailTemplate } from '../../templates/welcomeEmail.template.js';
+import { adminPasswordResetTemplate } from '../../templates/adminPasswordReset.template.js';
 import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
 
 function generatePrefix(designation: string): string {
@@ -26,7 +27,7 @@ export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
     validateRequestFields(["name", "role", "password"], req.body);
 
-    const { name, email, phone, role, district, password } = req.body;
+    const { name, email, phone, role, district, password, skills, preferredLanguages } = req.body;
 
     let existingUser = null;
     if (email || phone) {
@@ -69,6 +70,8 @@ export class UserController {
       existingUser.password = password;
       existingUser.role = role;
       existingUser.district = district;
+      if (skills) existingUser.skills = skills;
+      if (preferredLanguages) existingUser.preferredLanguages = preferredLanguages;
       existingUser.status = 'ACTIVE';
       user = await existingUser.save();
     } else {
@@ -79,7 +82,9 @@ export class UserController {
         phone,
         password,
         role,
-        district
+        district,
+        skills,
+        preferredLanguages
       });
     }
 
@@ -176,6 +181,7 @@ export class UserController {
     const users = await User.find(query)
       .populate('role')
       .populate('district')
+      .populate('skills')
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -193,7 +199,7 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, phone, role, status, district, password } = req.body;
+    const { name, phone, role, status, district, password, skills, preferredLanguages } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -205,7 +211,24 @@ export class UserController {
     if (role) user.role = role;
     if (status !== undefined) user.status = status;
     if (district) user.district = district;
-    if (password) user.password = password;
+    if (skills) user.skills = skills;
+    if (preferredLanguages) user.preferredLanguages = preferredLanguages;
+    if (password) {
+      user.password = password;
+      user.isPasswordResetMandatory = true;
+      if (user.email) {
+        await EmailService.sendEmail({
+          to: user.email,
+          subject: "Your Account Password Has Been Reset",
+          html: adminPasswordResetTemplate({
+            name: user.name,
+            userCode: user.userCode,
+            email: user.email,
+            password
+          })
+        });
+      }
+    }
 
     await user.save();
     
