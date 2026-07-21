@@ -7,50 +7,54 @@ import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
 
 export class WorkflowLevelController {
-  static createLevel = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["role"], req.body);
+  static saveWorkflow = asyncHandler(async (req: Request, res: Response) => {
+    validateRequestFields(["department", "levels"], req.body);
     
-    const { role, description } = req.body;
+    const { department, levels } = req.body;
 
-    const existingRole = await Role.findById(role);
-    if (!existingRole) {
-      throw new ApiError({ status: 404, message: 'Role not found' });
+    if (!Array.isArray(levels)) {
+      throw new ApiError({ status: 400, message: 'Levels must be an array' });
     }
 
-    const lastLevel = await WorkflowLevel.findOne().sort({ order: -1 });
-    const finalOrder = lastLevel ? lastLevel.order + 1 : 1;
-
-    const existingLevelForRole = await WorkflowLevel.findOne({ role });
-    if (existingLevelForRole) {
-      if (existingLevelForRole.active) {
-         throw new ApiError({ status: 400, message: 'Workflow level for this role already exists' });
-      } else {
-         existingLevelForRole.description = description;
-         existingLevelForRole.active = true;
-         existingLevelForRole.order = finalOrder;
-         await existingLevelForRole.save();
-         return new ApiResponse({ res, status: 201, data: existingLevelForRole, message: 'Workflow level created successfully' });
+    // Validate roles belong to the department
+    for (const level of levels) {
+      if (!level.role || level.order === undefined) {
+        throw new ApiError({ status: 400, message: 'Each level must have a role and an order' });
+      }
+      const roleExists = await Role.findOne({ _id: level.role, department });
+      if (!roleExists) {
+        throw new ApiError({ status: 400, message: `Role ${level.role} not found or does not belong to department` });
       }
     }
 
-    const level = await WorkflowLevel.create({
-      role,
-      description,
-      order: finalOrder
-    });
+    let workflow = await WorkflowLevel.findOne({ department });
     
-    return new ApiResponse({ res, status: 201, data: level, message: 'Workflow level created successfully' });
+    if (workflow) {
+      workflow.levels = levels;
+      workflow.active = true;
+      await workflow.save();
+    } else {
+      workflow = await WorkflowLevel.create({ department, levels });
+    }
+
+    return new ApiResponse({ res, status: 200, data: workflow, message: 'Workflow saved successfully' });
   });
 
-  static getLevels = asyncHandler(async (req: Request, res: Response) => {
+  static getWorkflows = asyncHandler(async (req: Request, res: Response) => {
+    const departmentId = req.query.department as string;
+
+    const query: any = { active: true };
+    if (departmentId) {
+      query.department = departmentId;
+    }
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const query = { active: true };
-    const levels = await WorkflowLevel.find(query)
-      .sort({ order: 1 })
-      .populate('role')
+    const workflows = await WorkflowLevel.find(query)
+      .populate('department')
+      .populate('levels.role')
       .skip(skip)
       .limit(limit);
       
@@ -59,64 +63,30 @@ export class WorkflowLevelController {
     return new ApiResponse({ 
       res, 
       status: 200, 
-      data: { docs: levels, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
-      message: 'Workflow levels fetched successfully' 
+      data: { docs: workflows, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
+      message: 'Workflows fetched successfully' 
     });
   });
 
-  static updateLevel = asyncHandler(async (req: Request, res: Response) => {
+  static getWorkflowById = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { role, description } = req.body;
+    const workflow = await WorkflowLevel.findById(id).populate('department').populate('levels.role');
     
-    const level = await WorkflowLevel.findById(id);
-    if (!level) {
-      throw new ApiError({ status: 404, message: 'Workflow level not found' });
+    if (!workflow) {
+      throw new ApiError({ status: 404, message: 'Workflow not found' });
     }
 
-    if (role) {
-      const roleExists = await Role.findById(role);
-      if (!roleExists) {
-        throw new ApiError({ status: 404, message: 'Role not found' });
-      }
-      level.role = role;
-    }
-
-    if (description) level.description = description;
-
-    await level.save();
-    
-    return new ApiResponse({ res, status: 200, data: level, message: 'Workflow level updated successfully' });
+    return new ApiResponse({ res, status: 200, data: workflow, message: 'Workflow fetched successfully' });
   });
 
-  static deleteLevel = asyncHandler(async (req: Request, res: Response) => {
+  static deleteWorkflow = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const level = await WorkflowLevel.findByIdAndUpdate(id, { active: false }, { new: true });
+    const workflow = await WorkflowLevel.findByIdAndUpdate(id, { active: false }, { new: true });
     
-    if (!level) {
-      throw new ApiError({ status: 404, message: 'Workflow level not found' });
+    if (!workflow) {
+      throw new ApiError({ status: 404, message: 'Workflow not found' });
     }
 
-    return new ApiResponse({ res, status: 200, message: 'Workflow level deleted successfully' });
-  });
-
-  static bulkUpdateOrder = asyncHandler(async (req: Request, res: Response) => {
-    const { updates } = req.body; // Expects [{ id: '...', order: 1 }, { id: '...', order: 2 }]
-    
-    if (!Array.isArray(updates)) {
-      throw new ApiError({ status: 400, message: 'Updates must be an array of objects with id and order' });
-    }
-
-    const bulkOps = updates.map(update => ({
-      updateOne: {
-        filter: { _id: update.id },
-        update: { $set: { order: update.order } }
-      }
-    }));
-
-    if (bulkOps.length > 0) {
-      await WorkflowLevel.bulkWrite(bulkOps);
-    }
-    
-    return new ApiResponse({ res, status: 200, message: 'Workflow level orders updated successfully' });
+    return new ApiResponse({ res, status: 200, message: 'Workflow deleted successfully' });
   });
 }

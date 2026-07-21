@@ -12,13 +12,23 @@ export const checkAndEscalateGrievances = async () => {
     // 1. Fetch complaints that are NOT closed or resolved
     const activeGrievances = await Grievance.find({
       status: { $nin: ["CLOSED", "RESOLVED"] },
-    }).populate("assignedOfficer");
+    })
+      .populate("assignedOfficer")
+      .populate({
+        path: "classification.subService",
+        populate: { path: "service" }
+      });
 
     if (!activeGrievances.length) return;
 
-    // Load workflow levels sorted by order
-    const workflowLevels = await WorkflowLevel.find({ active: true }).sort({ order: 1 });
-    if (!workflowLevels.length) return;
+    // Load workflows and map by department
+    const workflows = await WorkflowLevel.find({ active: true });
+    const workflowMap = new Map();
+    for (const wf of workflows) {
+      workflowMap.set(wf.department.toString(), wf.levels.sort((a, b) => a.order - b.order));
+    }
+
+    if (!workflows.length) return;
 
     // Fetch all SLA configs 
     const allSlaConfigs = await SlaConfig.find({ active: true });
@@ -30,20 +40,25 @@ export const checkAndEscalateGrievances = async () => {
 
     for (const grievance of activeGrievances) {
       console.log("complain",grievance.grievanceId)
-      const subServiceId = grievance.classification?.subService?.toString();
+      const subServiceId = grievance.classification?.subService?._id?.toString();
+      const departmentId = (grievance.classification?.subService as any)?.service?.department?.toString();
+      
       console.log(subServiceId,"subServiceId")
-      if (!subServiceId) continue;
+      if (!subServiceId || !departmentId) continue;
 
       const slaConfig = slaConfigMap.get(subServiceId);
       console.log(slaConfig,"slaConfig")
 
       if (!slaConfig || !slaConfig.escalations || slaConfig.escalations.length === 0) continue;
 
+      const workflowLevels = workflowMap.get(departmentId);
+      if (!workflowLevels || !workflowLevels.length) continue;
+
       let currentLevelIndex = grievance.escalationLevel || 0;
       const assignedUser = grievance.assignedOfficer as any;
       if (assignedUser && assignedUser.role) {
         const roleIdStr = assignedUser.role.toString();
-        const foundIndex = workflowLevels.findIndex(wl => wl.role.toString() === roleIdStr);
+        const foundIndex = workflowLevels.findIndex((wl: any) => wl.role.toString() === roleIdStr);
         if (foundIndex !== -1) {
           currentLevelIndex = foundIndex;
         }

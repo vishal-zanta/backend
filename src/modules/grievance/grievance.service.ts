@@ -36,10 +36,16 @@ export class GrievanceService {
    */
   static async autoAssignOfficer(subServiceId: string, ward?: string): Promise<string | null> {
     try {
-      const workflowLevels = await WorkflowLevel.find({ active: true }).sort({ order: 1 });
-      if (workflowLevels.length === 0) return null;
+      const subService = await SubService.findById(subServiceId).populate('service');
+      if (!subService || !(subService as any).service || !(subService as any).service.department) return null;
+      const departmentId = (subService as any).service.department;
+
+      const workflowDoc = await WorkflowLevel.findOne({ department: departmentId, active: true });
+      if (!workflowDoc || !workflowDoc.levels || workflowDoc.levels.length === 0) return null;
       
-      for (const level of workflowLevels) {
+      const sortedLevels = workflowDoc.levels.sort((a, b) => a.order - b.order);
+
+      for (const level of sortedLevels) {
         const roleId = level.role;
         
         const eligibleUsers = await User.find({ role: roleId, status: 'ACTIVE' }).select('_id');
