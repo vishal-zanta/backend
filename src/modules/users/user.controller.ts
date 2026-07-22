@@ -27,7 +27,11 @@ export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
     validateRequestFields(["name", "role", "password"], req.body);
 
-    const { name, email, phone, role, district, password, skills, preferredLanguages, loginId } = req.body;
+    let { name, email, phone, role, district, password, skills, preferredLanguages, loginId } = req.body;
+
+    if (email === "") email = undefined;
+    if (phone === "") phone = undefined;
+    if (loginId === "") loginId = undefined;
 
     let existingUser = null;
     if (email || phone || loginId) {
@@ -203,7 +207,7 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, phone, role, status, district, password, skills, preferredLanguages, loginId } = req.body;
+    let { name, phone, email, role, status, district, password, skills, preferredLanguages, loginId } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -211,13 +215,21 @@ export class UserController {
     }
 
     if (name) user.name = name;
-    if (phone) user.phone = phone;
+    
+    if (phone === "") user.phone = undefined as any;
+    else if (phone) user.phone = phone;
+
+    if (email === "") user.email = undefined as any;
+    else if (email) user.email = email;
+    
     if (role) user.role = role;
     if (status !== undefined) user.status = status;
     if (district) user.district = district;
     if (skills) user.skills = skills;
     if (preferredLanguages) user.preferredLanguages = preferredLanguages;
-    if (loginId !== undefined) user.loginId = loginId;
+    
+    if (loginId === "") user.loginId = undefined;
+    else if (loginId !== undefined) user.loginId = loginId;
     if (password) {
       user.password = password;
       user.isPasswordResetMandatory = true;
