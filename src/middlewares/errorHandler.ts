@@ -39,11 +39,11 @@ export const handleErrorResponse = (
       error?.name === 'MongoServerError' || 
       error?.name === 'MongooseError' || 
       (errorMessage && errorMessage.toLowerCase().includes('mongo'));
-
-    if (isDbError || status === StatusCodes.INTERNAL_SERVER_ERROR) {
-      errorMessage = "Something went wrong, please try after some time";
-      status = StatusCodes.INTERNAL_SERVER_ERROR;
-    }
+// TODO: fix consition check after dev
+    // if (isDbError || status === StatusCodes.INTERNAL_SERVER_ERROR) {
+    //   errorMessage = "Something went wrong, please try after some time";
+    //   status = StatusCodes.INTERNAL_SERVER_ERROR;
+    // }
   }
 
   new ApiResponse({

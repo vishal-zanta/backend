@@ -22,6 +22,7 @@ import shiftRoutes from "../shift/shift.routes.js";
 import departmentRoutes from "../departments/department.routes.js";
 import notificationRoutes from "../notifications/notification.routes.js";
 import skillRoutes from "../skills/skill.routes.js";
+import systemConfigRoutes from "../systemConfig/systemConfig.routes.js";
 
 const router = Router();
 
@@ -48,5 +49,6 @@ router.use("/shifts", shiftRoutes);
 router.use("/departments", departmentRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/skills", skillRoutes);
+router.use("/config", systemConfigRoutes);
 
 export default router;

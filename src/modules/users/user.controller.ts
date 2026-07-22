@@ -116,9 +116,10 @@ export class UserController {
     
     const query: any = { status: { $ne: 'INACTIVE' } };
     
-    if (role) {
-      if (Array.isArray(role)) {
-        query.role = { $in: role };
+    if (role && typeof(role) =="string") {
+      const roleArray=role.split(",");
+      if (Array.isArray(roleArray)) {
+        query.role = { $in: roleArray };
       } else {
         query.role = role;
       }

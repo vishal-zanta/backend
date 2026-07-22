@@ -13,6 +13,7 @@ export class CaptchaService {
       noise: 2,
       color: true,
       background: "#f0f0f0",
+      charPreset: "abcdefghijklmnopqrstuvwxyz0123456789"
     });
 
     // Generate a small UUID (8 characters hex)

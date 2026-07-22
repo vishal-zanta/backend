@@ -16,7 +16,7 @@ router.get('/conversations', ChatController.getConversations);
 router.get('/status/:userId', ChatController.getUserStatus);
 
 // Messages
-router.post('/message', upload.single('file'), ChatController.sendMessage);
+router.post('/message', upload.single('file', 'chat'), ChatController.sendMessage);
 router.get('/messages/:conversationId', ChatController.getMessages);
 router.put('/messages/:conversationId/read', ChatController.markAsRead);
 
