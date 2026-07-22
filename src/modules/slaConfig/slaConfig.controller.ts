@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { SlaConfig } from './slaConfig.model.js';
 import { SubService } from '../services/subService.model.js';
+import { Service } from '../services/service.model.js';
 import { Role } from '../roles/role.model.js';
 import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
@@ -54,9 +55,20 @@ export class SlaConfigController {
 
   static getConfigs = asyncHandler(async (req: Request, res: Response) => {
     const { subServiceId } = req.query;
+    const department = req.query.department as string;
+
     const query: any = { active: true };
+    
     if (subServiceId) {
       query.subService = subServiceId;
+    } else if (department) {
+      const services = await Service.find({ department }).select('_id');
+      const serviceIds = services.map(s => s._id);
+      
+      const subServices = await SubService.find({ service: { $in: serviceIds } }).select('_id');
+      const subServiceIds = subServices.map(s => s._id);
+      
+      query.subService = { $in: subServiceIds };
     }
 
     const page = parseInt(req.query.page as string) || 1;

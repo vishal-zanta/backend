@@ -85,9 +85,15 @@ export class ServiceController {
   static getSubServices = asyncHandler(async (req: Request, res: Response) => {
     // Optionally filter by service if provided in query params
     const serviceId = req.query.serviceId as string;
+    const department = req.query.department as string;
     const query: any = { active: true };
+    
     if (serviceId) {
       query.service = { $in: serviceId.split(',') };
+    } else if (department) {
+      const services = await Service.find({ department }).select('_id');
+      const serviceIds = services.map(s => s._id);
+      query.service = { $in: serviceIds };
     }
 
     const page = parseInt(req.query.page as string) || 1;

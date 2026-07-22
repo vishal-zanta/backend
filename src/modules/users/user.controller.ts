@@ -180,7 +180,7 @@ export class UserController {
     const skip = (page - 1) * limit;
 
     const users = await User.find(query)
-      .populate('role')
+      .populate({ path: 'role', populate: { path: 'department' } })
       .populate('district')
       .populate('skills')
       .select('-password')
