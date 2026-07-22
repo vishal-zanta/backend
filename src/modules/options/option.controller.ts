@@ -62,6 +62,11 @@ export class OptionController {
   static getOptions = asyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const sortBy = (req.query.sortBy as string) || "createdAt";
+    let sortOrder: 1 | -1 = -1; // Default for createdAt is desc
+    if (req.query.sortOrder === "asc") sortOrder = 1;
+    else if (req.query.sortOrder === "desc") sortOrder = -1;
+    else if (sortBy !== "createdAt") sortOrder = 1; // Default for other fields is asc
 
     const query: any = {};
 
@@ -87,7 +92,7 @@ export class OptionController {
     const options = await Option.find(query)
       .skip(pagination.offset)
       .limit(pagination.limit)
-      .sort({ createdAt: -1 });
+      .sort({ [sortBy]: sortOrder });
 
     return new ApiResponse({
       res,

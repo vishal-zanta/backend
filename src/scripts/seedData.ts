@@ -8,6 +8,7 @@ import { ComplaintSource } from "../modules/complaintSource/complaintSource.mode
 import { Demography } from "../modules/demography/demography.model.js";
 import { Ulb } from "../modules/demography/ulb.model.js";
 import { Option } from "../modules/options/option.model.js";
+import { Department } from "../modules/departments/department.model.js";
 import { User } from "../modules/users/user.model.js";
 import { OfficerTagging } from "../modules/officerTagging/officerTagging.model.js";
 import { Grievance } from "../modules/grievance/grievance.model.js";
@@ -43,72 +44,199 @@ const complaintSourcesData = [
 
 const servicesData = [
   {
-    title: "Street Lighting",
-    titleHindi: "स्ट्रीट लाइटिंग",
-    department: "Energy Dept",
-    subServices: [
-      { title: "Street light not working", titleHindi: "Street light not working", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Street light pole damaged", titleHindi: "Street light pole damaged", sla: 48, geoTagged: true, fieldVisit: true },
-      { title: "Exposed wiring / spark", titleHindi: "Exposed wiring / spark", sla: 6, geoTagged: true, fieldVisit: false }
-    ]
-  },
-  {
-    title: "Drainage & Sewerage",
-    titleHindi: "नाली एवं सीवरेज",
-    department: "Urban Dev Dept",
-    subServices: [
-      { title: "Drain overflow / waterlogging", titleHindi: "Drain overflow / waterlogging", sla: 12, geoTagged: true, fieldVisit: true },
-      { title: "Drain blocked", titleHindi: "Drain blocked", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Drain cover damaged / missing", titleHindi: "Drain cover damaged / missing", sla: 48, geoTagged: true, fieldVisit: false }
-    ]
-  },
-  {
-    title: "Water Supply",
-    titleHindi: "जल आपूर्ति",
+    title: "Hand Pump tube well problem",
+    titleHindi: "Hand Pump tube well problem",
     department: "PHED",
     subServices: [
-      { title: "No water supply", titleHindi: "No water supply", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Dirty / contaminated water", titleHindi: "Dirty / contaminated water", sla: 12, geoTagged: true, fieldVisit: true },
-      { title: "Pipe leakage / burst", titleHindi: "Pipe leakage / burst", sla: 8, geoTagged: true, fieldVisit: true }
+      { title: "Repairing of Public hand Pump", titleHindi: "Repairing of Public hand Pump", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true }
     ]
   },
   {
-    title: "Road & Infrastructure",
-    titleHindi: "सड़क एवं बुनियादी ढांचा",
-    department: "RCD",
+    title: "Miscellaneous",
+    titleHindi: "Miscellaneous",
+    department: "PHED",
     subServices: [
-      { title: "Potholes / damaged road", titleHindi: "Potholes / damaged road", sla: 72, geoTagged: true, fieldVisit: true },
-      { title: "Road blockade", titleHindi: "Road blockade", sla: 4, geoTagged: true, fieldVisit: true },
-      { title: "Damaged footpath", titleHindi: "Damaged footpath", sla: 96, geoTagged: false, fieldVisit: false }
+      { title: "Miscellaneous", titleHindi: "Miscellaneous", sla: 24, geoTagged: true, fieldVisit: true }
     ]
   },
   {
-    title: "Sanitation & Waste",
-    titleHindi: "सफाई एवं कचरा",
-    department: "Urban Dev Dept",
+    title: "Payment issue related problem",
+    titleHindi: "Payment issue related problem",
+    department: "PHED",
     subServices: [
-      { title: "Garbage not collected", titleHindi: "Garbage not collected", sla: 24, geoTagged: true, fieldVisit: false },
-      { title: "Illegal garbage dumping", titleHindi: "Illegal garbage dumping", sla: 48, geoTagged: true, fieldVisit: true },
-      { title: "Public toilet maintenance", titleHindi: "Public toilet maintenance", sla: 24, geoTagged: false, fieldVisit: false }
+      { title: "Electricity bill related", titleHindi: "Electricity bill related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Pump operator salary related", titleHindi: "Pump operator salary related", sla: 24, geoTagged: true, fieldVisit: true }
     ]
   },
   {
-    title: "Animal Rescue",
-    titleHindi: "जीव बचाव",
-    department: "Forest Dept",
+    title: "Pipe Water Supply related problem",
+    titleHindi: "Pipe Water Supply related problem",
+    department: "PHED",
     subServices: [
-      { title: "Stray dog menace", titleHindi: "Stray dog menace", sla: 12, geoTagged: true, fieldVisit: true },
-      { title: "Snake rescue", titleHindi: "Snake rescue", sla: 2, geoTagged: true, fieldVisit: true },
-      { title: "Stray cattle on road", titleHindi: "Stray cattle on road", sla: 6, geoTagged: true, fieldVisit: true }
+      { title: "Cleaning of water tank five thousand litre", titleHindi: "Cleaning of water tank five thousand litre", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Cleaning of water tank One lakh litre", titleHindi: "Cleaning of water tank One lakh litre", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Leakage of water high level", titleHindi: "Leakage of water high level", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Leakage of water small level", titleHindi: "Leakage of water small level", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Motor burn", titleHindi: "Motor burn", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Operator does not run the motor", titleHindi: "Operator does not run the motor", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Repairing of electricity related", titleHindi: "Repairing of electricity related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Repairing of stand post", titleHindi: "Repairing of stand post", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Repairing of starter or steplizer related", titleHindi: "Repairing of starter or steplizer related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Testing of water quality", titleHindi: "Testing of water quality", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water Connection not provided as main pipeline exists near to complainant's house", titleHindi: "Water Connection not provided as main pipeline exists near to complainant's house", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water connection not provided as no main pipeline near the complainant’s house", titleHindi: "Water connection not provided as no main pipeline near the complainant’s house", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water is not coming in good pressure", titleHindi: "Water is not coming in good pressure", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water is not coming through stand post", titleHindi: "Water is not coming through stand post", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water is not coming timely", titleHindi: "Water is not coming timely", sla: 24, geoTagged: true, fieldVisit: true }
     ]
   },
   {
-    title: "Cross-Departmental",
-    titleHindi: "अंतर-विभागीय",
-    department: "Multi-Dept",
+    title: "Water Quality problem",
+    titleHindi: "Water Quality problem",
+    department: "PHED",
     subServices: [
-      { title: "Fallen street light in drain", titleHindi: "Fallen street light in drain", sla: 8, geoTagged: true, fieldVisit: true },
-      { title: "Road cut + water pipe damage", titleHindi: "Road cut + water pipe damage", sla: 12, geoTagged: true, fieldVisit: true }
+      { title: "Dirty Water Supply related", titleHindi: "Dirty Water Supply related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "High amount of Iron in Water related", titleHindi: "High amount of Iron in Water related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water testing related", titleHindi: "Water testing related", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "School - Basic Infrastructure",
+    titleHindi: "School - Basic Infrastructure",
+    department: "Education Dept",
+    subServices: [
+      { title: "Condition of school building/rooms", titleHindi: "Condition of school building/rooms", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Quality of ongoing construction work", titleHindi: "Quality of ongoing construction work", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability and quality of furniture (bench-desk etc.)", titleHindi: "Availability and quality of furniture (bench-desk etc.)", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability of separate toilets for boys and girls", titleHindi: "Availability of separate toilets for boys and girls", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Drinking water facility", titleHindi: "Drinking water facility", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability of electricity connection, fans, tube lights and bulbs", titleHindi: "Availability of electricity connection, fans, tube lights and bulbs", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability of boundary wall", titleHindi: "Availability of boundary wall", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "School - School Operations",
+    titleHindi: "School - School Operations",
+    department: "Education Dept",
+    subServices: [
+      { title: "School not opening on time", titleHindi: "School not opening on time", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability of timetable and conducting of classes accordingly", titleHindi: "Availability of timetable and conducting of classes accordingly", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability and utilization of ICT Lab/Computer Lab", titleHindi: "Availability and utilization of ICT Lab/Computer Lab", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability and utilization of library", titleHindi: "Availability and utilization of library", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability and utilization of laboratory in secondary/senior secondary schools", titleHindi: "Availability and utilization of laboratory in secondary/senior secondary schools", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Organization of Parent-Teacher Meeting", titleHindi: "Organization of Parent-Teacher Meeting", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability of sports equipment and its use by children", titleHindi: "Availability of sports equipment and its use by children", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Affiliation/renewal of private schools", titleHindi: "Affiliation/renewal of private schools", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "School - Teacher Conduct",
+    titleHindi: "School - Teacher Conduct",
+    department: "Education Dept",
+    subServices: [
+      { title: "Attendance of headmaster/teacher", titleHindi: "Attendance of headmaster/teacher", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Not coming to school on time", titleHindi: "Not coming to school on time", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Not conducting classes as per prescribed routine", titleHindi: "Not conducting classes as per prescribed routine", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Polluting the educational environment", titleHindi: "Polluting the educational environment", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Instigating other teachers not to teach", titleHindi: "Instigating other teachers not to teach", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Inappropriate behavior with female teachers/students", titleHindi: "Inappropriate behavior with female teachers/students", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Involvement in politics in favor of a particular party/group", titleHindi: "Involvement in politics in favor of a particular party/group", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Involvement in private tuition/coaching institute", titleHindi: "Involvement in private tuition/coaching institute", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "School - MDM (Mid-Day Meal)",
+    titleHindi: "School - MDM (Mid-Day Meal)",
+    department: "Education Dept",
+    subServices: [
+      { title: "Supply and quality of MDM", titleHindi: "Supply and quality of MDM", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability and quality of plates for MDM", titleHindi: "Availability and quality of plates for MDM", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Availability of kitchen shed, gas stove", titleHindi: "Availability of kitchen shed, gas stove", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Distribution of eggs/seasonal fruits every Friday", titleHindi: "Distribution of eggs/seasonal fruits every Friday", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Cleanliness and hygiene of kitchen", titleHindi: "Cleanliness and hygiene of kitchen", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Teacher - Transfer",
+    titleHindi: "Teacher - Transfer",
+    department: "Education Dept",
+    subServices: [
+      { title: "Request/complaint related to transfer", titleHindi: "Request/complaint related to transfer", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Teacher - Establishment Related Matters",
+    titleHindi: "Teacher - Establishment Related Matters",
+    department: "Education Dept",
+    subServices: [
+      { title: "Salary payment/salary increment/payment of arrears", titleHindi: "Salary payment/salary increment/payment of arrears", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Salary fixation", titleHindi: "Salary fixation", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Approval of maternity/medical/CL/SL/EL leave", titleHindi: "Approval of maternity/medical/CL/SL/EL leave", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Payment related to retirement benefits", titleHindi: "Payment related to retirement benefits", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Reimbursement of medical claim", titleHindi: "Reimbursement of medical claim", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Updating of service book", titleHindi: "Updating of service book", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Onboarding related to HRMS/Treasury/Employee ID for new teacher", titleHindi: "Onboarding related to HRMS/Treasury/Employee ID for new teacher", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Any correction required in teacher-related data", titleHindi: "Any correction required in teacher-related data", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Students - Scheme Related Complaints",
+    titleHindi: "Students - Scheme Related Complaints",
+    department: "Education Dept",
+    subServices: [
+      { title: "Kanya Utthan Yojana (Girl Child Upliftment Scheme)", titleHindi: "Kanya Utthan Yojana (Girl Child Upliftment Scheme)", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Cycle Scheme", titleHindi: "Cycle Scheme", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Uniform", titleHindi: "Uniform", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Scholarship", titleHindi: "Scholarship", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Textbooks", titleHindi: "Textbooks", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "FLN Kit", titleHindi: "FLN Kit", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Students - General",
+    titleHindi: "Students - General",
+    department: "Education Dept",
+    subServices: [
+      { title: "Transfer certificate", titleHindi: "Transfer certificate", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Correction in mark sheet/certificate/domicile certificate etc.", titleHindi: "Correction in mark sheet/certificate/domicile certificate etc.", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Inappropriate behavior with students", titleHindi: "Inappropriate behavior with students", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Indiscipline", titleHindi: "Indiscipline", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Vendor/Contractor/Supplier - Tender/Payment",
+    titleHindi: "Vendor/Contractor/Supplier - Tender/Payment",
+    department: "Education Dept",
+    subServices: [
+      { title: "Tender", titleHindi: "Tender", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Payment", titleHindi: "Payment", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Onboarding", titleHindi: "Onboarding", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "University/College - General",
+    titleHindi: "University/College - General",
+    department: "Education Dept",
+    subServices: [
+      { title: "Admission", titleHindi: "Admission", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Delayed session", titleHindi: "Delayed session", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Examination", titleHindi: "Examination", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Fee", titleHindi: "Fee", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Migration certificate not issued", titleHindi: "Migration certificate not issued", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Correction in mark sheet/certificate etc.", titleHindi: "Correction in mark sheet/certificate etc.", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Inappropriate behavior with female faculty/students", titleHindi: "Inappropriate behavior with female faculty/students", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Affiliation of colleges", titleHindi: "Affiliation of colleges", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Illegal Collection of Money",
+    titleHindi: "Illegal Collection of Money",
+    department: "Education Dept",
+    subServices: [
+      { title: "Information regarding illegal collection of money by Education Department staff from any teacher/student for various works", titleHindi: "Information regarding illegal collection of money by Education Department staff from any teacher/student for various works", sla: 24, geoTagged: true, fieldVisit: true }
     ]
   }
 ];
@@ -231,11 +359,27 @@ const runSeed = async () => {
     await connectDB();
     console.log("Connected to DB, starting seed...");
 
+    // 0. Seed Departments
+    const uniqueDepartments = [...new Set(servicesData.map(s => s.department))];
+    if (!uniqueDepartments.includes("Education Dept")) uniqueDepartments.push("Education Dept");
+    
+    const departmentMap: Record<string, mongoose.Types.ObjectId> = {};
+    for (const dept of uniqueDepartments) {
+      const doc = await Department.findOneAndUpdate(
+        { title: dept },
+        { $set: { title: dept, titleHindi: dept, active: true } },
+        { upsert: true, new: true }
+      );
+      departmentMap[dept] = doc._id as mongoose.Types.ObjectId;
+    }
+    console.log("Departments seeded.");
+
     // 1. Seed Roles
     for (const role of rolesData) {
+      const roleDeptId = departmentMap["Education Dept"]; // Assigning base roles to Education Dept
       await Role.findOneAndUpdate(
         { designationEnglish: role.designationEnglish },
-        { $set: role },
+        { $set: { ...role, department: roleDeptId } },
         { upsert: true, new: true }
       );
     }
@@ -253,9 +397,10 @@ const runSeed = async () => {
 
     // 3. Seed Services & SubServices
     for (const s of servicesData) {
+      const deptId = departmentMap[s.department];
       const service = await Service.findOneAndUpdate(
         { title: s.title },
-        { $set: { title: s.title, titleHindi: s.titleHindi, department: s.department } },
+        { $set: { title: s.title, titleHindi: s.titleHindi, department: deptId } },
         { upsert: true, new: true }
       );
 
@@ -469,7 +614,7 @@ const runSeed = async () => {
               role: "System",
             },
             metadata: {
-              description: timelineTemplates.ASSIGNED(l1Role.designationEnglish, l1UserGrievance.name)
+              description: timelineTemplates.ASSIGNED(l1Role?.designationEnglish || "Officer", l1UserGrievance.name)
             }
           });
         }
