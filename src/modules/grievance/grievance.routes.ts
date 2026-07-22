@@ -29,6 +29,9 @@ router.get("/all", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceContro
 // Get single grievance details for admin/general
 router.get("/all/:id", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceController.getAdminGrievanceById);
 
+// Get general analytics summary (Total, Resolved, Pending, Escalated)
+router.get("/analytics-summary", authProtect, GrievanceController.getGrievanceAnalyticsSummary);
+
 // Get admin dashboard analytics
 router.get("/admin/dashboard-analytics", authProtect,checkPermission("ADMIN_DASHBOARD"), GrievanceController.getAdminDashboardAnalytics);
 

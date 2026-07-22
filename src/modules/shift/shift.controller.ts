@@ -28,11 +28,10 @@ export class ShiftController {
       .skip(pagination.offset)
       .limit(pagination.limit);
 
-    // Get all shifts for these users for the given date
+    // Get all shifts for these users
     const userIds = users.map(u => u._id);
     const shifts = await Shift.find({
-      user: { $in: userIds },
-     
+      user: { $in: userIds }
     });
 
     // Map shifts to users
@@ -84,8 +83,8 @@ export class ShiftController {
 
     // Update or create shift
     const shift = await Shift.findOneAndUpdate(
-      { user: userId, date: shiftDate },
-      { time },
+      { user: userId },
+      { time, date: shiftDate },
       { new: true, upsert: true, runValidators: true }
     );
 

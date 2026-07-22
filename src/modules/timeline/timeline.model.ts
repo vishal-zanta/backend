@@ -30,6 +30,7 @@ const TimelineSchema = new Schema<ITimeline>(
         "SMS_SENT",
         "FIELD_VISIT",
         "ESCALATED",
+        "TRANSFERRED",
         "RESOLVED",
         "RESOLUTION_PHOTO",
         "CITIZEN_FEEDBACK",

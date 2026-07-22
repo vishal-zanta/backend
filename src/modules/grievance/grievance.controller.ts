@@ -196,6 +196,7 @@ export class GrievanceController {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
     const status=(req.query.status as string) ||null
+    const priority = req.query.priority as string;
 const citizenMobile = citizen.mobile.slice(-10);
 const alternateMobile = citizen?.alternateMobile?.slice(-10);
     // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
@@ -234,6 +235,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     $in: status.split(",")
   };
 }
+
+    if (priority) {
+      query.assignedPriority = {
+        $in: priority.split(",")
+      };
+    }
 
     const totalCount = await Grievance.countDocuments(query);
     const pagination = buildPagination({ page, limit, totalCount });
@@ -279,7 +286,10 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const grievance = await Grievance.findById(id).populate({
       path: "classification.subService",
       populate: {
-        path: "service"
+        path: "service",
+        populate: {
+          path: "department"
+        }
       }
     }).populate({
       path: "assignedOfficer",
@@ -315,6 +325,44 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       status: 200,
       data: responseData,
       message: "Grievance details retrieved successfully",
+    });
+  });
+
+  /**
+   * Get grievance analytics summary (Total Assigned, Resolved, Pending, Escalated)
+   */
+  static getGrievanceAnalyticsSummary = asyncHandler(async (req: Request, res: Response) => {
+    const officerId = req.query.officerId as string;
+    
+    const query: any = {};
+    if (officerId) {
+      query.assignedOfficer = officerId;
+    }
+
+    const totalAssigned = await Grievance.countDocuments({ ...query, assignedOfficer: { $ne: null } });
+    const resolvedCount = await Grievance.countDocuments({ ...query, status: { $in: ["RESOLVED", "CLOSED"] } });
+    const pendingCount = await Grievance.countDocuments({ ...query, status: { $nin: ["RESOLVED", "CLOSED"] } });
+
+    // For escalated, group by grievance so one grievance doesn't count multiple times
+    const escalatedQuery: any = { action: "ESCALATED" };
+    if (officerId) {
+      // If filtering by officer, only count escalations related to this officer
+      escalatedQuery["metadata.breachedOfficer"] = officerId;
+    }
+    
+    const escalatedGrievances = await GrievanceAnalyticLog.distinct("grievance", escalatedQuery);
+    const escalatedCount = escalatedGrievances.length;
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        totalAssigned,
+        resolvedCount,
+        pendingCount,
+        escalatedCount
+      },
+      message: "Grievance analytics summary fetched successfully"
     });
   });
 
@@ -537,11 +585,18 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const search = req.query.search as string;
     const status = (req.query.status as string) || null;
     const feedback = req.query.feedback as string;
+    const priority = req.query.priority as string;
 
     const query: any = {};
     if (status) {
       query.status = {
         $in: status.split(",")
+      };
+    }
+
+    if (priority) {
+      query.assignedPriority = {
+        $in: priority.split(",")
       };
     }
 
@@ -699,6 +754,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const search = req.query.search as string;
     const status = (req.query.status as string) || null;
     const feedback = req.query.feedback as string;
+    const priority = req.query.priority as string;
 
     const query: any = {
       assignedOfficer: officerId 
@@ -707,6 +763,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     if (status) {
       query.status = {
         $in: status.split(",")
+      };
+    }
+
+    if (priority) {
+      query.assignedPriority = {
+        $in: priority.split(",")
       };
     }
 
@@ -1061,6 +1123,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
 
+    if (status === "REOPENED") {
+      if (oldGrievance.status !== "RESOLVED" && oldGrievance.status !== "CLOSED") {
+        throw new ApiError({ status: 400, message: "A grievance can only be reopened if it is currently RESOLVED or CLOSED." });
+      }
+    }
+
     if (status === "RESOLVED") {
       const hasPhotos = oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0;
       if (!hasPhotos) {
@@ -1250,7 +1318,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const grievance = await Grievance.findById(id).populate({
       path: "classification.subService",
-      populate: { path: "service" }
+      populate: { 
+        path: "service",
+        populate: {
+          path: "department"
+        }
+      }
     }).populate({
       path: "assignedOfficer",
       select: "name role",
@@ -1290,7 +1363,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const grievance = await Grievance.findById(id).populate({
       path: "classification.subService",
-      populate: { path: "service" }
+      populate: { 
+        path: "service",
+        populate: {
+          path: "department"
+        }
+      }
     }).populate({
       path: "assignedOfficer",
       select: "name role",
