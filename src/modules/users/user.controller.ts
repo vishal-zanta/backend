@@ -27,18 +27,19 @@ export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
     validateRequestFields(["name", "role", "password"], req.body);
 
-    const { name, email, phone, role, district, password, skills, preferredLanguages } = req.body;
+    const { name, email, phone, role, district, password, skills, preferredLanguages, loginId } = req.body;
 
     let existingUser = null;
-    if (email || phone) {
+    if (email || phone || loginId) {
       const orConditions = [];
       if (email) orConditions.push({ email });
       if (phone) orConditions.push({ phone });
+      if (loginId) orConditions.push({ loginId });
       existingUser = await User.findOne({ $or: orConditions });
     }
 
     if (existingUser && existingUser.status !== 'INACTIVE') {
-      throw new ApiError({ status: 400, message: 'User with this email or phone already exists' });
+      throw new ApiError({ status: 400, message: 'User with this email, phone, or loginId already exists' });
     }
 
     const assignedRole = await Role.findById(role);
@@ -70,6 +71,7 @@ export class UserController {
       existingUser.password = password;
       existingUser.role = role;
       existingUser.district = district;
+      if (loginId) existingUser.loginId = loginId;
       if (skills) existingUser.skills = skills;
       if (preferredLanguages) existingUser.preferredLanguages = preferredLanguages;
       existingUser.status = 'ACTIVE';
@@ -84,7 +86,8 @@ export class UserController {
         role,
         district,
         skills,
-        preferredLanguages
+        preferredLanguages,
+        loginId
       });
     }
 
@@ -200,7 +203,7 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, phone, role, status, district, password, skills, preferredLanguages } = req.body;
+    const { name, phone, role, status, district, password, skills, preferredLanguages, loginId } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -214,6 +217,7 @@ export class UserController {
     if (district) user.district = district;
     if (skills) user.skills = skills;
     if (preferredLanguages) user.preferredLanguages = preferredLanguages;
+    if (loginId !== undefined) user.loginId = loginId;
     if (password) {
       user.password = password;
       user.isPasswordResetMandatory = true;
