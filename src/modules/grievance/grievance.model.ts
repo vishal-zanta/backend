@@ -62,6 +62,7 @@ export interface IGrievance extends Document {
     channel?: mongoose.Types.ObjectId;
     assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL"|"PENDING";
     assignedOfficer?: mongoose.Types.ObjectId;
+    assignedAt?: Date;
     status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED" ;
     address?: {
       state?: string;
@@ -211,6 +212,9 @@ const GrievanceSchema = new Schema<IGrievance>(
       assignedOfficer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+      },
+      assignedAt: {
+        type: Date,
       },
       status: {
         type: String,

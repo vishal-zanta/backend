@@ -17,14 +17,25 @@ import { TimelineService } from "../modules/timeline/timeline.service.js";
 import { timelineTemplates } from "../modules/timeline/timeline.template.js";
 
 const rolesData = [
-  { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" },
-  { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" },
+  { designationEnglish: "L1 Field Officer", designationHindi: "एल-1 फील्ड अधिकारी", level: "L1" ,"permissions":["OFFICER_DASHBOARD",
+		"MY_COMPLAINT",
+		"FIELD_VISIT",]},
+  { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" ,"permissions":["OFFICER_DASHBOARD",
+		"MY_COMPLAINT",
+		"FIELD_VISIT",]},
   { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone" },
   { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB" },
   { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division" },
   { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA" },
-  { designationEnglish: "Call Center Executive", designationHindi: "ग्राहक सेवा कार्यपालक", level: "CCE" },
-  { designationEnglish: "Call Centre Supervisor", designationHindi: "कॉल सेंटर पर्यवेक्षक", level: "Supervisor" },
+  { designationEnglish: "Call Centre Executive", designationHindi: "ग्राहक सेवा कार्यपालक", level: "CCE","permissions":["ALL_GRIEVANCE",
+  "CREATE_GRIEVANCE",
+  "UPDATE_GRIEVANCE",
+  "CCE_DASHBOARD",
+  "CHAT",
+  "SHIFT_AGENT"] },
+  { designationEnglish: "Call Centre Supervisor", designationHindi: "कॉल सेंटर पर्यवेक्षक", level: "Supervisor","permissions":["ALL_GRIEVANCE","CREATE_GRIEVANCE",  "UPDATE_GRIEVANCE","CCE_DASHBOARD",
+  "CHAT",
+  "SHIFT_AGENT"] },
     { designationEnglish: 'Admin', designationHindi: 'Admin', level: 'Admin',"permissions":["ALL"] }
 
 ];
@@ -379,7 +390,7 @@ const runSeed = async () => {
       const roleDeptId = departmentMap["Education Dept"]; // Assigning base roles to Education Dept
       await Role.findOneAndUpdate(
         { designationEnglish: role.designationEnglish },
-        { $set: { ...role, department: roleDeptId } },
+        { $set: { ...role, department:["Supervisor","CCE","Admin"].includes(role.level)?undefined:roleDeptId } },
         { upsert: true, new: true }
       );
     }
@@ -458,7 +469,7 @@ const runSeed = async () => {
     const supervisorRole = await Role.findOne({ level: "Supervisor" });
     const adminRole = await Role.findOne({ level: "Admin" });
     const patnaDistrict = await Demography.findOne({ name: "Patna" });
-    const streetLightService = await Service.findOne({ title: "Street Lighting" });
+    const streetLightService = await Service.findOne({ title: "Hand Pump tube well problem" });
     const subServices = await SubService.find({ service: streetLightService?._id });
 
     if (l1Role && l2Role && patnaDistrict && streetLightService && subServices.length > 0) {

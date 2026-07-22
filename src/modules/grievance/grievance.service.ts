@@ -190,6 +190,7 @@ export class GrievanceService {
       const assignedOfficerId = await GrievanceService.autoAssignOfficer(subServiceId, ward);
       if (assignedOfficerId) {
         payloadToCreate.assignedOfficer = assignedOfficerId;
+        payloadToCreate.assignedAt = new Date();
       }
     }
 

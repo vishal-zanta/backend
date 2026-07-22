@@ -20,7 +20,7 @@ import { FieldVisit } from '../fieldVisit/fieldVisit.model.js';
 import { Option } from "../options/option.model.js";
 import { Demography } from "../demography/demography.model.js";
 import { AuditService } from "../audit/audit.service.js";
-
+import { SlaConfig } from "../slaConfig/slaConfig.model.js";
 export class GrievanceController {
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
@@ -637,7 +637,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt citizenInfo")
+      .select("grievanceId classification.subService address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -647,15 +647,48 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         }
       })
       .populate("address.district", "name nameHindi")
+      .populate({
+        path: "assignedOfficer",
+        select: "name role",
+        populate: {
+          path: "role",
+          select: "_id level designationEnglish"
+        }
+      })
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
-      .limit(pagination.limit);
+      .limit(pagination.limit)
+      .lean();
+
+    const subServiceIds = grievances.map((g: any) => g.classification?.subService?._id || g.classification?.subService);
+    const slaConfigs = await SlaConfig.find({ subService: { $in: subServiceIds }, active: true });
+    
+    const slaConfigMap = new Map();
+    for (const config of slaConfigs) {
+      slaConfigMap.set(config.subService.toString(), config);
+    }
+
+    const modifiedGrievances = grievances.map((g: any) => {
+      const subServiceId = g.classification?.subService?._id?.toString() || g.classification?.subService?.toString();
+      const officerRoleId = g.assignedOfficer?.role?._id?.toString() || g.assignedOfficer?.role?.toString();
+      
+      if (subServiceId && officerRoleId) {
+        const config = slaConfigMap.get(subServiceId);
+        if (config && config.escalations) {
+          const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
+          if (roleSla) {
+            g.slaHours = roleSla.slaHours;
+          }
+        }
+      }
+      return g;
+    });
 
     return new ApiResponse({
       res,
       status: 200,
       data: {
-        docs: grievances,
+        docs: modifiedGrievances,
         pagination,
       },
       message: "All Grievances retrieved successfully",
@@ -803,7 +836,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt")
+      .select("grievanceId classification.subService address status assignedPriority createdAt assignedAt")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -815,13 +848,37 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
-      .limit(pagination.limit);
+      .limit(pagination.limit)
+      .lean();
+
+    const officerRoleId = (req as any).user?.role?._id?.toString() || (req as any).user?.role?.toString();
+    const subServiceIds = grievances.map((g: any) => g.classification?.subService?._id || g.classification?.subService);
+    const slaConfigs = await SlaConfig.find({ subService: { $in: subServiceIds }, active: true });
+    
+    const slaConfigMap = new Map();
+    for (const config of slaConfigs) {
+      slaConfigMap.set(config.subService.toString(), config);
+    }
+
+    const modifiedGrievances = grievances.map((g: any) => {
+      const subServiceId = g.classification?.subService?._id?.toString() || g.classification?.subService?.toString();
+      if (subServiceId && officerRoleId) {
+        const config = slaConfigMap.get(subServiceId);
+        if (config && config.escalations) {
+          const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
+          if (roleSla) {
+            g.slaHours = roleSla.slaHours;
+          }
+        }
+      }
+      return g;
+    });
 
     return new ApiResponse({
       res,
       status: 200,
       data: {
-        docs: grievances,
+        docs: modifiedGrievances,
         pagination,
       },
       message: "Assigned Grievances retrieved successfully",
@@ -1060,7 +1117,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const grievance = await Grievance.findByIdAndUpdate(
       id,
-      { assignedOfficer },
+      { assignedOfficer, assignedAt: new Date() },
       { new: true, runValidators: true }
     );
 

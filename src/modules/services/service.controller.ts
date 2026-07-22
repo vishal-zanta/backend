@@ -31,7 +31,12 @@ export class ServiceController {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const query = { active: true };
+    const query: any = { active: true };
+    const department = req.query.department as string;
+    if (department) {
+      query.department = department;
+    }
+
     const services = await Service.find(query).populate('department').populate('subservices').sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Service.countDocuments(query);
 

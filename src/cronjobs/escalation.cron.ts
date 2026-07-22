@@ -152,6 +152,7 @@ console.log(currentRoleSla,"currentRoleSla")
 
           // Reassign and jump to the correct next level
           grievance.assignedOfficer = nextOfficer._id as any;
+          grievance.assignedAt = new Date() as any;
           grievance.escalationLevel = nextValidLevelIndex;
           grievance.status = "OPEN"; 
           
