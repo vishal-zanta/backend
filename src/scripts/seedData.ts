@@ -278,7 +278,7 @@ const ulbData = [
 
 const options=[{
   
-  "title": "one-time",
+  "title": "One-time",
   "type": "Evidence Frequency",
   "value": "one_time",
   "active": true
@@ -286,7 +286,7 @@ const options=[{
 },
 {
   
-  "title": "recurring",
+  "title": "Recurring",
   "type": "Evidence Frequency",
   "value": "recurring",
   "active": true
@@ -318,7 +318,7 @@ const options=[{
 },
 {
  
-  "title": "systemic",
+  "title": "Systemic",
   "type": "Public Impact",
   "value": "systemic",
   "active": true

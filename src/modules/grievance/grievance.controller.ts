@@ -64,6 +64,55 @@ export class GrievanceController {
     await Promise.all(checks);
   }
 
+  /**
+   * Helper to attach SLA hours to a single grievance
+   */
+  private static async attachSlaToGrievance(grievance: any) {
+    let slaHours;
+    const subServiceId = grievance.classification?.subService?._id;
+    const officerRoleId = grievance.assignedOfficer?.role?._id;
+
+    if (subServiceId && officerRoleId) {
+      const slaConfig = await SlaConfig.findOne({ subService: subServiceId, active: true });
+      if (slaConfig && slaConfig.escalations) {
+        const roleSla = slaConfig.escalations.find((e: any) => e.role.toString() === officerRoleId.toString());
+        if (roleSla) {
+          slaHours = roleSla.slaHours;
+        }
+      }
+    }
+    return slaHours;
+  }
+
+  /**
+   * Helper to attach SLA hours to an array of grievances
+   */
+  private static async attachSlaToGrievancesList(grievances: any[], defaultOfficerRoleId?: string) {
+    const subServiceIds = grievances.map((g: any) => g.classification?.subService?._id || g.classification?.subService);
+    const slaConfigs = await SlaConfig.find({ subService: { $in: subServiceIds }, active: true });
+    
+    const slaConfigMap = new Map();
+    for (const config of slaConfigs) {
+      slaConfigMap.set(config.subService.toString(), config);
+    }
+
+    return grievances.map((g: any) => {
+      const subServiceId = g.classification?.subService?._id?.toString() || g.classification?.subService?.toString();
+      const officerRoleId = defaultOfficerRoleId || g.assignedOfficer?.role?._id?.toString() || g.assignedOfficer?.role?.toString();
+      
+      if (subServiceId && officerRoleId) {
+        const config = slaConfigMap.get(subServiceId);
+        if (config && config.escalations) {
+          const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
+          if (roleSla) {
+            g.slaHours = roleSla.slaHours;
+          }
+        }
+      }
+      return g;
+    });
+  }
+
   
   static createGrievance = asyncHandler(async (req: Request, res: Response) => {
     const citizen = req.citizen;
@@ -660,29 +709,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .limit(pagination.limit)
       .lean();
 
-    const subServiceIds = grievances.map((g: any) => g.classification?.subService?._id || g.classification?.subService);
-    const slaConfigs = await SlaConfig.find({ subService: { $in: subServiceIds }, active: true });
-    
-    const slaConfigMap = new Map();
-    for (const config of slaConfigs) {
-      slaConfigMap.set(config.subService.toString(), config);
-    }
-
-    const modifiedGrievances = grievances.map((g: any) => {
-      const subServiceId = g.classification?.subService?._id?.toString() || g.classification?.subService?.toString();
-      const officerRoleId = g.assignedOfficer?.role?._id?.toString() || g.assignedOfficer?.role?.toString();
-      
-      if (subServiceId && officerRoleId) {
-        const config = slaConfigMap.get(subServiceId);
-        if (config && config.escalations) {
-          const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
-          if (roleSla) {
-            g.slaHours = roleSla.slaHours;
-          }
-        }
-      }
-      return g;
-    });
+    const modifiedGrievances = await GrievanceController.attachSlaToGrievancesList(grievances);
 
     return new ApiResponse({
       res,
@@ -852,27 +879,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .lean();
 
     const officerRoleId = (req as any).user?.role?._id?.toString() || (req as any).user?.role?.toString();
-    const subServiceIds = grievances.map((g: any) => g.classification?.subService?._id || g.classification?.subService);
-    const slaConfigs = await SlaConfig.find({ subService: { $in: subServiceIds }, active: true });
-    
-    const slaConfigMap = new Map();
-    for (const config of slaConfigs) {
-      slaConfigMap.set(config.subService.toString(), config);
-    }
-
-    const modifiedGrievances = grievances.map((g: any) => {
-      const subServiceId = g.classification?.subService?._id?.toString() || g.classification?.subService?.toString();
-      if (subServiceId && officerRoleId) {
-        const config = slaConfigMap.get(subServiceId);
-        if (config && config.escalations) {
-          const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
-          if (roleSla) {
-            g.slaHours = roleSla.slaHours;
-          }
-        }
-      }
-      return g;
-    });
+    const modifiedGrievances = await GrievanceController.attachSlaToGrievancesList(grievances, officerRoleId);
 
     return new ApiResponse({
       res,
@@ -1394,9 +1401,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     }
 
     const timeline = await TimelineService.getTimelineHistory(id);
+    const slaHours = await GrievanceController.attachSlaToGrievance(grievance);
+
     const responseData = {
       ...grievance.toJSON(),
       timeline,
+      slaHours
     };
 
     return new ApiResponse({
@@ -1452,11 +1462,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const timeline = await TimelineService.getTimelineHistory(id);
     const fieldVisits = await FieldVisit.find({ grievance: id }).sort({ createdAt: -1 });
+    
+    const slaHours = await GrievanceController.attachSlaToGrievance(grievance);
 
     const responseData = {
       ...grievance.toJSON(),
       timeline,
       fieldVisits,
+      slaHours
     };
 
     return new ApiResponse({
