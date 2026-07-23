@@ -59,6 +59,7 @@ export interface IGrievance extends Document {
 
     grievanceId: string;
     createdBy?: mongoose.Types.ObjectId;
+    sourceApiKey?: mongoose.Types.ObjectId;
     channel?: mongoose.Types.ObjectId;
     assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL"|"PENDING";
     assignedOfficer?: mongoose.Types.ObjectId;
@@ -259,6 +260,10 @@ const GrievanceSchema = new Schema<IGrievance>(
       createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+      },
+      sourceApiKey: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ApiKey",
       },
     },
   {

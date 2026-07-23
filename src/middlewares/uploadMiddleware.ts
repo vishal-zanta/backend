@@ -13,7 +13,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new ApiError({ status: 400, message: "Invalid file type. Only standard images, documents, audio and video are allowed." }));
+    cb( new ApiError({ status: 400, message: "Invalid file type. Only standard images, documents, audio and video are allowed." }));
   }
 };
 

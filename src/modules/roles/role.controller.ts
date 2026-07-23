@@ -4,6 +4,8 @@ import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
+import { WorkflowLevel } from '../workflowLevel/workflowLevel.model.js';
+import { SlaConfig } from '../slaConfig/slaConfig.model.js';
 
 export class RoleController {
   static createRole = asyncHandler(async (req: Request, res: Response) => {
@@ -48,11 +50,29 @@ export class RoleController {
 
   static updateRole = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const role = await Role.findByIdAndUpdate(id, req.body, { new: true });
-    
-    if (!role) {
+
+    const existingRole = await Role.findById(id);
+    if (!existingRole) {
       throw new ApiError({ status: 404, message: 'Role not found' });
     }
+
+    const newDepartment = req.body.department;
+    
+    if (newDepartment && newDepartment.toString() !== existingRole.department.toString()) {
+      // Role department has changed, remove from workflow and SLA configs
+     
+      await WorkflowLevel.updateMany(
+        { "levels.role": existingRole._id },
+        { $pull: { levels: { role: existingRole._id } } }
+      );
+      
+      await SlaConfig.updateMany(
+        { "escalations.role": existingRole._id },
+        { $pull: { escalations: { role: existingRole._id } } }
+      );
+    }
+
+    const role = await Role.findByIdAndUpdate(id, req.body, { new: true });
     
     return new ApiResponse({ res, status: 200, data: role, message: 'Role updated successfully' });
   });
@@ -64,6 +84,17 @@ export class RoleController {
     if (!role) {
       throw new ApiError({ status: 404, message: 'Role not found' });
     }
+
+    // Remove from workflow and SLA configs since it's deleted
+    await WorkflowLevel.updateMany(
+      { "levels.role": role._id },
+      { $pull: { levels: { role: role._id } } }
+    );
+
+    await SlaConfig.updateMany(
+      { "escalations.role": role._id },
+      { $pull: { escalations: { role: role._id } } }
+    );
 
     return new ApiResponse({ res, status: 200, message: 'Role deleted successfully' });
   });

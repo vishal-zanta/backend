@@ -6,6 +6,7 @@ import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
+import { Role } from '../roles/role.model.js';
 
 export class OfficerTaggingController {
   static createTagging = asyncHandler(async (req: Request, res: Response) => {
@@ -49,7 +50,20 @@ export class OfficerTaggingController {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const query = { active: true };
+    const department = req.query.department as string;
+
+    const query: any = { active: true };
+
+    if (department) {
+      const roles = await Role.find({ department });
+      const roleIds = roles.map(r => r._id);
+
+      const users = await User.find({ role: { $in: roleIds } });
+      const userIds = users.map(u => u._id);
+
+      query.officer = { $in: userIds };
+    }
+
     const taggings = await OfficerTagging.find(query)
       .populate({
         path: 'officer',

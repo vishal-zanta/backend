@@ -67,7 +67,7 @@ export class GrievanceController {
   /**
    * Helper to attach SLA hours to a single grievance
    */
-  private static async attachSlaToGrievance(grievance: any) {
+  static attachSlaToGrievance = async (grievance: any) => {
     let slaHours;
     const subServiceId = grievance.classification?.subService?._id;
     const officerRoleId = grievance.assignedOfficer?.role?._id;

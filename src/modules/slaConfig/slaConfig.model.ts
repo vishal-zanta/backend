@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ISlaEscalation {
   role: mongoose.Types.ObjectId;
   slaHours: number;
+  slaType:String;
 }
 
 export interface ISlaConfig extends Document {
@@ -16,7 +17,9 @@ export interface ISlaConfig extends Document {
 
 const slaEscalationSchema = new Schema<ISlaEscalation>({
   role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
-  slaHours: { type: Number, required: true }
+  slaHours: { type: Number, required: true },
+  slaType:String
+
 }, { _id: false });
 
 const slaConfigSchema = new Schema<ISlaConfig>({

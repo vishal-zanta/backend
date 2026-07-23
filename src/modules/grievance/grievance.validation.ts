@@ -76,7 +76,7 @@ export const createGrievanceByAgentSchema = createGrievanceSchema.extend({
       .regex(/^[0-9]+$/, "Mobile number must contain only digits"),
     fullName: optionalText,
     alternateMobile: z.string().trim().optional(),
-    email: z.string().trim().email("Invalid email format").optional().or(z.literal("")),
+    email: z.email("Invalid email format").optional().or(z.literal("")),
     preferredLanguage: optionalText,
   })
 });

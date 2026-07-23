@@ -4,6 +4,7 @@ export interface ISubService extends Document {
   title: string;
   titleHindi: string;
   sla: number;
+  slaType:String;
   geoTagged: boolean;
   fieldVisit: boolean;
   service: mongoose.Types.ObjectId;
@@ -27,6 +28,7 @@ const subServiceSchema = new Schema<ISubService>({
     type: Number,
     required: true
   },
+  slaType:String,
   geoTagged: {
     type: Boolean,
     default: false

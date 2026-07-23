@@ -119,16 +119,27 @@ export class UserController {
   });
 
   static getUsers = asyncHandler(async (req: Request, res: Response) => {
-    const { role, search } = req.query;
+    const { role, search,department } = req.query;
+
+     
+    
     
     const query: any = { status: { $ne: 'INACTIVE' } };
     
     if (role && typeof(role) =="string") {
-      const roleArray=role.split(",");
-      if (Array.isArray(roleArray)) {
-        query.role = { $in: roleArray };
+      const roleArray = role.split(",");
+      query.role = { $in: roleArray };
+    }
+
+    if (department && typeof department === "string") {
+      const deptArray = department.split(",");
+      const roles = await Role.find({ department: { $in: deptArray } });
+      const roleIds = roles.map(r => r._id.toString());
+      
+      if (query.role && query.role.$in) {
+         query.role.$in = query.role.$in.filter((id: string) => roleIds.includes(id));
       } else {
-        query.role = role;
+         query.role = { $in: roleIds };
       }
     }
 

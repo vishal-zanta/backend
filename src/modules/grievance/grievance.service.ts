@@ -115,9 +115,10 @@ export class GrievanceService {
     citizenInfo: any;
     files?: Express.Multer.File[];
     createdBy?: ObjectId;
+    sourceApiKey?: ObjectId;
     channel?: any;
   }) {
-    const { citizen, classification, evidence, impact, communication, address, citizenInfo, files, createdBy, channel } = payload;
+    const { citizen, classification, evidence, impact, communication, address, citizenInfo, files, createdBy, sourceApiKey, channel } = payload;
 
     // console.log("createdby ",createdBy)
     // Handle File Uploads
@@ -176,6 +177,7 @@ export class GrievanceService {
       address,
       status: "OPEN",
       createdBy,
+      sourceApiKey,
       channel
     };
     
@@ -198,16 +200,32 @@ export class GrievanceService {
 
     const officer:any = await User.findById(createdBy).populate("role").lean();
 
+    let actorId = createdBy || citizen?._id;
+    let actorName = officer?.name || "CITIZEN";
+    let actorRole = officer?.role?.level || "CITIZEN";
+    let descriptionRole = officer?.role?.level || "CITIZEN";
+
+    if (sourceApiKey) {
+      const { ApiKey } = await import("../apiKey/apiKey.model.js");
+      const apiKeyDoc = await ApiKey.findById(sourceApiKey).lean();
+      if (apiKeyDoc) {
+        actorId = apiKeyDoc._id as any;
+        actorName = apiKeyDoc.name;
+        actorRole = "API_KEY";
+        descriptionRole = `API: ${apiKeyDoc.name}`;
+      }
+    }
+
     await TimelineService.logEvent({
       grievanceId: newGrievance._id,
       type:"COMPLAINT_REGISTERED",
       actor:{
-        id: createdBy || citizen?._id,
-        name: officer?.name || "CITIZEN",
-        role: officer?.role?.level || "CITIZEN",
+        id: actorId,
+        name: actorName,
+        role: actorRole,
       },
       metadata:{
-        description:timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, officer?.role?.level || "CITIZEN")
+        description:timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, descriptionRole)
       }
     });
 
@@ -218,9 +236,9 @@ export class GrievanceService {
           grievanceId: newGrievance._id,
           type: "ASSIGNED",
           actor: {
-            id: createdBy || citizen?._id,
-            name: officer?.name || "SYSTEM",
-            role: officer?.role?.level || "SYSTEM",
+            id: actorId,
+            name: actorRole === "API_KEY" ? actorName : (officer?.name || "SYSTEM"),
+            role: actorRole === "API_KEY" ? actorRole : (officer?.role?.level || "SYSTEM"),
           },
           metadata: {
             description: timelineTemplates.ASSIGNED(assignedUser?.role?.level || "Officer", assignedUser.name)

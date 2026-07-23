@@ -23,7 +23,8 @@ import departmentRoutes from "../departments/department.routes.js";
 import notificationRoutes from "../notifications/notification.routes.js";
 import skillRoutes from "../skills/skill.routes.js";
 import systemConfigRoutes from "../systemConfig/systemConfig.routes.js";
-
+import apiKeyRoutes from "../apiKey/apiKey.routes.js";
+import thirdPartyGrievanceRoutes from "../grievance/thirdPartyGrievance.routes.js";
 const router = Router();
 
 router.use("/", healthRoutes);
@@ -50,5 +51,7 @@ router.use("/departments", departmentRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/skills", skillRoutes);
 router.use("/config", systemConfigRoutes);
+router.use("/api-keys", apiKeyRoutes);
+router.use("/third-party/grievances", thirdPartyGrievanceRoutes);
 
 export default router;
