@@ -76,7 +76,10 @@ export class SlaConfigController {
     const skip = (page - 1) * limit;
 
     const configs = await SlaConfig.find(query)
-      .populate('subService')
+      .populate({
+        path: 'subService',
+        populate: { path: 'service' }
+      })
       .populate('escalations.role')
       .skip(skip)
       .limit(limit);
