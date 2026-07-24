@@ -62,8 +62,42 @@ export class ChatController {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
+    const search = req.query.search as string || '';
 
-    const totalConversations = await Conversation.countDocuments({ participants: currentUserId });
+    let userSearchQuery: any = {};
+    let matchingUserIds: string[] = [];
+
+    if (search) {
+      const { Role } = await import('../roles/role.model.js');
+      const searchRegex = new RegExp(search, 'i');
+      
+      const matchingRoles = await Role.find({
+        $or: [
+          { designationEnglish: searchRegex },
+          { designationHindi: searchRegex }
+        ]
+      }).select('_id');
+      const roleIds = matchingRoles.map(r => r._id);
+
+      userSearchQuery = {
+        $or: [
+          { name: searchRegex },
+          { email: searchRegex },
+          { loginId: searchRegex },
+          { role: { $in: roleIds } }
+        ]
+      };
+      
+      const matchingUsers = await User.find(userSearchQuery).select('_id');
+      matchingUserIds = matchingUsers.map(u => u._id.toString());
+    }
+
+    const convQuery: any = { participants: currentUserId };
+    if (search) {
+      convQuery.participants = { $all: [currentUserId], $in: matchingUserIds };
+    }
+
+    const totalConversations = await Conversation.countDocuments(convQuery);
 
     // We need existingParticipantIds to know how many "other users" exist
     const allConversations = await Conversation.find({ participants: currentUserId }).select('participants');
@@ -76,10 +110,15 @@ export class ChatController {
       });
     });
 
-    const totalOtherUsers = await User.countDocuments({
+    const otherUsersQuery: any = {
       _id: { $ne: currentUserId, $nin: Array.from(existingParticipantIds) },
       status: 'ACTIVE'
-    });
+    };
+    if (search) {
+      otherUsersQuery.$and = [userSearchQuery];
+    }
+
+    const totalOtherUsers = await User.countDocuments(otherUsersQuery);
 
     const totalCount = totalConversations + totalOtherUsers;
     const pagination = buildPagination({ page, limit, totalCount });
@@ -89,13 +128,11 @@ export class ChatController {
 
     if (offset < totalConversations) {
       // Fetch actual conversations
-      paginatedConversations = await Conversation.find({
-        participants: currentUserId
-      })
+      paginatedConversations = await Conversation.find(convQuery)
       .populate({
         path: 'participants',
-        select: 'name email isBreak status role',
-        populate: { path: 'role' }
+        select: 'name email loginId isBreak status role',
+        populate: { path: 'role' , select:'designationEnglish designationHindi level' }
       })
       .populate('lastMessage')
       .sort({ updatedAt: -1 })
@@ -105,11 +142,8 @@ export class ChatController {
       const remainingLimit = limit - paginatedConversations.length;
       if (remainingLimit > 0) {
         // Fetch some users to fill the rest of the page
-        const otherUsers = await User.find({
-          _id: { $ne: currentUserId, $nin: Array.from(existingParticipantIds) },
-          status: 'ACTIVE'
-        })
-        .populate('role').select('name email isBreak status role')
+        const otherUsers = await User.find(otherUsersQuery)
+        .populate('role').select('name email loginId isBreak status role')
         .skip(0)
         .limit(remainingLimit);
 
@@ -124,11 +158,8 @@ export class ChatController {
     } else {
       // Only fetch users
       const userOffset = offset - totalConversations;
-      const otherUsers = await User.find({
-        _id: { $ne: currentUserId, $nin: Array.from(existingParticipantIds) },
-        status: 'ACTIVE'
-      })
-      .populate('role').select('name email isBreak status role')
+      const otherUsers = await User.find(otherUsersQuery)
+      .populate('role').select('name email loginId isBreak status role')
       .skip(userOffset)
       .limit(limit);
 

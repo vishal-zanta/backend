@@ -33,6 +33,7 @@ export class UserController {
     if (email === "") email = undefined;
     if (phone === "") phone = undefined;
     if (loginId === "") loginId = undefined;
+    if (district === "") district = undefined;
 
     let existingUser = null;
     if (email || phone || loginId) {
