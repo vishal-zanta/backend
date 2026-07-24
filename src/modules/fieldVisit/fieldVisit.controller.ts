@@ -12,6 +12,59 @@ import ApiResponse from '../../utils/apiResponse.js';
 export class FieldVisitController {
   
   /**
+   * Get field visit stats for the logged-in officer
+   */
+  static getVisitStats = asyncHandler(async (req: Request, res: Response) => {
+    const officerId = req.user?.id;
+    if (!officerId) throw new ApiError({ status: 401, message: 'Unauthorized' });
+
+    const pipeline: any[] = [
+      {
+        $lookup: {
+          from: 'grievances',
+          localField: 'grievance',
+          foreignField: '_id',
+          as: 'grievance'
+        }
+      },
+      { $unwind: '$grievance' },
+      { $match: { 'grievance.assignedOfficer': new mongoose.Types.ObjectId(officerId) } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    const stats = await FieldVisit.aggregate(pipeline);
+
+    let total = 0;
+    let scheduled = 0;
+    let inProgress = 0;
+    let completed = 0;
+
+    stats.forEach(stat => {
+      total += stat.count;
+      if (stat._id === 'SCHEDULED') scheduled = stat.count;
+      else if (stat._id === 'IN_PROGRESS') inProgress = stat.count;
+      else if (stat._id === 'COMPLETED') completed = stat.count;
+    });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        total,
+        scheduled,
+        inProgress,
+        completed
+      },
+      message: 'Field visit stats fetched successfully'
+    });
+  });
+
+  /**
    * Get field visits for grievances assigned to the logged in officer
    */
   static getVisits = asyncHandler(async (req: Request, res: Response) => {

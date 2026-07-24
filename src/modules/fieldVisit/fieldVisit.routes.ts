@@ -5,6 +5,9 @@ import { checkPermission } from "../../middlewares/permissionMiddleware.js";
 
 const router = Router();
 
+// Get field visit stats for the logged-in officer
+router.get("/stats", authProtect, checkPermission("FIELD_VISIT"), FieldVisitController.getVisitStats);
+
 // Get field visits assigned to the logged-in officer
 router.get("/", authProtect,checkPermission("FIELD_VISIT"), FieldVisitController.getVisits);
 
