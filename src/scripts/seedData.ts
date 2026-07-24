@@ -23,19 +23,27 @@ const rolesData = [
   { designationEnglish: "L2 Supervisory Officer", designationHindi: "एल-2 पर्यवेक्षी अधिकारी", level: "L2" ,"permissions":["OFFICER_DASHBOARD",
 		"MY_COMPLAINT",
 		"FIELD_VISIT",]},
-  { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone" },
-  { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB" },
-  { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division" },
-  { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA" },
+  { designationEnglish: "Zone Administrator", designationHindi: "ज़ोन प्रशासक", level: "Zone","permissions":["OFFICER_DASHBOARD",
+		"MY_COMPLAINT",
+		"FIELD_VISIT",] },
+  { designationEnglish: "ULB Administrator", designationHindi: "नगर निकाय प्रशासक", level: "ULB","permissions":["OFFICER_DASHBOARD",
+		"MY_COMPLAINT",
+		"FIELD_VISIT",] },
+  { designationEnglish: "Divisional Administrator", designationHindi: "संभागीय प्रशासक", level: "Division","permissions":["OFFICER_DASHBOARD",
+		"MY_COMPLAINT",
+		"FIELD_VISIT",] },
+  { designationEnglish: "SUDA Administrator", designationHindi: "सुडा प्रशासक", level: "SUDA","permissions":["OFFICER_DASHBOARD",
+		"MY_COMPLAINT",
+		"FIELD_VISIT",] },
   { designationEnglish: "Call Centre Executive", designationHindi: "ग्राहक सेवा कार्यपालक", level: "CCE","permissions":["ALL_GRIEVANCE",
   "CREATE_GRIEVANCE",
   "UPDATE_GRIEVANCE",
   "CCE_DASHBOARD",
   "CHAT",
-  "SHIFT_AGENT"] },
+  "SHIFT_AGENT","ASSIGN_GRIEVANCE"] },
   { designationEnglish: "Call Centre Supervisor", designationHindi: "कॉल सेंटर पर्यवेक्षक", level: "Supervisor","permissions":["ALL_GRIEVANCE","CREATE_GRIEVANCE",  "UPDATE_GRIEVANCE","CCE_DASHBOARD",
   "CHAT",
-  "SHIFT_AGENT"] },
+  "SHIFT_AGENT","ASSIGN_GRIEVANCE"] },
     { designationEnglish: 'Admin', designationHindi: 'Admin', level: 'Admin',"permissions":["ALL"] }
 
 ];
@@ -54,66 +62,7 @@ const complaintSourcesData = [
 ];
 
 const servicesData = [
-  {
-    title: "Hand Pump tube well problem",
-    titleHindi: "Hand Pump tube well problem",
-    department: "PHED",
-    subServices: [
-      { title: "Repairing of Public hand Pump", titleHindi: "Repairing of Public hand Pump", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true }
-    ]
-  },
-  {
-    title: "Miscellaneous",
-    titleHindi: "Miscellaneous",
-    department: "PHED",
-    subServices: [
-      { title: "Miscellaneous", titleHindi: "Miscellaneous", sla: 24, geoTagged: true, fieldVisit: true }
-    ]
-  },
-  {
-    title: "Payment issue related problem",
-    titleHindi: "Payment issue related problem",
-    department: "PHED",
-    subServices: [
-      { title: "Electricity bill related", titleHindi: "Electricity bill related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Pump operator salary related", titleHindi: "Pump operator salary related", sla: 24, geoTagged: true, fieldVisit: true }
-    ]
-  },
-  {
-    title: "Pipe Water Supply related problem",
-    titleHindi: "Pipe Water Supply related problem",
-    department: "PHED",
-    subServices: [
-      { title: "Cleaning of water tank five thousand litre", titleHindi: "Cleaning of water tank five thousand litre", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Cleaning of water tank One lakh litre", titleHindi: "Cleaning of water tank One lakh litre", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Leakage of water high level", titleHindi: "Leakage of water high level", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Leakage of water small level", titleHindi: "Leakage of water small level", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Motor burn", titleHindi: "Motor burn", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Operator does not run the motor", titleHindi: "Operator does not run the motor", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Repairing of electricity related", titleHindi: "Repairing of electricity related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Repairing of stand post", titleHindi: "Repairing of stand post", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Repairing of starter or steplizer related", titleHindi: "Repairing of starter or steplizer related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Testing of water quality", titleHindi: "Testing of water quality", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water Connection not provided as main pipeline exists near to complainant's house", titleHindi: "Water Connection not provided as main pipeline exists near to complainant's house", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water connection not provided as no main pipeline near the complainant’s house", titleHindi: "Water connection not provided as no main pipeline near the complainant’s house", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water is not coming in good pressure", titleHindi: "Water is not coming in good pressure", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water is not coming through stand post", titleHindi: "Water is not coming through stand post", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water is not coming timely", titleHindi: "Water is not coming timely", sla: 24, geoTagged: true, fieldVisit: true }
-    ]
-  },
-  {
-    title: "Water Quality problem",
-    titleHindi: "Water Quality problem",
-    department: "PHED",
-    subServices: [
-      { title: "Dirty Water Supply related", titleHindi: "Dirty Water Supply related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "High amount of Iron in Water related", titleHindi: "High amount of Iron in Water related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water testing related", titleHindi: "Water testing related", sla: 24, geoTagged: true, fieldVisit: true }
-    ]
-  },
+  
   {
     title: "School - Basic Infrastructure",
     titleHindi: "School - Basic Infrastructure",
@@ -248,6 +197,66 @@ const servicesData = [
     department: "Education Dept",
     subServices: [
       { title: "Information regarding illegal collection of money by Education Department staff from any teacher/student for various works", titleHindi: "Information regarding illegal collection of money by Education Department staff from any teacher/student for various works", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Hand Pump tube well problem",
+    titleHindi: "Hand Pump tube well problem",
+    department: "PHED",
+    subServices: [
+      { title: "Repairing of Public hand Pump", titleHindi: "Repairing of Public hand Pump", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Miscellaneous",
+    titleHindi: "Miscellaneous",
+    department: "PHED",
+    subServices: [
+      { title: "Miscellaneous", titleHindi: "Miscellaneous", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Payment issue related problem",
+    titleHindi: "Payment issue related problem",
+    department: "PHED",
+    subServices: [
+      { title: "Electricity bill related", titleHindi: "Electricity bill related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Pump operator salary related", titleHindi: "Pump operator salary related", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Pipe Water Supply related problem",
+    titleHindi: "Pipe Water Supply related problem",
+    department: "PHED",
+    subServices: [
+      { title: "Cleaning of water tank five thousand litre", titleHindi: "Cleaning of water tank five thousand litre", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Cleaning of water tank One lakh litre", titleHindi: "Cleaning of water tank One lakh litre", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Leakage of water high level", titleHindi: "Leakage of water high level", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Leakage of water small level", titleHindi: "Leakage of water small level", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Motor burn", titleHindi: "Motor burn", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Operator does not run the motor", titleHindi: "Operator does not run the motor", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Other", titleHindi: "Other", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Repairing of electricity related", titleHindi: "Repairing of electricity related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Repairing of stand post", titleHindi: "Repairing of stand post", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Repairing of starter or steplizer related", titleHindi: "Repairing of starter or steplizer related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Testing of water quality", titleHindi: "Testing of water quality", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water Connection not provided as main pipeline exists near to complainant's house", titleHindi: "Water Connection not provided as main pipeline exists near to complainant's house", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water connection not provided as no main pipeline near the complainant’s house", titleHindi: "Water connection not provided as no main pipeline near the complainant’s house", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water is not coming in good pressure", titleHindi: "Water is not coming in good pressure", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water is not coming through stand post", titleHindi: "Water is not coming through stand post", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water is not coming timely", titleHindi: "Water is not coming timely", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
+  },
+  {
+    title: "Water Quality problem",
+    titleHindi: "Water Quality problem",
+    department: "PHED",
+    subServices: [
+      { title: "Dirty Water Supply related", titleHindi: "Dirty Water Supply related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "High amount of Iron in Water related", titleHindi: "High amount of Iron in Water related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water testing related", titleHindi: "Water testing related", sla: 24, geoTagged: true, fieldVisit: true }
     ]
   }
 ];
@@ -387,7 +396,7 @@ const runSeed = async () => {
 
     // 1. Seed Roles
     for (const role of rolesData) {
-      const roleDeptId = departmentMap["Education Dept"]; // Assigning base roles to Education Dept
+      const roleDeptId = departmentMap["PHED"]; // Assigning base roles to Education Dept
       await Role.findOneAndUpdate(
         { designationEnglish: role.designationEnglish },
         { $set: { ...role, department:["Supervisor","CCE","Admin"].includes(role.level)?undefined:roleDeptId } },

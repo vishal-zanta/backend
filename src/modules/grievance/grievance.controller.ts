@@ -1042,6 +1042,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     }
 
     if (updateData.status === 'RESOLVED') {
+      if (oldGrievance.status !== 'RESOLVED') {
+        updateData.resolvedAt = new Date();
+      }
       const hasPhotos = (oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0) || (updateData.geotaggedImages && updateData.geotaggedImages.length > 0);
       if (!hasPhotos) {
         throw new ApiError({ status: 400, message: "Cannot resolve grievance: At least one photo of the resolution is required." });
@@ -1205,9 +1208,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       }
     }
 
+    const updatePayload: any = { status };
+    if (status === "RESOLVED" && oldGrievance.status !== "RESOLVED") {
+      updatePayload.resolvedAt = new Date();
+    }
+
     const grievance = await Grievance.findByIdAndUpdate(
       id,
-      { status },
+      updatePayload,
       { new: true, runValidators: true }
     );
 

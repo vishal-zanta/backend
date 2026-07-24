@@ -9,6 +9,7 @@ import { EmailService } from '../../libs/emailService.lib.js';
 import { welcomeEmailTemplate } from '../../templates/welcomeEmail.template.js';
 import { adminPasswordResetTemplate } from '../../templates/adminPasswordReset.template.js';
 import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
+import { ROLES } from '../../config/roles.config.js';
 
 function generatePrefix(designation: string): string {
   return designation
@@ -265,10 +266,14 @@ export class UserController {
 
   static deleteUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const user = await User.findByIdAndUpdate(id, { status: 'INACTIVE' }, { new: true });
+    const user:any = await User.findByIdAndUpdate(id, { status: 'INACTIVE' }, { new: true }).populate("role");
     
     if (!user) {
       throw new ApiError({ status: 404, message: 'User not found' });
+    }
+    if(user.role?.level===ROLES.ADMIN){
+      throw new ApiError({ status: 400, message: 'Cannot delete an Admin user' });
+    
     }
 
     // Inactivate the user's tagging

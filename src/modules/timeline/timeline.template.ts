@@ -29,6 +29,8 @@ export const timelineTemplates = {
   CITIZEN_FEEDBACK: (rating: number | string, feedback: string) =>
     `Rating: ${rating}/5 - ${feedback}`,
 
+  // COMPLAINT_CLOSED: (afterHours: number | string) =>
+  //   `Auto-closed after ${afterHours}h of resolution with no dispute`,
   COMPLAINT_CLOSED: (afterHours: number | string) =>
-    `Auto-closed after ${afterHours}h of resolution with no dispute`,
+    `Closed after ${afterHours}h of resolution with no dispute`,
 };
