@@ -296,13 +296,21 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt feedbackText rating")
+      .select("grievanceId classification.subService address status assignedPriority createdAt feedbackText rating assignedOfficer")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
         populate: {
           path: "service",
           select: "title titleHindi department"
+        }
+      })
+      .populate({
+        path: "assignedOfficer",
+        select: "name role",
+        populate: {
+          path: "role",
+          select: "_id level designationEnglish designationHindi"
         }
       })
       .populate("address.district", "name nameHindi")
