@@ -7,6 +7,7 @@ export interface INotification extends Document {
   type: "INFO" | "ALERT" | "SUCCESS" | "WARNING";
   referenceId?: mongoose.Types.ObjectId; // E.g., Grievance ID or any other entity
   referenceModel?: string; // E.g., 'Grievance'
+  metadata?: Record<string, any>; // Store arbitrary contextual data like grievance string ID
   isRead: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -37,6 +38,9 @@ const notificationSchema = new Schema<INotification>({
   },
   referenceModel: {
     type: String
+  },
+  metadata: {
+    type: Schema.Types.Mixed
   },
   isRead: {
     type: Boolean,

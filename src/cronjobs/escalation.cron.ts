@@ -7,6 +7,8 @@ import { timelineTemplates } from "../modules/timeline/timeline.template.js";
 import { Role } from "../modules/roles/role.model.js";
 import { GrievanceAnalyticLog } from "../modules/grievance/grievanceAnalyticLog.model.js";
 import { OfficerTagging } from "../modules/officerTagging/officerTagging.model.js";
+import { SystemConfig } from "../modules/systemConfig/systemConfig.model.js";
+import { NotificationService } from "../modules/notifications/notification.service.js";
 
 export const checkAndEscalateGrievances = async () => {
   try {
@@ -21,6 +23,10 @@ export const checkAndEscalateGrievances = async () => {
       });
 
     if (!activeGrievances.length) return;
+
+    // Fetch SLA Warning Percentage
+    const sysConfig = await SystemConfig.findOne();
+    const slaWarningPercent = sysConfig?.slaWarningPercentage || 80;
 
     // Load workflows and map by department
     const workflows = await WorkflowLevel.find({ active: true });
@@ -88,6 +94,7 @@ console.log(currentRoleSla,"currentRoleSla")
       console.log(cumulativeSlaHours, "cumulativeSlaHours")
       
       const slaMs = cumulativeSlaHours * 60 * 60 * 1000;
+      const warningMs = slaMs * (slaWarningPercent / 100);
       const timePassedMs = Date.now() - grievance.createdAt.getTime();
 
       console.log(`timePassedMs: ${timePassedMs}ms (${Math.round(timePassedMs/1000/60)} mins), slaMs: ${slaMs}ms (${cumulativeSlaHours} hours)`);
@@ -155,6 +162,7 @@ console.log(currentRoleSla,"currentRoleSla")
           grievance.assignedAt = new Date() as any;
           grievance.escalationLevel = nextValidLevelIndex;
           grievance.status = "OPEN"; 
+          grievance.slaWarningSent = false;
           
           await grievance.save();
 
@@ -199,8 +207,17 @@ console.log(currentRoleSla,"currentRoleSla")
             }
           ]);
           
+          // Trigger notifications
+          NotificationService.notifySLABreach(grievance._id, grievance.grievanceId).catch(e => console.error(e));
+          NotificationService.notifyEscalation(nextOfficer._id, assignedUser?._id, grievance._id, grievance.grievanceId).catch(e => console.error(e));
+          
           console.log(`[Cron] Grievance ${grievance.grievanceId} escalated to ${nextOfficer.name} (Level ${grievance.escalationLevel})`);
         }
+      } else if (timePassedMs >= warningMs && !grievance.slaWarningSent && grievance.assignedOfficer) {
+        // Send SLA Warning
+        NotificationService.notifySLAWarning(grievance.assignedOfficer, grievance._id, grievance.grievanceId).catch(e => console.error(e));
+        grievance.slaWarningSent = true;
+        await grievance.save();
       }
     }
   } catch (error) {

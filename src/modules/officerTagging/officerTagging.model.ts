@@ -30,7 +30,7 @@ const officerTaggingSchema = new Schema<IOfficerTagging>({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'SubService'
   }],
-  wards: {
+  wards: {   // save subdivision of officers map to complain subdivision
     type: [String],
     default: []
   },

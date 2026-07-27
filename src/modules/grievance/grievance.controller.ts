@@ -5,6 +5,8 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import ApiResponse from "../../utils/apiResponse.js";
 import { ApiError } from "../../middlewares/errorHandler.js";
 import { buildPagination } from "../../utils/helpers.js";
+import { validateRequestFields } from "../../utils/helpers.js";
+import { NotificationService } from "../notifications/notification.service.js";
 import exifr from "exifr";
 
 import { GrievanceService } from "./grievance.service.js";
@@ -1044,6 +1046,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     if (updateData.status === 'RESOLVED') {
       if (oldGrievance.status !== 'RESOLVED') {
         updateData.resolvedAt = new Date();
+        // Notify CCE for feedback reminder
+        NotificationService.notifyFeedbackReminder(id, oldGrievance.grievanceId || "N/A").catch(e => console.error(e));
       }
       const hasPhotos = (oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0) || (updateData.geotaggedImages && updateData.geotaggedImages.length > 0);
       if (!hasPhotos) {
@@ -1166,6 +1170,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       }
     });
 
+    // Notify the new officer about the transfer
+    NotificationService.notifyTransfer(assignedOfficer, grievance._id, grievance.grievanceId).catch(e => console.error(e));
+
     return new ApiResponse({
       res,
       status: 200,
@@ -1211,6 +1218,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const updatePayload: any = { status };
     if (status === "RESOLVED" && oldGrievance.status !== "RESOLVED") {
       updatePayload.resolvedAt = new Date();
+      // Notify CCE for feedback reminder
+      NotificationService.notifyFeedbackReminder(id, oldGrievance.grievanceId || "N/A").catch(e => console.error(e));
     }
 
     const grievance = await Grievance.findByIdAndUpdate(

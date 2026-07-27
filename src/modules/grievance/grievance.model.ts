@@ -76,6 +76,7 @@ export interface IGrievance extends Document {
     };
     escalationLevel?: number;
     geotaggedImages?: IGeotaggedImage[];
+    slaWarningSent?: boolean;
   
   rating?: number;
   feedbackText?: string;
@@ -246,9 +247,13 @@ const GrievanceSchema = new Schema<IGrievance>(
         landmark: String,
       },
       escalationLevel: {
-        type: Number,
-        default: 0,
-      },
+      type: Number,
+      default: 0
+    },
+    slaWarningSent: {
+      type: Boolean,
+      default: false
+    },
       geotaggedImages: [GeotaggedImageSchema],
       rating: {
         type: Number,
