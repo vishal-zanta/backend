@@ -694,7 +694,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer")
+      .select("grievanceId classification.subService address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
