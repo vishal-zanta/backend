@@ -37,7 +37,7 @@ export const sendDailyFieldVisitReminders = async () => {
         type: "INFO",
         referenceId: grievance._id,
         referenceModel: "Grievance",
-        metadata: { visitId: visit.visitId, grievanceId: grievance.grievanceId }
+        metadata: { visitId: visit.visitId, grievanceRef: grievance.grievanceId }
       });
       sentCount++;
     }

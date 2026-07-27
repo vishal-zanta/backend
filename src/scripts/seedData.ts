@@ -250,16 +250,6 @@ const servicesData = [
     ]
   },
   {
-    title: "Water Quality problem",
-    titleHindi: "Water Quality problem",
-    department: "PHED",
-    subServices: [
-      { title: "Dirty Water Supply related", titleHindi: "Dirty Water Supply related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "High amount of Iron in Water related", titleHindi: "High amount of Iron in Water related", sla: 24, geoTagged: true, fieldVisit: true },
-      { title: "Water testing related", titleHindi: "Water testing related", sla: 24, geoTagged: true, fieldVisit: true }
-    ]
-  },
-  {
     title: "General",
     titleHindi: "General",
     department: "Health Information Helpline",
@@ -274,7 +264,18 @@ const servicesData = [
       { title: "Public health program–related grievances", titleHindi: "Public health program–related grievances", sla: 24, geoTagged: true, fieldVisit: true },
       { title: "Ayushman Bharat scheme–related complaints", titleHindi: "Ayushman Bharat scheme–related complaints", sla: 24, geoTagged: true, fieldVisit: true }
     ]
+  },
+  {
+    title: "Water Quality problem",
+    titleHindi: "Water Quality problem",
+    department: "PHED",
+    subServices: [
+      { title: "Dirty Water Supply related", titleHindi: "Dirty Water Supply related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "High amount of Iron in Water related", titleHindi: "High amount of Iron in Water related", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Water testing related", titleHindi: "Water testing related", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
   }
+  
 ];
 
 const demographyData = [

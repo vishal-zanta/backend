@@ -54,7 +54,7 @@ export const createGrievanceSchema = z.object({
   address: z.object({
     state: optionalText,
     district: mongoId,
-    subdivision: optionalText,
+    subdivision: requiredText("Subdivision is required"),
     villageOrWard: optionalText,
     pinCode: optionalText,
     landmark: optionalText,

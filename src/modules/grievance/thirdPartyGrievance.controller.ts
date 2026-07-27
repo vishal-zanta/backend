@@ -37,13 +37,9 @@ export class ThirdPartyGrievanceController {
       throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
     }
 
-    // Assign channel to a default "Third Party API" or dynamic based on api key name
     let channel = req.body.channel;
     if (!channel) {
-      const dbThirdPartySourceId = await ComplaintSource.findOne({ title: RegExp(`^${apiKeyDoc.name}$`, "i") });
-      if (dbThirdPartySourceId) {
-        channel = dbThirdPartySourceId._id;
-      }
+      throw new ApiError({ status: 400, message: "channel is required." });
     }
 
     let citizen;

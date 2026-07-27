@@ -6,7 +6,7 @@ import { Role } from '../roles/role.model.js';
 export class NotificationService {
   /**
    * Base method to send a single notification
-   */
+   */ 
   static async sendNotification(data: {
     recipient: mongoose.Types.ObjectId | string;
     title: string;
