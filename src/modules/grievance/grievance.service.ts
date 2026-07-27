@@ -10,6 +10,7 @@ import { SubService } from "../services/subService.model.js";
 import { FieldVisit } from "../fieldVisit/fieldVisit.model.js";
 import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
+import { NotificationService } from "../notifications/notification.service.js";
 
 // Helper to determine the Attachment schema 'type' from mimetype
 const getAttachmentType = (mimetype: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" => {
@@ -34,7 +35,7 @@ export class GrievanceService {
    * Determine the best officer to assign to a grievance based on workflow levels,
    * tagged sub-services, and wards (round-robin).
    */
-  static async autoAssignOfficer(subServiceId: string, ward?: string): Promise<string | null> {
+  static async autoAssignOfficer(subServiceId: string, subdivision?: string): Promise<string | null> {
     try {
       const subService = await SubService.findById(subServiceId).populate('service');
       if (!subService || !(subService as any).service || !(subService as any).service.department) return null;
@@ -59,8 +60,8 @@ export class GrievanceService {
           active: true
         };
         
-        if (ward) {
-          tagQuery.wards = ward;
+        if (subdivision) {
+          tagQuery.wards = subdivision;
         }
         
         const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
@@ -73,8 +74,8 @@ export class GrievanceService {
           "classification.subService": subServiceId,
           assignedOfficer: { $in: eligibleTags.map(t => t.officer) }
         };
-        if (ward) {
-          lastGrievanceQuery["address.villageOrWard"] = ward;
+        if (subdivision) {
+          lastGrievanceQuery["address.subdivision"] = subdivision;
         }
         
         const lastGrievance = await Grievance.findOne(lastGrievanceQuery)
@@ -187,16 +188,25 @@ export class GrievanceService {
 
     // Auto Assignment Logic
     const subServiceId = classification?.subService;
+    let autoAssignFailed = false;
+    let subdivision:string|undefined ;
     if (subServiceId) {
-      const ward = address?.villageOrWard;
-      const assignedOfficerId = await GrievanceService.autoAssignOfficer(subServiceId, ward);
+      subdivision = address?.subdivision ;
+      const assignedOfficerId = await GrievanceService.autoAssignOfficer(subServiceId, subdivision);
       if (assignedOfficerId) {
         payloadToCreate.assignedOfficer = assignedOfficerId;
         payloadToCreate.assignedAt = new Date();
+      } else {
+        autoAssignFailed = true;
       }
     }
 
     const newGrievance = await Grievance.create(payloadToCreate);
+
+    if (autoAssignFailed) {
+      // Tagging Gap Alert if no officer found for this subservice and ward
+      NotificationService.notifyTaggingGap(subServiceId, subdivision, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
+    }
 
     const officer:any = await User.findById(createdBy).populate("role").lean();
 
@@ -229,6 +239,9 @@ export class GrievanceService {
       }
     });
 
+    // Notify CCE of new complaint creation
+    NotificationService.notifyNewComplaint(newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
+
     if (newGrievance.assignedOfficer) {
       const assignedUser: any = await User.findById(newGrievance.assignedOfficer).populate("role").lean();
       if (assignedUser) {
@@ -244,6 +257,13 @@ export class GrievanceService {
             description: timelineTemplates.ASSIGNED(assignedUser?.role?.level || "Officer", assignedUser.name)
           }
         });
+        
+        // Notify officer of assignment
+        NotificationService.notifyOfficerAssignment(
+          newGrievance.assignedOfficer, 
+          newGrievance._id, 
+          newGrievance.grievanceId
+        ).catch(e => console.error(e));
       }
     }
 
