@@ -224,10 +224,29 @@ console.log(currentRoleSla,"currentRoleSla")
     console.error("[Cron Error] checkAndEscalateGrievances:", error);
   }
 };
+
+import { sendDailyFieldVisitReminders } from "./fieldVisitReminder.cron.js";
+
 export const initCronJobs = () => {
   console.log("[Cron] Initializing background jobs...");
-  // Run every 1 minute (60,000 ms)
+
+  // Escalation check — every 1 minute
   setInterval(async () => {
     await checkAndEscalateGrievances();
+  }, 60 * 1000);
+
+  // Field visit daily reminder — runs at 8:00 AM IST
+  let lastReminderDate = "";
+  setInterval(async () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const today = now.toDateString();
+
+    if (hours === 8 && minutes === 0 && lastReminderDate !== today) {
+      lastReminderDate = today;
+      console.log("[Cron] Running daily field visit reminders...");
+      await sendDailyFieldVisitReminders();
+    }
   }, 60 * 1000);
 };

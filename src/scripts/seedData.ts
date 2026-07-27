@@ -258,6 +258,22 @@ const servicesData = [
       { title: "High amount of Iron in Water related", titleHindi: "High amount of Iron in Water related", sla: 24, geoTagged: true, fieldVisit: true },
       { title: "Water testing related", titleHindi: "Water testing related", sla: 24, geoTagged: true, fieldVisit: true }
     ]
+  },
+  {
+    title: "General",
+    titleHindi: "General",
+    department: "Health Information Helpline",
+    subServices: [
+      { title: "Hospital service–related grievances", titleHindi: "Hospital service–related grievances", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Medicine/Drug availability issues at Health Facility", titleHindi: "Medicine/Drug availability issues at Health Facility", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Staff absence or behaviour complaints", titleHindi: "Staff absence or behaviour complaints", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Ambulance service–related complaints", titleHindi: "Ambulance service–related complaints", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Diagnostic service issues (tests, reports, availability)", titleHindi: "Diagnostic service issues (tests, reports, availability)", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Grievances regarding benefits under government health schemes", titleHindi: "Grievances regarding benefits under government health schemes", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Maternal and Child Health (MCH) service related Issues", titleHindi: "Maternal and Child Health (MCH) service related Issues", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Public health program–related grievances", titleHindi: "Public health program–related grievances", sla: 24, geoTagged: true, fieldVisit: true },
+      { title: "Ayushman Bharat scheme–related complaints", titleHindi: "Ayushman Bharat scheme–related complaints", sla: 24, geoTagged: true, fieldVisit: true }
+    ]
   }
 ];
 
@@ -554,93 +570,93 @@ const runSeed = async () => {
     const l2UserGrievance = await User.findOne({ email: "l2@example.com" });
     const districtPatna = await Demography.findOne({ name: "Patna" });
 
-    if (natureId && frequencyId && beneficiaryId && complaintSource && l1UserGrievance && l2UserGrievance && districtPatna && allSubServices.length > 0) {
-      for (let i = 0; i < 5; i++) {
-        const subSvc = allSubServices[i % allSubServices.length];
-        const gId = `BR-2026-00002${3 + i}`;
+    // if (natureId && frequencyId && beneficiaryId && complaintSource && l1UserGrievance && l2UserGrievance && districtPatna && allSubServices.length > 0) {
+    //   for (let i = 0; i < 5; i++) {
+    //     const subSvc = allSubServices[i % allSubServices.length];
+    //     const gId = `BR-2026-00002${3 + i}`;
         
-        let grievance = await Grievance.findOne({ grievanceId: gId });
-        if (!grievance) {
-          grievance = await Grievance.create({
-            citizenInfo: {
-              fullName: `Tarun Kumar ${i}`,
-              mobile: `830775537${5 + i}`,
-              alternateMobile: `830775537${5 + i}`,
-              email: `tkb8059${i}@gmail.com`,
-              preferredLanguage: "English"
-            },
-            classification: {
-              subService: subSvc._id,
-              nature: natureId,
-              subject: `Grievance about ${subSvc.title}`
-            },
-            evidence: {
-              occurrenceDate: new Date(),
-              frequency: frequencyId,
-              attachments: []
-            },
-            impact: {
-              affectedBeneficiary: beneficiaryId
-            },
-            communication: {
-              satisfactionSurveyConsent: true
-            },
-            grievanceId: gId,
-            channel: complaintSource._id,
-            assignedPriority: "PENDING",
-            status: "OPEN",
-            address: {
-              state: "Bihar",
-              district: districtPatna._id,
-              subdivision: "Munger Sadar",
-              pinCode: "800001"
-            },
-            escalationLevel: 0,
-            createdBy: l2UserGrievance._id,
-            assignedOfficer: l1UserGrievance._id,
-            geotaggedImages: []
-          });
+    //     let grievance = await Grievance.findOne({ grievanceId: gId });
+    //     if (!grievance) {
+    //       grievance = await Grievance.create({
+    //         citizenInfo: {
+    //           fullName: `Tarun Kumar ${i}`,
+    //           mobile: `830775537${5 + i}`,
+    //           alternateMobile: `830775537${5 + i}`,
+    //           email: `tkb8059${i}@gmail.com`,
+    //           preferredLanguage: "English"
+    //         },
+    //         classification: {
+    //           subService: subSvc._id,
+    //           nature: natureId,
+    //           subject: `Grievance about ${subSvc.title}`
+    //         },
+    //         evidence: {
+    //           occurrenceDate: new Date(),
+    //           frequency: frequencyId,
+    //           attachments: []
+    //         },
+    //         impact: {
+    //           affectedBeneficiary: beneficiaryId
+    //         },
+    //         communication: {
+    //           satisfactionSurveyConsent: true
+    //         },
+    //         grievanceId: gId,
+    //         channel: complaintSource._id,
+    //         assignedPriority: "PENDING",
+    //         status: "OPEN",
+    //         address: {
+    //           state: "Bihar",
+    //           district: districtPatna._id,
+    //           subdivision: "Munger Sadar",
+    //           pinCode: "800001"
+    //         },
+    //         escalationLevel: 0,
+    //         createdBy: l2UserGrievance._id,
+    //         assignedOfficer: l1UserGrievance._id,
+    //         geotaggedImages: []
+    //       });
           
-          await FieldVisit.create({
-            visitId: `FV-${gId}`,
-            grievance: grievance._id,
-            status: "SCHEDULED",
-            schedule: new Date(Date.now() + 86400000), // Next day
-            remark: "Initial visit scheduled",
-            logs: [{
-              action: "CREATED",
-              newValue: "SCHEDULED",
-              changedAt: new Date()
-            }]
-          });
+    //       await FieldVisit.create({
+    //         visitId: `FV-${gId}`,
+    //         grievance: grievance._id,
+    //         status: "SCHEDULED",
+    //         schedule: new Date(Date.now() + 86400000), // Next day
+    //         remark: "Initial visit scheduled",
+    //         logs: [{
+    //           action: "CREATED",
+    //           newValue: "SCHEDULED",
+    //           changedAt: new Date()
+    //         }]
+    //       });
 
-          await TimelineService.logEvent({
-            grievanceId: grievance._id as any,
-            type: "COMPLAINT_REGISTERED",
-            actor: {
-              name: "System",
-              role: "System",
-            },
-            metadata: {
-              description: timelineTemplates.COMPLAINT_REGISTERED(gId, complaintSource.title)
-            }
-          });
+    //       await TimelineService.logEvent({
+    //         grievanceId: grievance._id as any,
+    //         type: "COMPLAINT_REGISTERED",
+    //         actor: {
+    //           name: "System",
+    //           role: "System",
+    //         },
+    //         metadata: {
+    //           description: timelineTemplates.COMPLAINT_REGISTERED(gId, complaintSource.title)
+    //         }
+    //       });
 
-          await TimelineService.logEvent({
-            grievanceId: grievance._id as any,
-            type: "ASSIGNED",
-            actor: {
-              name: "System",
-              role: "System",
-            },
-            metadata: {
-              description: timelineTemplates.ASSIGNED(l1Role?.designationEnglish || "Officer", l1UserGrievance.name)
-            }
-          });
-        }
-      }
-      console.log("5 Grievances and Field Visits seeded.");
-    }
+    //       await TimelineService.logEvent({
+    //         grievanceId: grievance._id as any,
+    //         type: "ASSIGNED",
+    //         actor: {
+    //           name: "System",
+    //           role: "System",
+    //         },
+    //         metadata: {
+    //           description: timelineTemplates.ASSIGNED(l1Role?.designationEnglish || "Officer", l1UserGrievance.name)
+    //         }
+    //       });
+    //     }
+    //   }
+    //   console.log("5 Grievances and Field Visits seeded.");
+    // }
 
     console.log("Seeding complete!");
     process.exit(0);

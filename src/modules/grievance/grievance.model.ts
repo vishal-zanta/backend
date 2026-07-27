@@ -65,6 +65,7 @@ export interface IGrievance extends Document {
     assignedOfficer?: mongoose.Types.ObjectId;
     assignedAt?: Date;
     resolvedAt?: Date;
+    resolvedReason?: string;
     status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED" ;
     address?: {
       state?: string;
@@ -221,6 +222,9 @@ const GrievanceSchema = new Schema<IGrievance>(
       },
       resolvedAt: {
         type: Date,
+      },
+      resolvedReason: {
+        type: String,
       },
       status: {
         type: String,

@@ -1054,6 +1054,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     if (updateData.status === 'RESOLVED') {
       if (oldGrievance.status !== 'RESOLVED') {
         updateData.resolvedAt = new Date();
+        if (updateData.remarks) {
+          updateData.resolvedReason = updateData.remarks;
+        }
         // Notify CCE for feedback reminder
         NotificationService.notifyFeedbackReminder(id, oldGrievance.grievanceId || "N/A").catch(e => console.error(e));
       }
@@ -1226,6 +1229,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const updatePayload: any = { status };
     if (status === "RESOLVED" && oldGrievance.status !== "RESOLVED") {
       updatePayload.resolvedAt = new Date();
+      if (remarks) {
+        updatePayload.resolvedReason = remarks;
+      }
       // Notify CCE for feedback reminder
       NotificationService.notifyFeedbackReminder(id, oldGrievance.grievanceId || "N/A").catch(e => console.error(e));
     }
