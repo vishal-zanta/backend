@@ -4,6 +4,7 @@ import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { validateRequestFields } from '../../utils/helpers.js';
+import { SYSTEM_ROLE_LEVELS } from '../../config/roles.config.js';
 import { WorkflowLevel } from '../workflowLevel/workflowLevel.model.js';
 import { SlaConfig } from '../slaConfig/slaConfig.model.js';
 
@@ -56,6 +57,22 @@ export class RoleController {
       throw new ApiError({ status: 404, message: 'Role not found' });
     }
 
+    // System roles — only permissions and designations (English/Hindi) can be edited
+    if (SYSTEM_ROLE_LEVELS.includes(existingRole.level)) {
+      const allowedFields = ['permissions', 'designationEnglish', 'designationHindi'];
+      const disallowedFields = Object.keys(req.body).filter(f => !allowedFields.includes(f));
+      if (disallowedFields.length > 0) {
+        throw new ApiError({
+          status: 403,
+          message: `System role cannot be fully edited. Only permissions and designations can be updated.`
+        });
+      }
+
+      Object.assign(existingRole, req.body);
+      await existingRole.save();
+      return new ApiResponse({ res, status: 200, data: existingRole, message: 'Role updated successfully' });
+    }
+
     const newDepartment = req.body.department;
     
     if (newDepartment && newDepartment.toString() !== existingRole.department.toString()) {
@@ -79,21 +96,32 @@ export class RoleController {
 
   static deleteRole = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const role = await Role.findByIdAndUpdate(id, { active: false }, { new: true });
-    
-    if (!role) {
+
+    const existingRole = await Role.findById(id);
+    if (!existingRole) {
       throw new ApiError({ status: 404, message: 'Role not found' });
     }
 
+    // System roles cannot be deleted
+    if (SYSTEM_ROLE_LEVELS.includes(existingRole.level)) {
+      throw new ApiError({
+        status: 403,
+        message: `System role "${existingRole.designationEnglish}" cannot be deleted`
+      });
+    }
+
+    existingRole.active = false;
+    await existingRole.save();
+
     // Remove from workflow and SLA configs since it's deleted
     await WorkflowLevel.updateMany(
-      { "levels.role": role._id },
-      { $pull: { levels: { role: role._id } } }
+      { "levels.role": existingRole._id },
+      { $pull: { levels: { role: existingRole._id } } }
     );
 
     await SlaConfig.updateMany(
-      { "escalations.role": role._id },
-      { $pull: { escalations: { role: role._id } } }
+      { "escalations.role": existingRole._id },
+      { $pull: { escalations: { role: existingRole._id } } }
     );
 
     return new ApiResponse({ res, status: 200, message: 'Role deleted successfully' });
