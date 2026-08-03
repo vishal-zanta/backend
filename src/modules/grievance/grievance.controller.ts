@@ -574,7 +574,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           as: "districtDetails"
         }
       },
-      { $unwind: { path: "$districtDetails", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$districtDetails", preserveNullAndEmptyArrays: false } },
       {
         $project: {
           _id: 1,
