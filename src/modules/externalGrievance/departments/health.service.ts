@@ -168,6 +168,7 @@ export class HealthDepartmentService {
     }
 
   }
+  
   static async getMasterData(): Promise<any> {
     try {
       const response = await fetch('http://bihargrhelp.piramalswasthya.org/egov-mdms-service/v1/_search?tenantId=bh', {
