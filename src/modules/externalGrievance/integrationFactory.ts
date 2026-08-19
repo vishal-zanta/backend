@@ -1,4 +1,5 @@
 import { HealthDepartmentService } from "./departments/health.service.js";
+import { EducationDepartmentService } from "./departments/education.service.js";
 
 export class ExternalIntegrationService {
   
@@ -18,8 +19,9 @@ export class ExternalIntegrationService {
       return this.tokenCache[departmentCode];
     } 
     else if (departmentCode === "EDUCATION") {
-      console.log(`[IntegrationService] Using static token for EDUCATION...`);
-      this.tokenCache[departmentCode] = "mock-edu-api-key-456";
+      // Education uses static API key/secret via axios interceptors – no dynamic token needed
+      console.log(`[IntegrationService] Education uses static API key auth, no token exchange required.`);
+      this.tokenCache[departmentCode] = "education-static-key";
       return this.tokenCache[departmentCode];
     }
     
@@ -35,21 +37,8 @@ export class ExternalIntegrationService {
       return await HealthDepartmentService.createGrievance(payload, token);
     } 
     else if (departmentCode === "EDUCATION") {
-      const mappedPayload = {
-        complaint_data: payload,
-        source: "CRM"
-      };
-      
-      await new Promise(resolve => setTimeout(resolve, 200));
-      const externalId = `EDU-${Math.floor(Math.random() * 90000) + 10000}`;
-      
-      console.log(`[IntegrationService] Payload Sent:`, JSON.stringify(mappedPayload));
-      return {
-        complaintId: externalId,
-        mobile: payload.mobile, // Assuming payload has mobile
-        status: "OPEN"
-      };
-    } 
+      return await EducationDepartmentService.createGrievance(payload);
+    }
     else {
       throw new Error(`No integration setup for ${departmentCode}`);
     }
@@ -95,7 +84,7 @@ export class ExternalIntegrationService {
         return await HealthDepartmentService.getStatus(externalComplaintId, token);
       } 
       else if (departmentCode === "EDUCATION") {
-        return "RESOLVED";
+        return await EducationDepartmentService.getStatus(externalComplaintId);
       }
       return null;
     } catch (error: any) {
@@ -107,9 +96,13 @@ export class ExternalIntegrationService {
   /**
    * Fetch master data for a specific department
    */
-  static async fetchMasterData(departmentCode: string): Promise<any> {
+  static async fetchMasterData(departmentCode: string, type?: string, params?: Record<string, string | number>): Promise<any> {
     if (departmentCode === "HEALTH") {
       return await HealthDepartmentService.getMasterData();
+    }
+    if (departmentCode === "EDUCATION") {
+      const masterType = (type || 'categories') as any;
+      return await EducationDepartmentService.getMasterData(masterType, params);
     }
     throw new Error(`Master data not configured for department: ${departmentCode}`);
   }
@@ -121,7 +114,9 @@ export class ExternalIntegrationService {
     if (departmentCode === "HEALTH") {
       return await HealthDepartmentService.getDistrictData();
     }
+    if (departmentCode === "EDUCATION") {
+      return await EducationDepartmentService.getMasterData('districts');
+    }
     throw new Error(`District data not configured for department: ${departmentCode}`);
   }
 }
-

@@ -157,7 +157,14 @@ export class ExternalGrievanceController {
       throw new ApiError({ status: 400, message: "departmentCode is required" });
     }
 
-    const data = await ExternalIntegrationService.fetchMasterData(String(departmentCode).toUpperCase());
+    // Extract optional `type` and remaining query params for departments like Education
+    const { type, ...queryParams } = req.query as Record<string, string>;
+
+    const data = await ExternalIntegrationService.fetchMasterData(
+      String(departmentCode).toUpperCase(),
+      type,
+      queryParams as Record<string, string | number>,
+    );
     
     return new ApiResponse({
       res,
