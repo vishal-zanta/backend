@@ -154,6 +154,15 @@ export class EducationDepartmentService {
       const { data } = await educationAxios.post('/integration/grievance', payload);
 
       if (data?.status !== 'success' || !data?.data?.grievanceId) {
+        if (data?.status === 'failure') {
+          let errorMsg = data.message || 'External API validation failed';
+          if (data.details && Array.isArray(data.details)) {
+            const detailMessages = data.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+            errorMsg += ` (${detailMessages})`;
+          }
+          throw new Error(errorMsg);
+        }
+        
         throw new Error(
           `Unexpected response from Education create API: ${JSON.stringify(data)}`,
         );
@@ -168,6 +177,18 @@ export class EducationDepartmentService {
       };
     } catch (error: any) {
       console.error('[EducationService] Create Grievance Error:', error?.message);
+      
+      // If the external API throws a 400 with a failure payload
+      if (error.isAxiosError && error.response?.data?.status === 'failure') {
+        const errData = error.response.data;
+        let errorMsg = errData.message || 'External API validation failed';
+        if (errData.details && Array.isArray(errData.details)) {
+          const detailMessages = errData.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+          errorMsg += ` (${detailMessages})`;
+        }
+        throw new Error(errorMsg);
+      }
+      
       throw error;
     }
   }
