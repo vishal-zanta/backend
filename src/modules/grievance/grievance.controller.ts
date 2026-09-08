@@ -37,11 +37,7 @@ export class GrievanceController {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.nature: Reference does not exist" });
       }));
     }
-    if (data.evidence?.frequency) {
-      checks.push(Option.exists({ _id: data.evidence.frequency }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid evidence.frequency: Reference does not exist" });
-      }));
-    }
+
     if (data.address?.district) {
       checks.push(Demography.exists({ _id: data.address.district }).then(exists => {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid address.district: Reference does not exist" });

@@ -31,12 +31,9 @@ export interface IGrievance extends Document {
     subService: mongoose.Types.ObjectId;
     scheme?: string;
     nature: mongoose.Types.ObjectId;
-    subject: string;
   };
   evidence: {
     details?: string;
-    occurrenceDate?: Date;
-    frequency: mongoose.Types.ObjectId;
     attachments?: IAttachment[];
   };
   impact?: {
@@ -145,20 +142,10 @@ const GrievanceSchema = new Schema<IGrievance>(
         ref: "Option",
         required: true,
       },
-      subject: {
-        type: String,
-        required: true,
-      },
     },
     evidence: {
       details: {
         type: String,
-      },
-      occurrenceDate: Date,
-      frequency: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Option",
-        required: true,
       },
       attachments: [AttachmentSchema],
     },

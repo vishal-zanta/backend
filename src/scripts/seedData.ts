@@ -592,8 +592,6 @@ const runSeed = async () => {
     //           subject: `Grievance about ${subSvc.title}`
     //         },
     //         evidence: {
-    //           occurrenceDate: new Date(),
-    //           frequency: frequencyId,
     //           attachments: []
     //         },
     //         impact: {

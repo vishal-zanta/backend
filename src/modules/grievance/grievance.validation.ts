@@ -29,12 +29,9 @@ export const createGrievanceSchema = z.object({
     subService: mongoId,
     scheme: optionalText,
     nature: mongoId,
-    subject: optionalText,
   }, { message: "classification is required" }),
   evidence: z.object({
     details: optionalText,
-    occurrenceDate: z.string().or(z.date()).optional(), 
-    frequency: mongoId,
   }, { message: "evidence is required" }),
   impact: z.object({
     affectedBeneficiary: mongoId,
