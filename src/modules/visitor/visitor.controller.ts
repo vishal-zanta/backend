@@ -23,12 +23,12 @@ export class VisitorController {
   static saveVisitor = asyncHandler(async (req: Request, res: Response) => {
     const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const userAgent = req.headers['user-agent'];
-    const { source } = req.body;
+  
 
     const visitor = await Visitor.create({
       ipAddress: typeof ipAddress === 'string' ? ipAddress : Array.isArray(ipAddress) ? ipAddress[0] : undefined,
       userAgent,
-      source,
+      source:"website",
     });
 
     const count = await Visitor.countDocuments();
