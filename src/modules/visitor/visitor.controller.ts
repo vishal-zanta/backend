@@ -25,11 +25,30 @@ export class VisitorController {
     const userAgent = req.headers['user-agent'];
   
 
-    const visitor = await Visitor.create({
-      ipAddress: typeof ipAddress === 'string' ? ipAddress : Array.isArray(ipAddress) ? ipAddress[0] : undefined,
-      userAgent,
-      source:"website",
-    });
+    const ipStr = typeof ipAddress === 'string' ? ipAddress : Array.isArray(ipAddress) ? ipAddress[0] : undefined;
+
+    let visitor;
+    if (ipStr) {
+      // Upsert: Create if it doesn't exist, update if it does.
+      visitor = await Visitor.findOneAndUpdate(
+        { ipAddress: ipStr },
+        { 
+          $set: { 
+            userAgent, 
+            source: "website",
+            visitedAt: new Date()
+          } 
+        },
+        { upsert: true, new: true }
+      );
+    } else {
+      // Fallback if no IP is detected
+      visitor = await Visitor.create({
+        userAgent,
+        source: "website",
+        visitedAt: new Date()
+      });
+    }
 
     const count = await Visitor.countDocuments();
 
