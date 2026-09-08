@@ -298,13 +298,17 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt feedbackText rating assignedOfficer")
+      .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt feedbackText rating assignedOfficer")
+      .populate("classification.nature")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
         populate: {
           path: "service",
-          select: "title titleHindi department"
+          select: "title titleHindi department",
+          populate: {
+            path: "department"
+          }
         }
       })
       .populate({
@@ -350,7 +354,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           path: "department"
         }
       }
-    }).populate({
+    })
+    .populate("classification.nature")
+    .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
@@ -696,13 +702,17 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
+      .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
+      .populate("classification.nature")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
         populate: {
           path: "service",
-          select: "title titleHindi department"
+          select: "title titleHindi department",
+          populate: {
+            path: "department"
+          }
         }
       })
       .populate("address.district", "name nameHindi")
@@ -873,13 +883,17 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService address status assignedPriority createdAt assignedAt")
+      .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt assignedAt")
+      .populate("classification.nature")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
         populate: {
           path: "service",
-          select: "title titleHindi department"
+          select: "title titleHindi department",
+          populate: {
+            path: "department"
+          }
         }
       })
       .populate("address.district", "name nameHindi")
@@ -1419,7 +1433,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           path: "department"
         }
       }
-    }).populate({
+    })
+    .populate("classification.nature")
+    .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
@@ -1467,7 +1483,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           path: "department"
         }
       }
-    }).populate({
+    })
+    .populate("classification.nature")
+    .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
