@@ -26,6 +26,16 @@ export interface IGrievance extends Document {
     alternateMobile?: string;
     email?: string;
     preferredLanguage?: string;
+    address?: {
+      addressLine?: string;
+      city?: string;
+      state?: string;
+      district?: string;
+      subdivision?: string;
+      panchayat?: string;
+      thana?: string;
+      pincode?: string;
+    };
   };
   classification: {
     subService: mongoose.Types.ObjectId;
@@ -54,28 +64,28 @@ export interface IGrievance extends Document {
     satisfactionSurveyConsent?: boolean;
   };
 
-    grievanceId: string;
-    createdBy?: mongoose.Types.ObjectId;
-    sourceApiKey?: mongoose.Types.ObjectId;
-    channel?: mongoose.Types.ObjectId;
-    assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL"|"PENDING";
-    assignedOfficer?: mongoose.Types.ObjectId;
-    assignedAt?: Date;
-    resolvedAt?: Date;
-    resolvedReason?: string;
-    status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED" ;
-    address?: {
-      state?: string;
-      district: mongoose.Types.ObjectId;
-      subdivision?: string;
-      villageOrWard?: string;
-      pinCode?: string;
-      landmark?: string;
-    };
-    escalationLevel?: number;
-    geotaggedImages?: IGeotaggedImage[];
-    slaWarningSent?: boolean;
-  
+  grievanceId: string;
+  createdBy?: mongoose.Types.ObjectId;
+  sourceApiKey?: mongoose.Types.ObjectId;
+  channel?: mongoose.Types.ObjectId;
+  assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL" | "PENDING";
+  assignedOfficer?: mongoose.Types.ObjectId;
+  assignedAt?: Date;
+  resolvedAt?: Date;
+  resolvedReason?: string;
+  status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
+  location?: {
+    division: string;
+    district: string;
+    subdivision: string;
+    block: string;
+    panchayat: string;
+    pinCode: string;
+  };
+  escalationLevel?: number;
+  geotaggedImages?: IGeotaggedImage[];
+  slaWarningSent?: boolean;
+
   rating?: number;
   feedbackText?: string;
   reOpenReason?: string;
@@ -129,12 +139,22 @@ const GrievanceSchema = new Schema<IGrievance>(
       alternateMobile: String,
       email: String,
       preferredLanguage: String,
+      address: {
+        addressLine: String,
+        city: String,
+        state: String,
+        district: String,
+        subdivision: String,
+        panchayat: String,
+        thana: String,
+        pincode: String,
+      },
     },
     classification: {
       subService: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubService",
-        required: true,
+        // required: true,
       },
       scheme: String,
       nature: {
@@ -225,17 +245,13 @@ const GrievanceSchema = new Schema<IGrievance>(
         ],
         default: "OPEN",
       },
-      address: {
-        state: String,
-        district: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Demography',
-          required: true
-        },
+      location: {
+        division: String,
+        district: String,
         subdivision: String,
-        villageOrWard: String,
+        block: String,
+        panchayat: String,
         pinCode: String,
-        landmark: String,
       },
       escalationLevel: {
       type: Number,

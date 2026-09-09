@@ -8,6 +8,7 @@ import { User } from "../users/user.model.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
 import { SubService } from "../services/subService.model.js";
 import { FieldVisit } from "../fieldVisit/fieldVisit.model.js";
+import { Citizen } from "../citizen/citizen.model.js";
 import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 import { NotificationService } from "../notifications/notification.service.js";
@@ -112,14 +113,14 @@ export class GrievanceService {
     evidence: any;
     impact: any;
     communication: any;
-    address: any;
+    location?: any;
     citizenInfo: any;
     files?: Express.Multer.File[];
     createdBy?: ObjectId;
     sourceApiKey?: ObjectId;
     channel?: any;
   }) {
-    const { citizen, classification, evidence, impact, communication, address, citizenInfo, files, createdBy, sourceApiKey, channel } = payload;
+    const { citizen, classification, evidence, impact, communication, location, citizenInfo, files, createdBy, sourceApiKey, channel } = payload;
 
     // console.log("createdby ",createdBy)
     // Handle File Uploads
@@ -147,7 +148,7 @@ export class GrievanceService {
       evidence.attachments = attachments;
     }
 
-    const stateName = address?.state;
+    const stateName = citizenInfo?.address?.state;
     const stateCode = getStateCode(stateName);
     const year = new Date().getFullYear();
     const seq = await getNextSequenceValue(`grievance_${year}`);
@@ -175,7 +176,7 @@ export class GrievanceService {
       impact,
       communication,
       grievanceId,
-      address,
+      location,
       status: "OPEN",
       createdBy,
       sourceApiKey,
@@ -191,7 +192,7 @@ export class GrievanceService {
     let autoAssignFailed = false;
     let subdivision:string|undefined ;
     if (subServiceId) {
-      subdivision = address?.subdivision ;
+      subdivision = location?.subdivision ;
       const assignedOfficerId = await GrievanceService.autoAssignOfficer(subServiceId, subdivision);
       if (assignedOfficerId) {
         payloadToCreate.assignedOfficer = assignedOfficerId;
@@ -203,6 +204,9 @@ export class GrievanceService {
 
     const newGrievance = await Grievance.create(payloadToCreate);
 
+    if (citizen && citizen._id && citizenInfo?.address) {
+      await Citizen.findByIdAndUpdate(citizen._id, { address: citizenInfo.address }).catch(e => console.error("Failed to update citizen address", e));
+    }
     if (autoAssignFailed) {
       // Tagging Gap Alert if no officer found for this subservice and ward
       NotificationService.notifyTaggingGap(subServiceId, subdivision, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));

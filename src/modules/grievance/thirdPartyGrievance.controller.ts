@@ -17,7 +17,7 @@ import { Service } from '../services/service.model.js';
 export class ThirdPartyGrievanceController {
   
   static registerGrievance = asyncHandler(async (req: Request, res: Response) => {
-    let classification, evidence, impact, communication, address, citizenInfo;
+    let classification, evidence, impact, communication, location, citizenInfo;
     const apiKeyDoc = (req as any).apiKey;
     
     try {
@@ -25,13 +25,13 @@ export class ThirdPartyGrievanceController {
       evidence = typeof req.body.evidence === "string" ? JSON.parse(req.body.evidence) : req.body.evidence;
       impact = typeof req.body.impact === "string" ? JSON.parse(req.body.impact) : req.body.impact;
       communication = typeof req.body.communication === "string" ? JSON.parse(req.body.communication) : req.body.communication;
-      address = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
+      location = typeof req.body.location === "string" ? JSON.parse(req.body.location) : req.body.location;
       citizenInfo = typeof req.body.citizenInfo === "string" ? JSON.parse(req.body.citizenInfo) : req.body.citizenInfo;
     } catch (e) {
       throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
     }
 
-    const parsedBody = { classification, evidence, impact, communication, address, citizenInfo };
+    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
     const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
     if (!validation.success) {
       throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
@@ -42,6 +42,7 @@ export class ThirdPartyGrievanceController {
       throw new ApiError({ status: 400, message: "channel is required." });
     }
 
+    // Attempt to link to an existing Citizen profile if one exists for this mobile number
     let citizen;
     try {
       const { Citizen } = await import("../citizen/citizen.model.js");
@@ -56,7 +57,7 @@ export class ThirdPartyGrievanceController {
       evidence,
       impact,
       communication,
-      address,
+      location,
       citizenInfo,
       channel,
       files: req.files as Express.Multer.File[] | undefined,

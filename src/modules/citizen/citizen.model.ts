@@ -1,20 +1,28 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICitizen extends Document {
-
   fullName: string;
   mobile: string;
   alternateMobile?: string | null;
   email?: string | null;
   preferredLanguage?: string;
   additionalInfo?: any;
+  address?: {
+    addressLine?: string;
+    city?: string;
+    state?: string;
+    district?: string;
+    subdivision?: string;
+    panchayat?: string;
+    thana?: string;
+    pincode?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
 
 const CitizenSchema = new Schema<ICitizen>(
   {
-    
       fullName: {
         type: String,
         trim: true,
@@ -45,6 +53,17 @@ const CitizenSchema = new Schema<ICitizen>(
       additionalInfo: {
         type: mongoose.Schema.Types.Mixed,
         default: {},
+      },
+
+      address: {
+        addressLine: String,
+        city: String,
+        state: String,
+        district: String,
+        subdivision: String,
+        panchayat: String,
+        thana: String,
+        pincode: String,
       },
     
   },
