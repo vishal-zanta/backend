@@ -4,9 +4,13 @@ import { upload } from "../../middlewares/uploadMiddleware.js";
 import { citizenAuthProtect } from "../../middlewares/citizen.middleware.js";
 import { authProtect } from "../../middlewares/authMiddleware.js";
 import { checkPermission } from "../../middlewares/permissionMiddleware.js";
-import { createLimiter } from "../../middlewares/rateLimiter.js";
+import { createLimiter, publicStatusLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = Router();
+
+// Get single grievance details for public citizen (Rate limited)
+router.get("/citizen/public/status/:id", publicStatusLimiter, GrievanceController.getPublicGrievanceStatus);
+
 
 
 router.post("/citizen",  citizenAuthProtect, createLimiter, upload.any('grievance'),  GrievanceController.createGrievance);

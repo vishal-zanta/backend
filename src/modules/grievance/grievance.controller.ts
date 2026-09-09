@@ -10,6 +10,7 @@ import { NotificationService } from "../notifications/notification.service.js";
 import exifr from "exifr";
 
 import { GrievanceService } from "./grievance.service.js";
+import { CaptchaService } from "../captcha/captcha.service.js";
 import { SubService } from "../services/subService.model.js";
 import { Service } from "../services/service.model.js";
 import { Department } from "../departments/department.model.js";
@@ -1551,4 +1552,78 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     });
   });
 
+
+
+  /**
+   * Public API to get grievance status with captcha
+   */
+  static getPublicGrievanceStatus = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    const { captchaId, captchaValue } = req.query as { captchaId?: string; captchaValue?: string };
+
+    if (!captchaId || !captchaValue) {
+      throw new ApiError({ status: 400, message: "Both captchaId and captchaValue are required." });
+    }
+
+    // Verify Captcha
+    try {
+      const isValid = await CaptchaService.verifyCaptcha(captchaId, captchaValue);
+      if (!isValid) {
+        throw new Error("Invalid Captcha");
+      }
+    } catch (error: any) {
+      throw new ApiError({ status: 400, message: error.message || "Invalid Captcha" });
+    }
+
+
+    const grievance = await Grievance.findOne({ grievanceId: id })
+      .select("grievanceId status classification citizenInfo assignedOfficer createdAt")
+      .populate({
+        path: "classification.service",
+        select: "title titleHindi"
+      })
+      .populate({
+        path: "assignedOfficer",
+        select: "name"
+      });
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    const timeline = await TimelineService.getTimelineHistory(grievance._id.toString());
+
+    
+    
+    let maskedCitizenInfo = grievance.citizenInfo ? JSON.parse(JSON.stringify(grievance.citizenInfo)) : null;
+    
+    if (maskedCitizenInfo) {
+      if (maskedCitizenInfo.mobile) {
+        const mob = maskedCitizenInfo.mobile;
+        maskedCitizenInfo.mobile = mob.length > 4 ? "X".repeat(mob.length - 4) + mob.slice(-4) : mob;
+      }
+      if (maskedCitizenInfo.alternateMobile) {
+        const altMob = maskedCitizenInfo.alternateMobile;
+        maskedCitizenInfo.alternateMobile = altMob.length > 4 ? "X".repeat(altMob.length - 4) + altMob.slice(-4) : altMob;
+      }
+    }
+
+    // Format response to strictly include required fields only
+    const responseData = {
+      grievanceId: grievance.grievanceId,
+      status: grievance.status,
+      service: grievance.classification?.service,
+      citizenInfo: maskedCitizenInfo,
+      assignedOfficer: grievance.assignedOfficer,
+      timeline
+    };
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: responseData,
+      message: "Grievance status retrieved successfully",
+    });
+  });
 }
