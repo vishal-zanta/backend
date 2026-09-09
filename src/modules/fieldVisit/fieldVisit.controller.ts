@@ -150,13 +150,13 @@ export class FieldVisitController {
             },
             {$lookup:{
                    from: 'demographies',
-          localField: 'grievance.address.district',
+          localField: 'grievance.location.district',
           foreignField: '_id',
-          as: 'grievance.address.district'
+          as: 'grievance.location.district'
 
             }
           },
-          {$unwind:"$grievance.address.district"}
+          {$unwind:"$grievance.location.district"}
           ]
         }
       }

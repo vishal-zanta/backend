@@ -317,7 +317,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt feedbackText rating assignedOfficer")
+      .select("grievanceId classification.subService classification.nature location status assignedPriority createdAt feedbackText rating assignedOfficer")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature")
@@ -340,7 +340,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           select: "_id level designationEnglish designationHindi"
         }
       })
-      .populate("address.district", "name nameHindi")
+      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -385,7 +385,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -587,7 +587,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       { $match: { createdAt: { $gte: currentStart, $lt: now } } },
       {
         $group: {
-          _id: { $ifNull: ["$address.district", "Unknown"] },
+          _id: { $ifNull: ["$location.district", "Unknown"] },
           total: { $sum: 1 },
           resolved: { $sum: { $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0] } },
           pending: { $sum: { $cond: [{ $eq: ["$status", "OPEN"] }, 1, 0] } },
@@ -725,7 +725,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
+      .select("grievanceId classification.subService classification.nature location status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature")
@@ -740,7 +740,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           }
         }
       })
-      .populate("address.district", "name nameHindi")
+      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .populate({
         path: "assignedOfficer",
         select: "name role",
@@ -908,7 +908,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt assignedAt")
+      .select("grievanceId classification.subService classification.nature location status assignedPriority createdAt assignedAt")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature")
@@ -923,7 +923,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           }
         }
       })
-      .populate("address.district", "name nameHindi")
+      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit)
@@ -1470,7 +1470,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1522,7 +1522,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });

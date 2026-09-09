@@ -131,9 +131,9 @@ function buildBaseMatch(district: string | undefined, bounds: DateBounds): Recor
 
   if (district && district.toLowerCase() !== "all") {
     if (mongoose.Types.ObjectId.isValid(district.trim())) {
-      match["address.district"] = new mongoose.Types.ObjectId(district.trim());
+      match["location.district"] = new mongoose.Types.ObjectId(district.trim());
     } else {
-      match["address.district"] = {
+      match["location.district"] = {
         $regex: `^${escapeRegex(district.trim())}$`,
         $options: "i",
       };
@@ -181,7 +181,7 @@ async function getSummaryReport(match: Record<string, unknown>) {
     { $match: match },
     {
       $group: {
-        _id: { $ifNull: ["$address.district", "Unknown"] },
+        _id: { $ifNull: ["$location.district", "Unknown"] },
         ...statusCounters(),
       },
     },
@@ -379,7 +379,7 @@ async function getUlbWiseReport(match: Record<string, unknown>, bounds: DateBoun
     urbanNames.length > 0
       ? {
           $or: urbanNames.map((name) => ({
-            "address.district": {
+            "location.district": {
               $regex: `^${escapeRegex(name)}$`,
               $options: "i",
             },
@@ -396,11 +396,11 @@ async function getUlbWiseReport(match: Record<string, unknown>, bounds: DateBoun
         _id: {
           ulb: {
             $ifNull: [
-              "$address.subdivision",
-              { $ifNull: ["$address.villageOrWard", "Unknown"] },
+              "$location.subdivision",
+              { $ifNull: ["$location.panchayat", "Unknown"] },
             ],
           },
-          district: { $ifNull: ["$address.district", "Unknown"] },
+          district: { $ifNull: ["$location.district", "Unknown"] },
         },
         complaints: { $sum: 1 },
         slaCompliant: {
@@ -439,8 +439,8 @@ async function getUlbWiseReport(match: Record<string, unknown>, bounds: DateBoun
     createdAt: { $gte: prevBounds.from, $lte: prevBounds.to },
     ...districtFilter,
   };
-  if (match["address.district"]) {
-    prevUlbMatch["address.district"] = match["address.district"];
+  if (match["location.district"]) {
+    prevUlbMatch["location.district"] = match["location.district"];
   }
 
   const prevRows = await Grievance.aggregate([
@@ -450,11 +450,11 @@ async function getUlbWiseReport(match: Record<string, unknown>, bounds: DateBoun
         _id: {
           ulb: {
             $ifNull: [
-              "$address.subdivision",
-              { $ifNull: ["$address.villageOrWard", "Unknown"] },
+              "$location.subdivision",
+              { $ifNull: ["$location.panchayat", "Unknown"] },
             ],
           },
-          district: { $ifNull: ["$address.district", "Unknown"] },
+          district: { $ifNull: ["$location.district", "Unknown"] },
         },
         complaints: { $sum: 1 },
       },
@@ -519,7 +519,7 @@ async function getBlockWiseReport(match: Record<string, unknown>) {
     ruralNames.length > 0
       ? {
           $or: ruralNames.map((name) => ({
-            "address.district": {
+            "location.district": {
               $regex: `^${escapeRegex(name)}$`,
               $options: "i",
             },
@@ -536,11 +536,11 @@ async function getBlockWiseReport(match: Record<string, unknown>) {
         _id: {
           block: {
             $ifNull: [
-              "$address.subdivision",
-              { $ifNull: ["$address.villageOrWard", "Unknown"] },
+              "$location.subdivision",
+              { $ifNull: ["$location.panchayat", "Unknown"] },
             ],
           },
-          district: { $ifNull: ["$address.district", "Unknown"] },
+          district: { $ifNull: ["$location.district", "Unknown"] },
         },
         ...statusCounters(),
       },
@@ -577,8 +577,8 @@ async function getBlockWiseReport(match: Record<string, unknown>) {
 
 async function getIvrStatsReport(match: Record<string, unknown>) {
   // IVR is not district-scoped — keep only the date window
-  const { ["address.district"]: _districtIgnored, ...dateMatch } = match as {
-    "address.district"?: unknown;
+  const { ["location.district"]: _districtIgnored, ...dateMatch } = match as {
+    "location.district"?: unknown;
     createdAt?: unknown;
   };
   const ivrSource = await ComplaintSource.findOne({

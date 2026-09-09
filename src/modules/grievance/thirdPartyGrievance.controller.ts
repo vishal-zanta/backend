@@ -85,7 +85,7 @@ export class ThirdPartyGrievanceController {
     
     if (division) {
       const divisionIds = (division as string).split(',').map(id => id.trim());
-      query['address.district'] = { $in: divisionIds };
+      query['location.district'] = { $in: divisionIds };
     }
 
     let allowedSubServiceIds: string[] | null = null;
@@ -145,7 +145,7 @@ export class ThirdPartyGrievanceController {
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.subService", "title")
-      .populate("address.district", "name")
+      .populate("location.district", "name").populate("citizenInfo.address.district", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -190,7 +190,7 @@ export class ThirdPartyGrievanceController {
       populate: {
         path: "role"
       }
-    }).populate("address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found" });
