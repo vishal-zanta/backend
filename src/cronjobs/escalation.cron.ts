@@ -134,7 +134,7 @@ console.log(currentRoleSla,"currentRoleSla")
           active: true
         };
         
-        const ward = grievance.address?.villageOrWard;
+        const ward = grievance.location?.panchayat;
         if (ward) {
           tagQuery.wards = ward;
         }

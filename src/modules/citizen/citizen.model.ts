@@ -11,7 +11,7 @@ export interface ICitizen extends Document {
     addressLine?: string;
     city?: string;
     state?: string;
-    district?: string;
+    district?: mongoose.Types.ObjectId;
     subdivision?: string;
     panchayat?: string;
     thana?: string;
@@ -59,7 +59,10 @@ const CitizenSchema = new Schema<ICitizen>(
         addressLine: String,
         city: String,
         state: String,
-        district: String,
+        district: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Demography',
+        },
         subdivision: String,
         panchayat: String,
         thana: String,

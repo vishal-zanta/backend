@@ -30,7 +30,7 @@ export interface IGrievance extends Document {
       addressLine?: string;
       city?: string;
       state?: string;
-      district?: string;
+      district?: mongoose.Types.ObjectId;
       subdivision?: string;
       panchayat?: string;
       thana?: string;
@@ -38,6 +38,8 @@ export interface IGrievance extends Document {
     };
   };
   classification: {
+    department: mongoose.Types.ObjectId;
+    service: mongoose.Types.ObjectId;
     subService: mongoose.Types.ObjectId;
     scheme?: string;
     nature: mongoose.Types.ObjectId;
@@ -76,7 +78,7 @@ export interface IGrievance extends Document {
   status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
   location?: {
     division: string;
-    district: string;
+    district: mongoose.Types.ObjectId;
     subdivision: string;
     block: string;
     panchayat: string;
@@ -143,7 +145,10 @@ const GrievanceSchema = new Schema<IGrievance>(
         addressLine: String,
         city: String,
         state: String,
-        district: String,
+        district: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Demography',
+        },
         subdivision: String,
         panchayat: String,
         thana: String,
@@ -151,6 +156,16 @@ const GrievanceSchema = new Schema<IGrievance>(
       },
     },
     classification: {
+      department: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Department",
+        required: true,
+      },
+      service: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Service",
+        required: true,
+      },
       subService: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubService",
@@ -247,7 +262,10 @@ const GrievanceSchema = new Schema<IGrievance>(
       },
       location: {
         division: String,
-        district: String,
+        district: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Demography',
+        },
         subdivision: String,
         block: String,
         panchayat: String,

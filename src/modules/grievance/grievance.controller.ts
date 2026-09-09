@@ -11,6 +11,8 @@ import exifr from "exifr";
 
 import { GrievanceService } from "./grievance.service.js";
 import { SubService } from "../services/subService.model.js";
+import { Service } from "../services/service.model.js";
+import { Department } from "../departments/department.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 import { TimelineService } from "../timeline/timeline.service.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
@@ -27,6 +29,16 @@ export class GrievanceController {
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
     
+    if (data.classification?.department) {
+      checks.push(Department.exists({ _id: data.classification.department }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.department: Reference does not exist" });
+      }));
+    }
+    if (data.classification?.service) {
+      checks.push(Service.exists({ _id: data.classification.service }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.service: Reference does not exist" });
+      }));
+    }
     if (data.classification?.subService) {
       checks.push(SubService.exists({ _id: data.classification.subService }).then(exists => {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.subService: Reference does not exist" });
@@ -35,6 +47,18 @@ export class GrievanceController {
     if (data.classification?.nature) {
       checks.push(Option.exists({ _id: data.classification.nature }).then(exists => {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.nature: Reference does not exist" });
+      }));
+    }
+
+    if (data.location?.district) {
+      checks.push(Demography.exists({ _id: data.location.district }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.district: Reference does not exist" });
+      }));
+    }
+    
+    if (data.citizenInfo?.address?.district) {
+      checks.push(Demography.exists({ _id: data.citizenInfo.address.district }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.district: Reference does not exist" });
       }));
     }
 
@@ -291,6 +315,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
       .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt feedbackText rating assignedOfficer")
+      .populate("classification.department")
+      .populate("classification.service")
       .populate("classification.nature")
       .populate({
         path: "classification.subService",
@@ -347,6 +373,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         }
       }
     })
+    .populate("classification.department")
+    .populate("classification.service")
     .populate("classification.nature")
     .populate({
       path: "assignedOfficer",
@@ -695,6 +723,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const grievances = await Grievance.find(query)
       .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
+      .populate("classification.department")
+      .populate("classification.service")
       .populate("classification.nature")
       .populate({
         path: "classification.subService",
@@ -876,6 +906,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const grievances = await Grievance.find(query)
       .select("grievanceId classification.subService classification.nature address status assignedPriority createdAt assignedAt")
+      .populate("classification.department")
+      .populate("classification.service")
       .populate("classification.nature")
       .populate({
         path: "classification.subService",
@@ -1426,6 +1458,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         }
       }
     })
+    .populate("classification.department")
+    .populate("classification.service")
     .populate("classification.nature")
     .populate({
       path: "assignedOfficer",
@@ -1476,6 +1510,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         }
       }
     })
+    .populate("classification.department")
+    .populate("classification.service")
     .populate("classification.nature")
     .populate({
       path: "assignedOfficer",

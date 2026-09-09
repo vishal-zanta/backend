@@ -28,7 +28,7 @@ const addressSchema = z.object({
   addressLine: z.string().min(1, "Address details are required"),
   city: z.string().optional(),
   state: z.string().optional(),
-  district: z.string().min(1, "District is required"),
+  district: mongoId,
   subdivision: z.string().min(1, "Block is required"),
   panchayat: z.string().min(1, "Panchayat is required"),
   thana: z.string().min(1, "Thana is required"),
@@ -55,8 +55,8 @@ export const createGrievanceSchema = z.object({
   classification: z.object({
     subService: z.string().min(1, "Sub-service is required"),
     nature: z.string().min(1, "Grievance type is required"),
-    service: z.any(),
-    department: z.any(),
+    service: mongoId,
+    department: mongoId,
   }),
   evidence: z.object({
     details: z.string().optional(),
@@ -77,7 +77,7 @@ export const createGrievanceSchema = z.object({
   address: addressSchema,
   location: z.object({
     division: z.string().min(1, "Division is required"),
-    district: z.string().min(1, "District is required"),
+    district: mongoId,
     subdivision: z.string().min(1, "Block is required"),
     block: z.string().min(1, "Block is required"),
     panchayat: z.string().min(1, "Panchayat is required"),

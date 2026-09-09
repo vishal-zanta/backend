@@ -141,6 +141,8 @@ export class ThirdPartyGrievanceController {
 
     const grievances = await Grievance.find(query)
       .select("grievanceId status assignedPriority createdAt updatedAt citizenInfo")
+      .populate("classification.department")
+      .populate("classification.service")
       .populate("classification.subService", "title")
       .populate("address.district", "name")
       .sort({ createdAt: -1 })
@@ -178,7 +180,10 @@ export class ThirdPartyGrievanceController {
           path: "department"
         }
       }
-    }).populate({
+    })
+    .populate("classification.department")
+    .populate("classification.service")
+    .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
