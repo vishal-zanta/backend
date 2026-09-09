@@ -82,7 +82,7 @@ export interface IGrievance extends Document {
     subdivision: string;
     block: string;
     panchayat: string;
-    pinCode: string;
+    pincode: string;
   };
   escalationLevel?: number;
   geotaggedImages?: IGeotaggedImage[];
@@ -269,7 +269,7 @@ const GrievanceSchema = new Schema<IGrievance>(
         subdivision: String,
         block: String,
         panchayat: String,
-        pinCode: String,
+        pincode: String,
       },
       escalationLevel: {
       type: Number,

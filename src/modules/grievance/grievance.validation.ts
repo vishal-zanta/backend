@@ -49,39 +49,39 @@ export const createGrievanceSchema = z.object({
       .optional()
       .or(z.literal("")),
     email: z.string().email("Enter a valid email").optional().or(z.literal("")),
-    preferredLanguage: z.string().min(1, "Preferred language is required"),
+    // preferredLanguage: z.string().min(1, "Preferred language is required"),
     address: addressSchema,
   }),
   classification: z.object({
-    subService: z.string().min(1, "Sub-service is required"),
+    // subService: z.string().min(1, "Sub-service is required"),
     nature: z.string().min(1, "Grievance type is required"),
     service: mongoId,
     department: mongoId,
   }),
   evidence: z.object({
     details: z.string().optional(),
-  }),
+  }).optional(),
   impact: z.object({
     affectedBeneficiary: z.string().min(1, "Affected beneficiary is required"),
     vulnerability: z.object({
-      seniorCitizen: z.boolean().optional(),
-      woman: z.boolean().optional(),
-      personWithDisability: z.boolean().optional(),
-      economicallyWeakerSection: z.boolean().optional(),
+      seniorCitizen: optionalBoolean,
+      woman: optionalBoolean,
+      personWithDisability: optionalBoolean,
+      economicallyWeakerSection: optionalBoolean,
     }).optional(),
     publicImpact: z.string().optional(),
   }).optional(),
   communication: z.object({
-    feedbackConsent: z.boolean().optional(),
+    feedbackConsent: optionalBoolean,
   }).optional(),
-  address: addressSchema,
+  // address: addressSchema,
   location: z.object({
     division: z.string().min(1, "Division is required"),
     district: mongoId,
     subdivision: z.string().min(1, "Block is required"),
     block: z.string().min(1, "Block is required"),
     panchayat: z.string().min(1, "Panchayat is required"),
-    pinCode: z
+    pincode: z
       .string()
       .min(1, "Pincode is required")
       .regex(/^8\d{5}$/, "Enter a valid pin code of Bihar"),

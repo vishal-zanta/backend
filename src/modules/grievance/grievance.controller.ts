@@ -163,7 +163,8 @@ export class GrievanceController {
     const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
     const validation = createGrievanceSchema.safeParse(parsedBody);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+      const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
+      throw new ApiError({ status: 400, message: `Validation failed: ${detailedErrors}` });
     }
 
     await GrievanceController.validateReferences(parsedBody);
@@ -213,9 +214,11 @@ export class GrievanceController {
     }
 
     const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
+    console.log(parsedBody,"parseBody");
     const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+      const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
+      throw new ApiError({ status: 400, message: `Validation failed: ${detailedErrors}` });
     }
 
     await GrievanceController.validateReferences(parsedBody);

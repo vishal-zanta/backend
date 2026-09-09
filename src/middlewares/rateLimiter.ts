@@ -39,7 +39,7 @@ export const otpLimiter = rateLimit({
 // API sensitive operation limiter (e.g. creating grievances)
 export const createLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, 
+  max: 50,
   message: {
     success: false,
     message: "You have exceeded the maximum allowed submissions, please try again after 1 hour",

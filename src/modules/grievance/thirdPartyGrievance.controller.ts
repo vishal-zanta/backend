@@ -34,7 +34,8 @@ export class ThirdPartyGrievanceController {
     const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
     const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+      const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
+      throw new ApiError({ status: 400, message: `Validation failed: ${detailedErrors}` });
     }
 
     let channel = req.body.channel;
