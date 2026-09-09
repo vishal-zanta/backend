@@ -110,9 +110,9 @@ export class GrievanceService {
   static async createGrievance(payload: {
     citizen?: any;
     classification: any;
-    evidence: any;
-    impact: any;
-    communication: any;
+    evidence?: any;
+    impact?: any;
+    communication?: any;
     location?: any;
     citizenInfo: any;
     files?: Express.Multer.File[];

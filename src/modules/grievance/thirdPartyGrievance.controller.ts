@@ -54,16 +54,11 @@ export class ThirdPartyGrievanceController {
 
     const newGrievance = await GrievanceService.createGrievance({
       citizen,
-      classification,
-      evidence,
-      impact,
-      communication,
-      location,
-      citizenInfo,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
-      createdBy: apiKeyDoc.createdBy, 
+      createdBy: apiKeyDoc.createdBy,
       sourceApiKey: apiKeyDoc._id,
+      ...validation.data
     });
 
     return new ApiResponse({
@@ -141,9 +136,9 @@ export class ThirdPartyGrievanceController {
     const total = await Grievance.countDocuments(query);
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId status assignedPriority createdAt updatedAt location citizenInfo")
+      .select("grievanceId status assignedPriority createdAt updatedAt classification location citizenInfo impact")
       .populate("classification.department")
-      .populate("classification.service")
+      .populate("classification.service").populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate("classification.subService", "title")
       .populate("location.district", "name").populate("citizenInfo.address.district", "name")
       .sort({ createdAt: -1 })
@@ -183,7 +178,7 @@ export class ThirdPartyGrievanceController {
       }
     })
     .populate("classification.department")
-    .populate("classification.service")
+    .populate("classification.service").populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
       select: "name role",

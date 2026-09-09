@@ -57,6 +57,8 @@ export const createGrievanceSchema = z.object({
     nature: z.string().min(1, "Grievance type is required"),
     service: mongoId,
     department: mongoId,
+    isSeasonal: optionalBoolean,
+    seasonalType: z.string().optional(),
   }),
   evidence: z.object({
     details: z.string().optional(),

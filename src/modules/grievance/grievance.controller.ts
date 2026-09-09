@@ -161,6 +161,7 @@ export class GrievanceController {
     citizenInfo.mobile = citizen.mobile;
 
     const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
+    console.log(impact);
     const validation = createGrievanceSchema.safeParse(parsedBody);
     if (!validation.success) {
       const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
@@ -172,16 +173,11 @@ export class GrievanceController {
     // Hand off to the newly created service for core business logic
     const newGrievance = await GrievanceService.createGrievance({
       citizen,
-      classification,
-      evidence,
-      impact,
-      communication,
-      location,
-      citizenInfo,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
-    });
-
+      ...validation.data
+    }); 
+ 
     // Log the grievance creation audit
     AuditService.logGrievanceCreation(req, newGrievance._id as any);
 
@@ -214,7 +210,7 @@ export class GrievanceController {
     }
 
     const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
-    console.log(parsedBody,"parseBody");
+    console.log(parsedBody,"parseBody",req.body.impact);
     const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
     if (!validation.success) {
       const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
@@ -233,16 +229,11 @@ export class GrievanceController {
     }
 
     const newGrievance = await GrievanceService.createGrievance({
-      citizen, // Will be undefined if they don't have an account yet, but mobile will be captured in citizenInfo
-      classification,
-      evidence,
-      impact,
-      communication,
-      location,
-      citizenInfo,
+      citizen,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
-      createdBy: (req as any).user.id, // Officer/Agent creating the grievance
+      createdBy: (req as any).user.id,
+      ...validation.data
     });
 
     return new ApiResponse({
@@ -317,10 +308,10 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature location citizenInfo status assignedPriority createdAt feedbackText rating assignedOfficer")
+      .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt feedbackText rating assignedOfficer")
       .populate("classification.department")
       .populate("classification.service")
-      .populate("classification.nature")
+      .populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -340,7 +331,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           select: "_id level designationEnglish designationHindi"
         }
       })
-      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
+      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -378,14 +369,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     })
     .populate("classification.department")
     .populate("classification.service")
-    .populate("classification.nature")
+    .populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
         path: "role"
       }
-    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -725,10 +716,10 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature location citizenInfo status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
+      .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
       .populate("classification.department")
       .populate("classification.service")
-      .populate("classification.nature")
+      .populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -740,7 +731,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           }
         }
       })
-      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
+      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .populate({
         path: "assignedOfficer",
         select: "name role",
@@ -908,10 +899,10 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature location citizenInfo status assignedPriority createdAt assignedAt")
+      .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt assignedAt")
       .populate("classification.department")
       .populate("classification.service")
-      .populate("classification.nature")
+      .populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate({
         path: "classification.subService",
         select: "title titleHindi sla service",
@@ -923,7 +914,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           }
         }
       })
-      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
+      .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit)
@@ -950,7 +941,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const { id } = req.params;
     const validation = submitFeedbackSchema.safeParse(req.body);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`).join(", ") });
     }
     const { rating, feedbackText } = validation.data;
     const citizen = req.citizen;
@@ -1016,7 +1007,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const { id } = req.params;
     const validation = reopenGrievanceSchema.safeParse(req.body);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => e.message).join(", ") });
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`).join(", ") });
     }
     const { reOpenReason } = validation.data;
     const citizen = req.citizen;
@@ -1463,14 +1454,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     })
     .populate("classification.department")
     .populate("classification.service")
-    .populate("classification.nature")
+    .populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
         path: "role"
       }
-    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1515,14 +1506,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     })
     .populate("classification.department")
     .populate("classification.service")
-    .populate("classification.nature")
+    .populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
       select: "name role",
       populate: {
         path: "role"
       }
-    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
+    }).populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });

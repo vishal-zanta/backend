@@ -43,6 +43,8 @@ export interface IGrievance extends Document {
     subService: mongoose.Types.ObjectId;
     scheme?: string;
     nature: mongoose.Types.ObjectId;
+    isSeasonal?: boolean;
+    seasonalType?: string;
   };
   evidence: {
     details?: string;
@@ -177,6 +179,8 @@ const GrievanceSchema = new Schema<IGrievance>(
         ref: "Option",
         required: true,
       },
+      isSeasonal: Boolean,
+      seasonalType: String,
     },
     evidence: {
       details: {
