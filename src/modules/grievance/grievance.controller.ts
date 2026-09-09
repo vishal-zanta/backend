@@ -317,7 +317,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     // Populate only the explicitly requested fields to reduce payload size
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature location status assignedPriority createdAt feedbackText rating assignedOfficer")
+      .select("grievanceId classification.subService classification.nature location citizenInfo status assignedPriority createdAt feedbackText rating assignedOfficer")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature")
@@ -725,7 +725,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature location status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
+      .select("grievanceId classification.subService classification.nature location citizenInfo status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature")
@@ -908,7 +908,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId classification.subService classification.nature location status assignedPriority createdAt assignedAt")
+      .select("grievanceId classification.subService classification.nature location citizenInfo status assignedPriority createdAt assignedAt")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature")

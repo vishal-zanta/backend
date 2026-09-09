@@ -141,7 +141,7 @@ export class ThirdPartyGrievanceController {
     const total = await Grievance.countDocuments(query);
 
     const grievances = await Grievance.find(query)
-      .select("grievanceId status assignedPriority createdAt updatedAt citizenInfo")
+      .select("grievanceId status assignedPriority createdAt updatedAt location citizenInfo")
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.subService", "title")

@@ -142,7 +142,7 @@ export class FieldVisitController {
                 'grievance.grievanceId': 1,
                 'grievance.status': 1,
                 'grievance.classification': 1,
-                'grievance.address': 1,
+                'grievance.location': 1,
                 'grievance.citizenInfo': 1,
                 'grievance.geotaggedImages': 1,
                 'grievance.createdAt':1
