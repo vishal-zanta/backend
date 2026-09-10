@@ -8,6 +8,7 @@ const router = Router();
 router.get('/divisions', AddressController.getDivisions);
 router.get('/divisions/:divisionId/districts', AddressController.getDistrictsByDivision);
 router.get('/districts', AddressController.getDistricts); // legacy
+router.get('/subdivisions', AddressController.getSubdivisions);
 router.get('/districts/:districtId/subdivisions', AddressController.getSubdivisionsByDistrict);
 router.get('/districts/:districtId/blocks', AddressController.getBlocksByDistrict); // legacy
 router.get('/subdivisions/:subdivisionId/blocks', AddressController.getBlocksBySubdivision);

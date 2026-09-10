@@ -10,9 +10,9 @@ import { Role } from '../roles/role.model.js';
 
 export class OfficerTaggingController {
   static createTagging = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["officer", "services", "wards","district"], req.body);
+    validateRequestFields(["officer", "services", "subdivisions", "divisions"], req.body);
     
-    const { officer, services, wards,district } = req.body;
+    const { officer, services, subdivisions, divisions } = req.body;
 
     const userExists = await User.findById(officer);
     if (!userExists) {
@@ -31,8 +31,8 @@ export class OfficerTaggingController {
     if (existingTagging) {
       if (!existingTagging.active) {
         existingTagging.services = services;
-        existingTagging.wards = wards;
-        existingTagging.district = district;
+        existingTagging.subdivisions = subdivisions;
+        existingTagging.divisions = divisions;
         existingTagging.active = true;
         await existingTagging.save();
         return new ApiResponse({ res, status: 201, data: existingTagging, message: 'Officer Tagging created successfully' });
@@ -74,7 +74,8 @@ export class OfficerTaggingController {
       })
       .populate('services', 'title titleHindi')
       
-      .populate('district', 'name nameHindi')
+      .populate('divisions', 'name_en name_local')
+      .populate('subdivisions', 'name_en name_local')
       .skip(skip)
       .limit(limit);
       
@@ -90,7 +91,7 @@ export class OfficerTaggingController {
 
   static updateTagging = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { services, wards, district } = req.body;
+    const { services, subdivisions, divisions } = req.body;
     
     const tagging = await OfficerTagging.findById(id);
     if (!tagging) {
@@ -105,12 +106,12 @@ export class OfficerTaggingController {
       tagging.services = services;
     }
 
-    if (wards) {
-      tagging.wards = wards;
+    if (subdivisions) {
+      tagging.subdivisions = subdivisions;
     }
 
-    if (district) {
-      tagging.district = district;
+    if (divisions) {
+      tagging.divisions = divisions;
     }
 
     await tagging.save();

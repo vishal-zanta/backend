@@ -155,9 +155,9 @@ export class UserController {
 
     const untagged = req.query.untagged;
     const services = req.query.services; 
-    const wards = req.query.wards ; 
+    const subdivision = req.query.subdivisions ; 
 
-    if (untagged === 'true' || services || wards) {
+    if (untagged === 'true' || services || subdivision) {
       // Find matching taggings
       let taggingQuery: any = { active: true };
       let performTaggingQuery = false;
@@ -171,12 +171,12 @@ export class UserController {
         performTaggingQuery = true;
       }
 
-      if (wards) {
-        let wardsArray: string[] = [];
-        if (typeof wards === 'string') {
-          wardsArray = wards.split(",");
+      if (subdivision) {
+        let subdivisionArray: string[] = [];
+        if (typeof subdivision === 'string') {
+          subdivisionArray = subdivision.split(",");
         }
-        taggingQuery.wards = { $in: wardsArray };
+        taggingQuery.subdivisions = { $in: subdivisionArray };
         performTaggingQuery = true;
       }
 
@@ -190,7 +190,7 @@ export class UserController {
         const allTaggings = await OfficerTagging.find({ active: true, services: { $exists: true, $not: { $size: 0 } } }).select('officer');
         const allTaggedOfficerIds = allTaggings.map(t => t.officer);
         
-        // If we already have a $in query (from subServices or wards), we merge them via $nin.
+        // If we already have a $in query (from services or subdivisions), we merge them via $nin.
         query._id = { ...query._id, $nin: allTaggedOfficerIds };
       }
     }

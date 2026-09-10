@@ -9,8 +9,41 @@ import { validateRequestFields } from '../../utils/helpers.js';
 export class AddressController {
   
   // ==========================
+  // HELPER
+  // ==========================
+  private static async resolveIds(param: string, model: any, keyField: string): Promise<string[]> {
+    const ids = param.split(',').map(id => id.trim()).filter(Boolean);
+    const resolved: string[] = [];
+    for (const id of ids) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        const doc = await model.findById(id);
+        if (doc) resolved.push((doc as any)[keyField]);
+      } else {
+        resolved.push(id);
+      }
+    }
+    return resolved;
+  }
+  
+  // ==========================
   // HIERARCHY APIS
   // ==========================
+
+  /**
+   * Get subdivisions by division IDs (via query param)
+   * Supports comma-separated IDs
+   */
+  static getSubdivisions = asyncHandler(async (req: Request, res: Response) => {
+    let query: any = {};
+    if (req.query.divisionId) {
+      const resolvedDivIds = await AddressController.resolveIds(req.query.divisionId as string, DivisionModel, 'division_id');
+      const districts = await DistrictModel.find({ division_id: { $in: resolvedDivIds } }).select('district_id').lean();
+      const districtIds = districts.map((d: any) => d.district_id);
+      query.district_id = { $in: districtIds };
+    }
+    const subdivisions = await SubdivisionModel.find(query).sort({ name_en: 1 }).lean();
+    return new ApiResponse({ res, status: 200, data: subdivisions, message: 'Subdivisions fetched successfully' });
+  });
 
   /**
    * Get all divisions

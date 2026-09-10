@@ -58,11 +58,12 @@ export class GrievanceService {
         const tagQuery: any = {
           officer: { $in: userIds },
           services: serviceId,
-          subdivision:subdivision,
           active: true
         };
         
-        
+        if (subdivision) {
+          tagQuery.subdivisions = subdivision;
+        }
         
         const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
         
