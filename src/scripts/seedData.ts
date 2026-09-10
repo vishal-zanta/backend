@@ -4,8 +4,7 @@ import connectDB from "../db/mongo.js";
 import { Role } from "../modules/roles/role.model.js";
 import { Service } from "../modules/services/service.model.js";
 import { ComplaintSource } from "../modules/complaintSource/complaintSource.model.js";
-import { Demography } from "../modules/demography/demography.model.js";
-import { Ulb } from "../modules/demography/ulb.model.js";
+import { DistrictModel as Demography } from "../modules/address/address.model.js";
 import { Option } from "../modules/options/option.model.js";
 import { Department } from "../modules/departments/department.model.js";
 import { User } from "../modules/users/user.model.js";
@@ -292,14 +291,6 @@ const demographyData = [
   { name: "Buxar", nameHindi: "बक्सर", division: "Saran", zone: "South Bihar", population: 1398105, urban: false }
 ];
 
-const ulbData = [
-  { name: "Patna Municipal Corporation", nameHindi: "पटना नगर निगम", districtName: "Patna", wards: 75, population: 2065784 },
-  { name: "Gaya Municipal Corporation", nameHindi: "गया नगर निगम", districtName: "Gaya", wards: 53, population: 470839 },
-  { name: "Bhagalpur Municipal Corporation", nameHindi: "भागलपुर नगर निगम", districtName: "Bhagalpur", wards: 51, population: 413200 },
-  { name: "Muzaffarpur Municipal Corporation", nameHindi: "मुजफ्फरपुर नगर निगम", districtName: "Muzaffarpur", wards: 49, population: 354462 },
-  { name: "Darbhanga Municipal Corporation", nameHindi: "दरभंगा नगर निगम", districtName: "Darbhanga", wards: 48, population: 306956 },
-  { name: "Purnia Municipal Corporation", nameHindi: "पूर्णिया नगर निगम", districtName: "Purnia", wards: 45, population: 280583 }
-];
 
 const options=[{
   
@@ -445,32 +436,15 @@ const runSeed = async () => {
     console.log("Services seeded.");
 
     // 4. Seed Demography
+    // Demography seeded elsewhere (seedAddress.ts)
     const districtIdMap: Record<string, mongoose.Types.ObjectId> = {};
-    for (const d of demographyData) {
-      const demo = await Demography.findOneAndUpdate(
-        { name: d.name },
-        { $set: d },
-        { upsert: true, new: true }
-      );
-      districtIdMap[d.name] = demo._id as mongoose.Types.ObjectId;
+    const allDists = await Demography.find();
+    for (const d of allDists) {
+      districtIdMap[d.name_en.toUpperCase()] = d._id as mongoose.Types.ObjectId;
     }
-    console.log("Demography seeded.");
 
-    // 5. Seed ULBs
-    for (const u of ulbData) {
-      const districtId = districtIdMap[u.districtName];
-      if (districtId) {
-        await Ulb.findOneAndUpdate(
-          { name: u.name },
-          { $set: { name: u.name, nameHindi: u.nameHindi, wards: u.wards, district: districtId } },
-          { upsert: true, new: true }
-        );
-      } else {
-        console.warn(`District ${u.districtName} not found for ULB ${u.name}`);
-      }
-    }
-    console.log("ULBs seeded.");
 
+    
     // 6. Seed Options
     for (const opt of options) {
       await Option.findOneAndUpdate(
@@ -487,7 +461,7 @@ const runSeed = async () => {
     const cceRole = await Role.findOne({ level: "CCE" });
     const supervisorRole = await Role.findOne({ level: "Supervisor" });
     const adminRole = await Role.findOne({ level: "Admin" });
-    const patnaDistrict = await Demography.findOne({ name: "Patna" });
+    const patnaDistrict = await Demography.findOne({ name_en: "PATNA" });
     const streetLightService = await Service.findOne({ title: "Hand Pump tube well problem" });
     
 
@@ -562,7 +536,7 @@ const runSeed = async () => {
     const allSubServices = [];
     const l1UserGrievance = await User.findOne({ email: "l1@example.com" });
     const l2UserGrievance = await User.findOne({ email: "l2@example.com" });
-    const districtPatna = await Demography.findOne({ name: "Patna" });
+    const districtPatna = await Demography.findOne({ name_en: "PATNA" });
 
     // if (natureId && frequencyId && beneficiaryId && complaintSource && l1UserGrievance && l2UserGrievance && districtPatna && allSubServices.length > 0) {
     //   for (let i = 0; i < 5; i++) {

@@ -1,0 +1,716 @@
+[
+  {
+    "_id": "SUB23101",
+    "district_id": "D231",
+    "sahyog_id": "23101",
+    "name_en": "ARA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23102",
+    "district_id": "D231",
+    "sahyog_id": "23102",
+    "name_en": "JAGDISHPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23103",
+    "district_id": "D231",
+    "sahyog_id": "23103",
+    "name_en": "PIRO",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23201",
+    "district_id": "D232",
+    "sahyog_id": "23201",
+    "name_en": "BUXAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23202",
+    "district_id": "D232",
+    "sahyog_id": "23202",
+    "name_en": "DUMRAON",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23301",
+    "district_id": "D233",
+    "sahyog_id": "23301",
+    "name_en": "BHABHUA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23302",
+    "district_id": "D233",
+    "sahyog_id": "23302",
+    "name_en": "MOHANIA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22901",
+    "district_id": "D229",
+    "sahyog_id": "22901",
+    "name_en": "BIHARSHARIF",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22902",
+    "district_id": "D229",
+    "sahyog_id": "22902",
+    "name_en": "HILSA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22903",
+    "district_id": "D229",
+    "sahyog_id": "22903",
+    "name_en": "RAJGIR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23001",
+    "district_id": "D230",
+    "sahyog_id": "23001",
+    "name_en": "PATNA SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23002",
+    "district_id": "D230",
+    "sahyog_id": "23002",
+    "name_en": "DANAPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23003",
+    "district_id": "D230",
+    "sahyog_id": "23003",
+    "name_en": "PATNA CITY",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23004",
+    "district_id": "D230",
+    "sahyog_id": "23004",
+    "name_en": "BARH",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23005",
+    "district_id": "D230",
+    "sahyog_id": "23005",
+    "name_en": "MASAURHI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23006",
+    "district_id": "D230",
+    "sahyog_id": "23006",
+    "name_en": "PALIGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23401",
+    "district_id": "D234",
+    "sahyog_id": "23401",
+    "name_en": "SASARAM",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23402",
+    "district_id": "D234",
+    "sahyog_id": "23402",
+    "name_en": "BIKRAMGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23403",
+    "district_id": "D234",
+    "sahyog_id": "23403",
+    "name_en": "DEHRI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21601",
+    "district_id": "D216",
+    "sahyog_id": "21601",
+    "name_en": "MUZAFFARPUR(EAST)",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21602",
+    "district_id": "D216",
+    "sahyog_id": "21602",
+    "name_en": "MUZAFFARPUR(WEST)",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20301",
+    "district_id": "D203",
+    "sahyog_id": "20301",
+    "name_en": "BETTIAH",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20302",
+    "district_id": "D203",
+    "sahyog_id": "20302",
+    "name_en": "NARKATIYAGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20303",
+    "district_id": "D203",
+    "sahyog_id": "20303",
+    "name_en": "BAGHA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20401",
+    "district_id": "D204",
+    "sahyog_id": "20401",
+    "name_en": "RAXAUL",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20402",
+    "district_id": "D204",
+    "sahyog_id": "20402",
+    "name_en": "MOTIHARI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20403",
+    "district_id": "D204",
+    "sahyog_id": "20403",
+    "name_en": "CHAKIYA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20404",
+    "district_id": "D204",
+    "sahyog_id": "20404",
+    "name_en": "PAKARIDYAL",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20405",
+    "district_id": "D204",
+    "sahyog_id": "20405",
+    "name_en": "ARERAJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20406",
+    "district_id": "D204",
+    "sahyog_id": "20406",
+    "name_en": "SIKARHANA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20501",
+    "district_id": "D205",
+    "sahyog_id": "20501",
+    "name_en": "SHEOHAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20601",
+    "district_id": "D206",
+    "sahyog_id": "20601",
+    "name_en": "SITAMARHI SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20602",
+    "district_id": "D206",
+    "sahyog_id": "20602",
+    "name_en": "PUPRI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20603",
+    "district_id": "D206",
+    "sahyog_id": "20603",
+    "name_en": "BELSAND",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22001",
+    "district_id": "D220",
+    "sahyog_id": "22001",
+    "name_en": "HAJIPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22002",
+    "district_id": "D220",
+    "sahyog_id": "22002",
+    "name_en": "MAHUA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22003",
+    "district_id": "D220",
+    "sahyog_id": "22003",
+    "name_en": "MAHNAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21701",
+    "district_id": "D217",
+    "sahyog_id": "21701",
+    "name_en": "GOPALGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21702",
+    "district_id": "D217",
+    "sahyog_id": "21702",
+    "name_en": "HATHUA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21901",
+    "district_id": "D219",
+    "sahyog_id": "21901",
+    "name_en": "SARAN SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21902",
+    "district_id": "D219",
+    "sahyog_id": "21902",
+    "name_en": "MARHAURA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21903",
+    "district_id": "D219",
+    "sahyog_id": "21903",
+    "name_en": "SONEPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21801",
+    "district_id": "D218",
+    "sahyog_id": "21801",
+    "name_en": "SIWAN SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21802",
+    "district_id": "D218",
+    "sahyog_id": "21802",
+    "name_en": "MAHARAJGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21501",
+    "district_id": "D215",
+    "sahyog_id": "21501",
+    "name_en": "DARBHANGA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21502",
+    "district_id": "D215",
+    "sahyog_id": "21502",
+    "name_en": "BENIPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21503",
+    "district_id": "D215",
+    "sahyog_id": "21503",
+    "name_en": "BIRAUL",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20701",
+    "district_id": "D207",
+    "sahyog_id": "20701",
+    "name_en": "MADHUBANI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20702",
+    "district_id": "D207",
+    "sahyog_id": "20702",
+    "name_en": "JAYNAGAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20703",
+    "district_id": "D207",
+    "sahyog_id": "20703",
+    "name_en": "BENIPATTI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20704",
+    "district_id": "D207",
+    "sahyog_id": "20704",
+    "name_en": "JHANJHARPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20705",
+    "district_id": "D207",
+    "sahyog_id": "20705",
+    "name_en": "PHULPARAS",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22101",
+    "district_id": "D221",
+    "sahyog_id": "22101",
+    "name_en": "DALSINGHSARAI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22102",
+    "district_id": "D221",
+    "sahyog_id": "22102",
+    "name_en": "PATORI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22103",
+    "district_id": "D221",
+    "sahyog_id": "22103",
+    "name_en": "ROSERA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22104",
+    "district_id": "D221",
+    "sahyog_id": "22104",
+    "name_en": "SAMASTIPUR SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21301",
+    "district_id": "D213",
+    "sahyog_id": "21301",
+    "name_en": "MADHEPURA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21302",
+    "district_id": "D213",
+    "sahyog_id": "21302",
+    "name_en": "UDAKISHUNGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21401",
+    "district_id": "D214",
+    "sahyog_id": "21401",
+    "name_en": "SAHARSA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21402",
+    "district_id": "D214",
+    "sahyog_id": "21402",
+    "name_en": "SIMRI BAKHTIARPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20801",
+    "district_id": "D208",
+    "sahyog_id": "20801",
+    "name_en": "SUPAUL",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20802",
+    "district_id": "D208",
+    "sahyog_id": "20802",
+    "name_en": "BIRPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20803",
+    "district_id": "D208",
+    "sahyog_id": "20803",
+    "name_en": "TRIVENIGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20804",
+    "district_id": "D208",
+    "sahyog_id": "20804",
+    "name_en": "NIRMALI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20901",
+    "district_id": "D209",
+    "sahyog_id": "20901",
+    "name_en": "ARARIA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB20902",
+    "district_id": "D209",
+    "sahyog_id": "20902",
+    "name_en": "FORBESGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21201",
+    "district_id": "D212",
+    "sahyog_id": "21201",
+    "name_en": "KATIHAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21202",
+    "district_id": "D212",
+    "sahyog_id": "21202",
+    "name_en": "MANIHARI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21203",
+    "district_id": "D212",
+    "sahyog_id": "21203",
+    "name_en": "BARSOI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21001",
+    "district_id": "D210",
+    "sahyog_id": "21001",
+    "name_en": "KISHANGANJ",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21101",
+    "district_id": "D211",
+    "sahyog_id": "21101",
+    "name_en": "PURNIA SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21102",
+    "district_id": "D211",
+    "sahyog_id": "21102",
+    "name_en": "BAISI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21103",
+    "district_id": "D211",
+    "sahyog_id": "21103",
+    "name_en": "BANMANKHI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21104",
+    "district_id": "D211",
+    "sahyog_id": "21104",
+    "name_en": "DHAMDAHA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB21105",
+    "district_id": "D211",
+    "sahyog_id": "21105",
+    "name_en": "Others",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22501",
+    "district_id": "D225",
+    "sahyog_id": "22501",
+    "name_en": "BANKA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22401",
+    "district_id": "D224",
+    "sahyog_id": "22401",
+    "name_en": "BHAGALPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22402",
+    "district_id": "D224",
+    "sahyog_id": "22402",
+    "name_en": "KAHALGAON",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22403",
+    "district_id": "D224",
+    "sahyog_id": "22403",
+    "name_en": "NAVGACHHIYA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22201",
+    "district_id": "D222",
+    "sahyog_id": "22201",
+    "name_en": "BEGUSARAI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22202",
+    "district_id": "D222",
+    "sahyog_id": "22202",
+    "name_en": "BALIA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22203",
+    "district_id": "D222",
+    "sahyog_id": "22203",
+    "name_en": "TEGHRA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22204",
+    "district_id": "D222",
+    "sahyog_id": "22204",
+    "name_en": "MANJHAUL",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22205",
+    "district_id": "D222",
+    "sahyog_id": "22205",
+    "name_en": "BAKHRI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23801",
+    "district_id": "D238",
+    "sahyog_id": "23801",
+    "name_en": "JAMUI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22301",
+    "district_id": "D223",
+    "sahyog_id": "22301",
+    "name_en": "KHAGARIA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22302",
+    "district_id": "D223",
+    "sahyog_id": "22302",
+    "name_en": "GOGRI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22701",
+    "district_id": "D227",
+    "sahyog_id": "22701",
+    "name_en": "LAKHISARAI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22601",
+    "district_id": "D226",
+    "sahyog_id": "22601",
+    "name_en": "MUNGER SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22602",
+    "district_id": "D226",
+    "sahyog_id": "22602",
+    "name_en": "HAWELI KHARAGPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22603",
+    "district_id": "D226",
+    "sahyog_id": "22603",
+    "name_en": "TARAPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB22801",
+    "district_id": "D228",
+    "sahyog_id": "22801",
+    "name_en": "SHEIKHPURA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB24001",
+    "district_id": "D240",
+    "sahyog_id": "24001",
+    "name_en": "ARWAL",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23501",
+    "district_id": "D235",
+    "sahyog_id": "23501",
+    "name_en": "AURANGABAD",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23502",
+    "district_id": "D235",
+    "sahyog_id": "23502",
+    "name_en": "DAUDNAGAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23601",
+    "district_id": "D236",
+    "sahyog_id": "23601",
+    "name_en": "GAYA SADAR",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23602",
+    "district_id": "D236",
+    "sahyog_id": "23602",
+    "name_en": "TEKARI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23603",
+    "district_id": "D236",
+    "sahyog_id": "23603",
+    "name_en": "SHERGHATTY",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23604",
+    "district_id": "D236",
+    "sahyog_id": "23604",
+    "name_en": "NEEMCHAK BATHANI",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23901",
+    "district_id": "D239",
+    "sahyog_id": "23901",
+    "name_en": "JEHANABAD",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23701",
+    "district_id": "D237",
+    "sahyog_id": "23701",
+    "name_en": "NAWADA",
+    "name_local": ""
+  },
+  {
+    "_id": "SUB23702",
+    "district_id": "D237",
+    "sahyog_id": "23702",
+    "name_en": "RAJAULI",
+    "name_local": ""
+  }
+]

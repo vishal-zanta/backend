@@ -59,10 +59,7 @@ const CitizenSchema = new Schema<ICitizen>(
         addressLine: String,
         city: String,
         state: String,
-        district: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Demography',
-        },
+        district: String,
         subdivision: String,
         panchayat: String,
         thana: String,

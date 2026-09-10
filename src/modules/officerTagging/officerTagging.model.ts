@@ -20,7 +20,7 @@ const officerTaggingSchema = new Schema<IOfficerTagging>({
  
   district:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Demography'
+    ref: 'District'
   },
   services: [{
     type: mongoose.Schema.Types.ObjectId,

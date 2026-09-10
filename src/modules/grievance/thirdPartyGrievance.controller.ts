@@ -6,7 +6,6 @@ import { Grievance } from './grievance.model.js';
 import { GrievanceService } from './grievance.service.js';
 import { createGrievanceByAgentSchema } from './grievance.validation.js';
 import { ComplaintSource } from '../complaintSource/complaintSource.model.js';
-import { Demography } from '../demography/demography.model.js';
 import { GrievanceController } from './grievance.controller.js';
 import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';

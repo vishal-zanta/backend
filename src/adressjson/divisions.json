@@ -1,0 +1,56 @@
+[
+  {
+    "_id": "DIV1",
+    "sahyog_id": "1",
+    "name_en": "PATNA",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV2",
+    "sahyog_id": "2",
+    "name_en": "TIRHUT",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV3",
+    "sahyog_id": "3",
+    "name_en": "SARAN",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV4",
+    "sahyog_id": "4",
+    "name_en": "DARBHANGA",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV5",
+    "sahyog_id": "5",
+    "name_en": "KOSHI",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV6",
+    "sahyog_id": "6",
+    "name_en": "PURNIA",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV7",
+    "sahyog_id": "7",
+    "name_en": "BHAGALPUR",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV8",
+    "sahyog_id": "8",
+    "name_en": "MUNGER",
+    "name_local": ""
+  },
+  {
+    "_id": "DIV9",
+    "sahyog_id": "9",
+    "name_en": "MAGADH",
+    "name_local": ""
+  }
+]

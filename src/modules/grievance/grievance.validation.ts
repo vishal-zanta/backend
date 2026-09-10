@@ -28,7 +28,7 @@ const addressSchema = z.object({
   addressLine: z.string().min(1, "Address details are required"),
   city: z.string().optional(),
   state: z.string().optional(),
-  district: mongoId,
+  district: z.string().min(1, "District is required"),
   subdivision: z.string().min(1, "Block is required"),
   panchayat: z.string().min(1, "Panchayat is required"),
   thana: z.string().min(1, "Thana is required"),
@@ -78,11 +78,12 @@ export const createGrievanceSchema = z.object({
   }).optional(),
   // address: addressSchema,
   location: z.object({
-    division: z.string().min(1, "Division is required"),
+    division: mongoId,
     district: mongoId,
-    subdivision: z.string().min(1, "Block is required"),
-    block: z.string().min(1, "Block is required"),
-    panchayat: z.string().min(1, "Panchayat is required"),
+    subdivision: mongoId,
+    block: mongoId,
+    panchayat: mongoId,
+    thana: mongoId,
     pincode: z
       .string()
       .min(1, "Pincode is required")

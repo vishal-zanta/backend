@@ -30,7 +30,7 @@ export interface IGrievance extends Document {
       addressLine?: string;
       city?: string;
       state?: string;
-      district?: mongoose.Types.ObjectId;
+      district?: string;
       subdivision?: string;
       panchayat?: string;
       thana?: string;
@@ -78,7 +78,9 @@ export interface IGrievance extends Document {
   resolvedReason?: string;
   status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
   location?: {
+    division: mongoose.Types.ObjectId;
     district: mongoose.Types.ObjectId;
+    subdivision: mongoose.Types.ObjectId;
     block: mongoose.Types.ObjectId;
     panchayat: mongoose.Types.ObjectId;
     thana: mongoose.Types.ObjectId;
@@ -145,10 +147,7 @@ const GrievanceSchema = new Schema<IGrievance>(
         addressLine: String,
         city: String,
         state: String,
-        district: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Demography',
-        },
+        district: String,
         subdivision: String,
         panchayat: String,
         thana: String,
@@ -258,7 +257,9 @@ const GrievanceSchema = new Schema<IGrievance>(
         default: "OPEN",
       },
       location: {
+        division: { type: mongoose.Schema.Types.ObjectId, ref: 'Division' },
         district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
+        subdivision: { type: mongoose.Schema.Types.ObjectId, ref: 'Subdivision' },
         block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
         panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
         thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },

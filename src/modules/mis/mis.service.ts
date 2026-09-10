@@ -3,8 +3,7 @@ import moment from "moment";
 import { Grievance } from "../grievance/grievance.model.js";
 import { User } from "../users/user.model.js";
 import { Role } from "../roles/role.model.js";
-import { Demography } from "../demography/demography.model.js";
-import { Ulb } from "../demography/ulb.model.js";
+import { DistrictModel } from "../address/address.model.js";
 import { ComplaintSource } from "../complaintSource/complaintSource.model.js";
 import { ActivityService } from "../activity/activity.service.js";
 import { ApiError } from "../../middlewares/errorHandler.js";
@@ -14,7 +13,6 @@ export const REPORT = {
   OFFICER: "officer",
   SERVICE: "service",
   URBAN: "urban",
-  ULB: "ulb",
   RURAL: "rural",
   IVR: "ivr",
   AGENT: "agent",
@@ -29,7 +27,6 @@ const REPORT_DATA_KEYS: Record<ReportType, string> = {
   [REPORT.OFFICER]: "officerRanking",
   [REPORT.SERVICE]: "servicePerformance",
   [REPORT.URBAN]: "ulbWise",
-  [REPORT.ULB]: "ulbWise",
   [REPORT.RURAL]: "blockWise",
   [REPORT.IVR]: "ivrStats",
   [REPORT.AGENT]: "agentPerformance",
@@ -366,154 +363,10 @@ async function getServicePerformanceReport(match: Record<string, unknown>) {
   return rows;
 }
 
-async function getUlbWiseReport(match: Record<string, unknown>, bounds: DateBounds) {
-  const urbanDistricts = await Demography.find({ urban: true, active: true })
-    .select("name population")
-    .lean();
-  const urbanNames = urbanDistricts.map((d) => d.name);
-  const popByDistrict = new Map(
-    urbanDistricts.map((d) => [d.name.toLowerCase(), d.population || 0]),
-  );
-
-  const districtFilter =
-    urbanNames.length > 0
-      ? {
-          $or: urbanNames.map((name) => ({
-            "location.district": {
-              $regex: `^${escapeRegex(name)}$`,
-              $options: "i",
-            },
-          })),
-        }
-      : {};
-
-  const ulbMatch = { ...match, ...districtFilter };
-
-  const currentRows = await Grievance.aggregate([
-    { $match: ulbMatch },
-    {
-      $group: {
-        _id: {
-          ulb: {
-            $ifNull: [
-              "$location.subdivision",
-              { $ifNull: ["$location.panchayat", "Unknown"] },
-            ],
-          },
-          district: { $ifNull: ["$location.district", "Unknown"] },
-        },
-        complaints: { $sum: 1 },
-        slaCompliant: {
-          $sum: {
-            $cond: [
-              {
-                $or: [
-                  { $eq: ["$escalationLevel", 0] },
-                  { $eq: ["$escalationLevel", null] },
-                  { $not: ["$escalationLevel"] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
-        ratingSum: {
-          $sum: { $cond: [{ $ifNull: ["$rating", false] }, "$rating", 0] },
-        },
-        ratingCount: {
-          $sum: { $cond: [{ $ifNull: ["$rating", false] }, 1, 0] },
-        },
-      },
-    },
-  ]);
-
-  // Previous period of equal length for trend
-  const periodMs = bounds.to.getTime() - bounds.from.getTime();
-  const prevBounds: DateBounds = {
-    from: new Date(bounds.from.getTime() - periodMs - 1),
-    to: new Date(bounds.from.getTime() - 1),
-  };
-
-  const prevUlbMatch: Record<string, unknown> = {
-    createdAt: { $gte: prevBounds.from, $lte: prevBounds.to },
-    ...districtFilter,
-  };
-  if (match["location.district"]) {
-    prevUlbMatch["location.district"] = match["location.district"];
-  }
-
-  const prevRows = await Grievance.aggregate([
-    { $match: prevUlbMatch },
-    {
-      $group: {
-        _id: {
-          ulb: {
-            $ifNull: [
-              "$location.subdivision",
-              { $ifNull: ["$location.panchayat", "Unknown"] },
-            ],
-          },
-          district: { $ifNull: ["$location.district", "Unknown"] },
-        },
-        complaints: { $sum: 1 },
-      },
-    },
-  ]);
-
-  const prevMap = new Map(
-    prevRows.map((r) => [
-      `${String(r._id.ulb).toLowerCase()}|${String(r._id.district).toLowerCase()}`,
-      r.complaints as number,
-    ]),
-  );
-
-  // Enrich ULB display names from Ulb collection when possible
-  const ulbs = await Ulb.find({ active: true })
-    .populate<{ district: { name: string; population: number } }>("district", "name population")
-    .lean();
-  const ulbNameSet = new Map(ulbs.map((u) => [u.name.toLowerCase(), u]));
-
-  const ranked = currentRows
-    .map((row) => {
-      const ulbKey = String(row._id.ulb);
-      const districtKey = String(row._id.district);
-      const registered = ulbNameSet.get(ulbKey.toLowerCase());
-      const population =
-        (registered?.district && typeof registered.district === "object"
-          ? registered.district.population
-          : undefined) ??
-        popByDistrict.get(districtKey.toLowerCase()) ??
-        0;
-      const complaints = row.complaints as number;
-      const prev =
-        prevMap.get(`${ulbKey.toLowerCase()}|${districtKey.toLowerCase()}`) || 0;
-      let trend: "up" | "down" | "stable" = "stable";
-      if (complaints > prev) trend = "up";
-      else if (complaints < prev) trend = "down";
-
-      return {
-        ulb: registered?.name || ulbKey,
-        population,
-        complaints,
-        perCapita: population > 0 ? round1((complaints / population) * 1000) : 0,
-        slaCompliance:
-          complaints > 0 ? round1((row.slaCompliant / complaints) * 100) : 0,
-        rating: row.ratingCount > 0 ? round1(row.ratingSum / row.ratingCount) : 0,
-        trend,
-      };
-    })
-    .sort((a, b) => b.slaCompliance - a.slaCompliance || b.complaints - a.complaints)
-    .map((row, index) => ({ ...row, rank: index + 1 }));
-
-  return ranked;
-}
-
 async function getBlockWiseReport(match: Record<string, unknown>) {
-  const ruralDistricts = await Demography.find({ urban: false, active: true })
-    .select("name")
+  const ruralDistricts = await DistrictModel.find({}).select("name_en")
     .lean();
-  const ruralNames = ruralDistricts.map((d) => d.name);
+  const ruralNames = ruralDistricts.map((d) => d.name_en);
 
   const ruralFilter =
     ruralNames.length > 0
@@ -881,9 +734,7 @@ export class MisService {
         payload = await getServicePerformanceReport(match);
         break;
       case REPORT.URBAN:
-      case REPORT.ULB:
-        payload = await getUlbWiseReport(match, bounds);
-        break;
+      
       case REPORT.RURAL:
         payload = await getBlockWiseReport(match);
         break;

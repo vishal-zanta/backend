@@ -58,7 +58,7 @@ const userSchema = new Schema<IUser>({
   },
   district: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Demography'
+    ref: 'District'
   },
   status: {
     type: String,

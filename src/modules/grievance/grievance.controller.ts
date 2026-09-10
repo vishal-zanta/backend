@@ -22,7 +22,7 @@ import { createGrievanceSchema, createGrievanceByAgentSchema, submitFeedbackSche
 import { User } from "../users/user.model.js";
 import { FieldVisit } from '../fieldVisit/fieldVisit.model.js';
 import { Option } from "../options/option.model.js";
-import { Demography } from "../demography/demography.model.js";
+import { DivisionModel, SubdivisionModel, DistrictModel, BlockModel, PanchayatModel, ThanaModel } from '../address/address.model.js';
 import { AuditService } from "../audit/audit.service.js";
 import { SlaConfig } from "../slaConfig/slaConfig.model.js";
 export class GrievanceController {
@@ -47,18 +47,37 @@ export class GrievanceController {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.nature: Reference does not exist" });
       }));
     }
-
+    if (data.location?.division) {
+      checks.push(DivisionModel.exists({ _id: data.location.division }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.division: Reference does not exist" });
+      }));
+    }
     if (data.location?.district) {
-      checks.push(Demography.exists({ _id: data.location.district }).then(exists => {
+      checks.push(DistrictModel.exists({ _id: data.location.district }).then(exists => {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid location.district: Reference does not exist" });
       }));
     }
-    
-    if (data.citizenInfo?.address?.district) {
-      checks.push(Demography.exists({ _id: data.citizenInfo.address.district }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.district: Reference does not exist" });
+    if (data.location?.subdivision) {
+      checks.push(SubdivisionModel.exists({ _id: data.location.subdivision }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.subdivision: Reference does not exist" });
       }));
     }
+    if (data.location?.block) {
+      checks.push(BlockModel.exists({ _id: data.location.block }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.block: Reference does not exist" });
+      }));
+    }
+    if (data.location?.panchayat) {
+      checks.push(PanchayatModel.exists({ _id: data.location.panchayat }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.panchayat: Reference does not exist" });
+      }));
+    }
+    if (data.location?.thana) {
+      checks.push(ThanaModel.exists({ _id: data.location.thana }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.thana: Reference does not exist" });
+      }));
+    }
+
 
 
     if (data.impact?.affectedBeneficiary) {
