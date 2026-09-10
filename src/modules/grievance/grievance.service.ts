@@ -36,7 +36,7 @@ export class GrievanceService {
    * Determine the best officer to assign to a grievance based on workflow levels,
    * tagged sub-services, and wards (round-robin).
    */
-  static async autoAssignOfficer(serviceId: string, subdivision?: string): Promise<string | null> {
+  static async autoAssignOfficer(serviceId: string, subdivision: string): Promise<string | null> {
     try {
       const serviceDoc = await Service.findById(serviceId);
       if (!serviceDoc || !serviceDoc.department) return null;
@@ -58,12 +58,11 @@ export class GrievanceService {
         const tagQuery: any = {
           officer: { $in: userIds },
           services: serviceId,
+          subdivision:subdivision,
           active: true
         };
         
-        if (subdivision) {
-          tagQuery.wards = subdivision;
-        }
+        
         
         const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
         
@@ -76,7 +75,7 @@ export class GrievanceService {
           assignedOfficer: { $in: eligibleTags.map(t => t.officer) }
         };
         if (subdivision) {
-          lastGrievanceQuery["address.subdivision"] = subdivision;
+          lastGrievanceQuery["location.subdivision"] = subdivision;
         }
         
         const lastGrievance = await Grievance.findOne(lastGrievanceQuery)
@@ -183,14 +182,28 @@ export class GrievanceService {
       channel
     };
     
+
     if (citizen && citizen._id) {
       payloadToCreate.citizen = citizen._id;
+      
+      // Update Citizen profile with the latest citizenInfo mapped data
+      const updatePayload: any = {};
+      if (finalCitizenInfo.fullName) updatePayload.fullName = finalCitizenInfo.fullName;
+      if (finalCitizenInfo.alternateMobile) updatePayload.alternateMobile = finalCitizenInfo.alternateMobile;
+      if (finalCitizenInfo.email) updatePayload.email = finalCitizenInfo.email;
+      if (finalCitizenInfo.preferredLanguage) updatePayload.preferredLanguage = finalCitizenInfo.preferredLanguage;
+      if (finalCitizenInfo.address) updatePayload.address = finalCitizenInfo.address;
+      
+      if (Object.keys(updatePayload).length > 0) {
+        await Citizen.findByIdAndUpdate(citizen._id, { $set: updatePayload });
+      }
     }
+
 
     // Auto Assignment Logic
     const serviceId = classification?.service;
     let autoAssignFailed = false;
-    let subdivision:string|undefined ;
+    let subdivision= location.subdivision;
     if (serviceId) {
       subdivision = location?.subdivision ;
       const assignedOfficerId = await GrievanceService.autoAssignOfficer(serviceId, subdivision);

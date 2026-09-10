@@ -154,20 +154,20 @@ export class UserController {
     }
 
     const untagged = req.query.untagged;
-    const subServices = req.query.subServices; 
+    const services = req.query.services; 
     const wards = req.query.wards ; 
 
-    if (untagged === 'true' || subServices || wards) {
+    if (untagged === 'true' || services || wards) {
       // Find matching taggings
       let taggingQuery: any = { active: true };
       let performTaggingQuery = false;
       
-      if (subServices) {
-        let subServiceArray: string[] = [];
-        if (typeof subServices === 'string') {
-          subServiceArray = subServices.split(',');
+      if (services) {
+        let ServiceArray: string[] = [];
+        if (typeof services === 'string') {
+          ServiceArray = services.split(',');
         }
-        taggingQuery.services = { $in: subServiceArray };
+        taggingQuery.services = { $in: ServiceArray };
         performTaggingQuery = true;
       }
 

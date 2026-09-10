@@ -30,10 +30,12 @@ export interface IGrievance extends Document {
       addressLine?: string;
       city?: string;
       state?: string;
-      district?: string;
-      subdivision?: string;
-      panchayat?: string;
-      thana?: string;
+      division?: mongoose.Types.ObjectId;
+      district?: mongoose.Types.ObjectId;
+      subdivision?: mongoose.Types.ObjectId;
+      block?: mongoose.Types.ObjectId;
+      panchayat?: mongoose.Types.ObjectId;
+      thana?: mongoose.Types.ObjectId;
       pincode?: string;
     };
   };
@@ -77,13 +79,22 @@ export interface IGrievance extends Document {
   resolvedAt?: Date;
   resolvedReason?: string;
   status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
+  address?: {
+    addressLine?: string;
+    city?: string;
+    state?: string;
+    district?: string;
+    subdivision?: string;
+    panchayat?: string;
+    thana?: string;
+    pincode?: string;
+  };
   location?: {
     division: mongoose.Types.ObjectId;
     district: mongoose.Types.ObjectId;
     subdivision: mongoose.Types.ObjectId;
     block: mongoose.Types.ObjectId;
     panchayat: mongoose.Types.ObjectId;
-    thana: mongoose.Types.ObjectId;
     pincode?: string;
   };
   escalationLevel?: number;
@@ -147,10 +158,11 @@ const GrievanceSchema = new Schema<IGrievance>(
         addressLine: String,
         city: String,
         state: String,
-        district: String,
-        subdivision: String,
-        panchayat: String,
-        thana: String,
+        division: { type: mongoose.Schema.Types.ObjectId, ref: 'Division' },
+        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
+        subdivision: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
+        panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
+        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
         pincode: String,
       },
     },
@@ -215,85 +227,95 @@ const GrievanceSchema = new Schema<IGrievance>(
       feedbackConsent: Boolean,
       satisfactionSurveyConsent: Boolean,
     },
-   
-      grievanceId: {
-        type: String,
-        unique: true,
-        sparse: true, // It might be uniquely generated later, sparse allows multiple docs without grievanceId initially
-      },
 
-      channel: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "ComplaintSource",
-      },
-      assignedPriority: {
-        type: String,
-        enum: ["NORMAL", "URGENT", "CRITICAL", "PENDING"],
-        default: "PENDING",
-      },
-      assignedOfficer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      assignedAt: {
-        type: Date,
-      },
-      resolvedAt: {
-        type: Date,
-      },
-      resolvedReason: {
-        type: String,
-      },
-      status: {
-        type: String,
-        enum: [
-          "OPEN",
-          "IN_PROGRESS",
-          "RESOLVED",
-          "CLOSED",
-          "REOPENED",
-          "ESCALATED",
-        ],
-        default: "OPEN",
-      },
-      location: {
-        division: { type: mongoose.Schema.Types.ObjectId, ref: 'Division' },
-        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
-        subdivision: { type: mongoose.Schema.Types.ObjectId, ref: 'Subdivision' },
-        block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
-        panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
-        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
-        pincode: String,
-      },
-      escalationLevel: {
+    grievanceId: {
+      type: String,
+      unique: true,
+      sparse: true, // It might be uniquely generated later, sparse allows multiple docs without grievanceId initially
+    },
+
+    channel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ComplaintSource",
+    },
+    assignedPriority: {
+      type: String,
+      enum: ["NORMAL", "URGENT", "CRITICAL", "PENDING"],
+      default: "PENDING",
+    },
+    assignedOfficer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    assignedAt: {
+      type: Date,
+    },
+    resolvedAt: {
+      type: Date,
+    },
+    resolvedReason: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: [
+        "OPEN",
+        "IN_PROGRESS",
+        "RESOLVED",
+        "CLOSED",
+        "REOPENED",
+        "ESCALATED",
+      ],
+      default: "OPEN",
+    },
+    location: {
+      division: { type: mongoose.Schema.Types.ObjectId, ref: "Division" },
+      district: { type: mongoose.Schema.Types.ObjectId, ref: "District" },
+      subdivision: { type: mongoose.Schema.Types.ObjectId, ref: "Subdivision" },
+      block: { type: mongoose.Schema.Types.ObjectId, ref: "Block" },
+      panchayat: { type: mongoose.Schema.Types.ObjectId, ref: "Panchayat" },
+      thana: { type: mongoose.Schema.Types.ObjectId, ref: "Thana" },
+      pincode: String,
+    },
+    escalationLevel: {
       type: Number,
-      default: 0
+      default: 0,
     },
     slaWarningSent: {
       type: Boolean,
-      default: false
+      default: false,
     },
-      geotaggedImages: [GeotaggedImageSchema],
-      rating: {
-        type: Number,
-        min: 1,
-        max: 5,
-      },
-      feedbackText: {
-        type: String,
-      },
-      reOpenReason: {
-        type: String,
-      },
-      createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      sourceApiKey: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "ApiKey",
-      },
+    geotaggedImages: [GeotaggedImageSchema],
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
     },
+    feedbackText: {
+      type: String,
+    },
+    reOpenReason: {
+      type: String,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    sourceApiKey: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ApiKey",
+    },
+    address: {
+      addressLine: String,
+      district: String,
+      panchayat: String,
+      pincode: String,
+      subdivision: String,
+      thana: String,
+      state: String,
+      city: String,
+    },
+  },
   {
     timestamps: true,
   },

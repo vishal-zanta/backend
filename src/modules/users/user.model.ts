@@ -65,10 +65,7 @@ const userSchema = new Schema<IUser>({
     enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED'],
     default: 'ACTIVE'
   },
-  // isAdmin:{
-  //   type:Boolean,
-  //   default:false
-  // },
+
   escalatedCount: {
     type: Number,
     default: 0

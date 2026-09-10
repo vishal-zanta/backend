@@ -28,11 +28,25 @@ const addressSchema = z.object({
   addressLine: z.string().min(1, "Address details are required"),
   city: z.string().optional(),
   state: z.string().optional(),
-  district: z.string().min(1, "District is required"),
-  subdivision: z.string().min(1, "Block is required"),
-  panchayat: z.string().min(1, "Panchayat is required"),
-  thana: z.string().min(1, "Thana is required"),
+  division: mongoId.optional(),
+  district: mongoId,
+  subdivision: mongoId,
+  block: mongoId.optional(),
+  panchayat: mongoId,
+  thana: mongoId,
   pincode: z.string().min(1, "Pincode is required"),
+});
+
+
+const rootAddressSchema = z.object({
+  addressLine: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  district: z.string().optional(),
+  subdivision: z.string().optional(),
+  panchayat: z.string().optional(),
+  thana: z.string().optional(),
+  pincode: z.string().optional(),
 });
 
 export const createGrievanceSchema = z.object({
@@ -76,14 +90,13 @@ export const createGrievanceSchema = z.object({
   communication: z.object({
     feedbackConsent: optionalBoolean,
   }).optional(),
-  // address: addressSchema,
+  address: rootAddressSchema.optional(),
   location: z.object({
     division: mongoId,
     district: mongoId,
     subdivision: mongoId,
     block: mongoId,
     panchayat: mongoId,
-    thana: mongoId,
     pincode: z
       .string()
       .min(1, "Pincode is required")

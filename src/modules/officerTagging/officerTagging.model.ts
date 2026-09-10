@@ -3,8 +3,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IOfficerTagging extends Document {
   officer: mongoose.Types.ObjectId;
   services: mongoose.Types.ObjectId[];
-  district: mongoose.Types.ObjectId;
-  wards: string[];
+  subdivisions: mongoose.Types.ObjectId[];
+  divisions: mongoose.Types.ObjectId[];
+
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -18,18 +19,18 @@ const officerTaggingSchema = new Schema<IOfficerTagging>({
     unique: true
   },
  
-  district:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'District'
-  },
   services: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Service'
   }],
-  wards: {   // save subdivision of officers map to complain subdivision
-    type: [String],
-    default: []
-  },
+  subdivisions:[{
+     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Subdivision'
+  }],
+  divisions:[{
+     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Division'
+  }],
   active: {
     type: Boolean,
     default: true

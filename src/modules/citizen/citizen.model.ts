@@ -11,10 +11,12 @@ export interface ICitizen extends Document {
     addressLine?: string;
     city?: string;
     state?: string;
+    division?: mongoose.Types.ObjectId;
     district?: mongoose.Types.ObjectId;
-    subdivision?: string;
-    panchayat?: string;
-    thana?: string;
+    subdivision?: mongoose.Types.ObjectId;
+    block?: mongoose.Types.ObjectId;
+    panchayat?: mongoose.Types.ObjectId;
+    thana?: mongoose.Types.ObjectId;
     pincode?: string;
   };
   createdAt: Date;
@@ -59,10 +61,12 @@ const CitizenSchema = new Schema<ICitizen>(
         addressLine: String,
         city: String,
         state: String,
-        district: String,
-        subdivision: String,
-        panchayat: String,
-        thana: String,
+        division: { type: mongoose.Schema.Types.ObjectId, ref: 'Division' },
+        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
+        subdivision: { type: mongoose.Schema.Types.ObjectId, ref: 'Subdivision' },
+        block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
+        panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
+        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
         pincode: String,
       },
     
