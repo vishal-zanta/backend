@@ -2,6 +2,8 @@ import { Router } from "express";
 import healthRoutes from "./system.routes.js";
 import authRoutes from "../auth/auth.routes.js";
 import userRoutes from "../users/user.routes.js";
+import addressRoutes from "../address/address.routes.js";
+
 import roleRoutes from "../roles/role.routes.js";
 import complaintSourceRoutes from "../complaintSource/complaintSource.routes.js";
 import serviceRoutes from "../services/service.routes.js";
@@ -35,6 +37,8 @@ router.use("/citizen", citizenRoutes);
 router.use("/auth", authRoutes);
 router.use("/options", optionsRoutes);
 router.use("/users", userRoutes);
+router.use("/address", addressRoutes);
+
 router.use("/roles", roleRoutes);
 router.use("/complaint-sources", complaintSourceRoutes);
 router.use("/services", serviceRoutes);

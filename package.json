@@ -8,7 +8,8 @@
     "dev": "tsx watch --import ./src/app.ts",
     "build": "tsc",
     "start": "node --import  ./dist/app.js",
-    "seed": " npx tsx ./src/scripts/seedData.ts"
+    "seed": " npx tsx ./src/scripts/seedData.ts",
+    "seed:address": "npx tsx ./src/scripts/seedAddress.ts"
   },
   "keywords": [],
   "author": "",

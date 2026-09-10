@@ -78,12 +78,11 @@ export interface IGrievance extends Document {
   resolvedReason?: string;
   status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
   location?: {
-    division: string;
     district: mongoose.Types.ObjectId;
-    subdivision: string;
-    block: string;
-    panchayat: string;
-    pincode: string;
+    block: mongoose.Types.ObjectId;
+    panchayat: mongoose.Types.ObjectId;
+    thana: mongoose.Types.ObjectId;
+    pincode?: string;
   };
   escalationLevel?: number;
   geotaggedImages?: IGeotaggedImage[];
@@ -259,14 +258,10 @@ const GrievanceSchema = new Schema<IGrievance>(
         default: "OPEN",
       },
       location: {
-        division: String,
-        district: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Demography',
-        },
-        subdivision: String,
-        block: String,
-        panchayat: String,
+        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
+        block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
+        panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
+        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
         pincode: String,
       },
       escalationLevel: {
