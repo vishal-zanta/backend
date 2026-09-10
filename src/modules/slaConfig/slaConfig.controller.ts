@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { SlaConfig } from './slaConfig.model.js';
-import { SubService } from '../services/subService.model.js';
 import { Service } from '../services/service.model.js';
 import { Role } from '../roles/role.model.js';
 import { asyncHandler } from '../../middlewares/asyncHandler.js';
@@ -10,18 +9,18 @@ import { validateRequestFields } from '../../utils/helpers.js';
 
 export class SlaConfigController {
   static createConfig = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["subService", "escalations"], req.body);
+    validateRequestFields(["service", "escalations"], req.body);
     
-    const { subService, escalations } = req.body;
+    const { service, escalations } = req.body;
 
-    const existingConfig = await SlaConfig.findOne({ subService });
+    const existingConfig = await SlaConfig.findOne({ service });
     if (existingConfig && existingConfig.active) {
-      throw new ApiError({ status: 400, message: 'SLA config for this Sub-Service already exists' });
+      throw new ApiError({ status: 400, message: 'SLA config for this Service already exists' });
     }
 
-    const subServiceData = await SubService.findById(subService);
-    if (!subServiceData) {
-      throw new ApiError({ status: 404, message: 'Sub-Service not found' });
+    const serviceData = await Service.findById(service);
+    if (!serviceData) {
+      throw new ApiError({ status: 404, message: 'Service not found' });
     }
 
     // Validate escalations
@@ -34,10 +33,10 @@ export class SlaConfigController {
       }
     }
 
-    if (totalSlaHours > subServiceData.sla) {
+    if (totalSlaHours > serviceData.sla) {
       throw new ApiError({ 
         status: 400, 
-        message: `Total escalation time (${totalSlaHours}h) cannot be greater than Sub-Service SLA (${subServiceData.sla}h)` 
+        message: `Total escalation time (${totalSlaHours}h) cannot be greater than Service SLA (${serviceData.sla}h)` 
       });
     }
 
@@ -54,21 +53,18 @@ export class SlaConfigController {
   });
 
   static getConfigs = asyncHandler(async (req: Request, res: Response) => {
-    const { subServiceId } = req.query;
+    const { serviceId } = req.query;
     const department = req.query.department as string;
 
     const query: any = { active: true };
     
-    if (subServiceId) {
-      query.subService = subServiceId;
+    if (serviceId) {
+      query.service = serviceId;
     } else if (department) {
       const services = await Service.find({ department }).select('_id');
       const serviceIds = services.map(s => s._id);
       
-      const subServices = await SubService.find({ service: { $in: serviceIds } }).select('_id');
-      const subServiceIds = subServices.map(s => s._id);
-      
-      query.subService = { $in: subServiceIds };
+      query.service = { $in: serviceIds };
     }
 
     const page = parseInt(req.query.page as string) || 1;
@@ -76,10 +72,7 @@ export class SlaConfigController {
     const skip = (page - 1) * limit;
 
     const configs = await SlaConfig.find(query)
-      .populate({
-        path: 'subService',
-        populate: { path: 'service' }
-      })
+      .populate({ path: "service", populate: { path: "department" } })
       .populate('escalations.role')
       .skip(skip)
       .limit(limit);
@@ -104,8 +97,8 @@ export class SlaConfigController {
     }
 
     if (escalations) {
-      const subServiceData = await SubService.findById(config.subService);
-      if (subServiceData) {
+      const serviceData = await Service.findById(config.service);
+      if (serviceData) {
         let totalSlaHours = 0;
         for (const esc of escalations) {
           totalSlaHours += esc.slaHours;
@@ -115,10 +108,10 @@ export class SlaConfigController {
           }
         }
         
-        if (totalSlaHours > subServiceData.sla) {
+        if (totalSlaHours > serviceData.sla) {
           throw new ApiError({ 
             status: 400, 
-            message: `Total escalation time (${totalSlaHours}h) cannot be greater than Sub-Service SLA (${subServiceData.sla}h)` 
+            message: `Total escalation time (${totalSlaHours}h) cannot be greater than Service SLA (${serviceData.sla}h)` 
           });
         }
       }

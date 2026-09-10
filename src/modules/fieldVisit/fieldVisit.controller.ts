@@ -104,21 +104,13 @@ export class FieldVisitController {
       {$match: status ? { status } : {} },
       {
         $lookup: {
-          from: 'subservices',
-          localField: 'grievance.classification.subService',
-          foreignField: '_id',
-          as: 'subServiceDetails'
-        }
-      },
-      { $unwind: { path: '$subServiceDetails', preserveNullAndEmptyArrays: true } },
-      {
-        $lookup: {
           from: 'services',
-          localField: 'subServiceDetails.service',
+          localField: 'grievance.classification.service',
           foreignField: '_id',
           as: 'serviceDetails'
         }
       },
+      
       { $unwind: { path: '$serviceDetails', preserveNullAndEmptyArrays: true } },
       { $sort: { createdAt: -1 } },
       {
@@ -134,8 +126,6 @@ export class FieldVisitController {
                 schedule: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                'subServiceDetails.title': 1,
-                'subServiceDetails.titleHindi': 1,
                 'serviceDetails.title': 1,
                 'serviceDetails.titleHindi': 1,
                 'grievance._id': 1,

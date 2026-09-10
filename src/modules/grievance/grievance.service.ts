@@ -1,3 +1,4 @@
+import { Service } from '../services/service.model.js';
 import { Grievance, IAttachment } from "./grievance.model.js";
 import { StorageService } from "../../libs/storage.lib.js";
 import { getNextSequenceValue } from "../../utils/counter.model.js";
@@ -6,7 +7,6 @@ import { ObjectId } from "mongoose";
 import { TimelineService } from "../timeline/timeline.service.js";
 import { User } from "../users/user.model.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
-import { SubService } from "../services/subService.model.js";
 import { FieldVisit } from "../fieldVisit/fieldVisit.model.js";
 import { Citizen } from "../citizen/citizen.model.js";
 import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
@@ -36,11 +36,11 @@ export class GrievanceService {
    * Determine the best officer to assign to a grievance based on workflow levels,
    * tagged sub-services, and wards (round-robin).
    */
-  static async autoAssignOfficer(subServiceId: string, subdivision?: string): Promise<string | null> {
+  static async autoAssignOfficer(serviceId: string, subdivision?: string): Promise<string | null> {
     try {
-      const subService = await SubService.findById(subServiceId).populate('service');
-      if (!subService || !(subService as any).service || !(subService as any).service.department) return null;
-      const departmentId = (subService as any).service.department;
+      const serviceDoc = await Service.findById(serviceId);
+      if (!serviceDoc || !serviceDoc.department) return null;
+      const departmentId = serviceDoc.department;
 
       const workflowDoc = await WorkflowLevel.findOne({ department: departmentId, active: true });
       if (!workflowDoc || !workflowDoc.levels || workflowDoc.levels.length === 0) return null;
@@ -57,7 +57,7 @@ export class GrievanceService {
 
         const tagQuery: any = {
           officer: { $in: userIds },
-          services: subServiceId,
+          services: serviceId,
           active: true
         };
         
@@ -72,7 +72,7 @@ export class GrievanceService {
         const officerIds = [...new Set(eligibleTags.map(t => t.officer.toString()))].sort();
         
         const lastGrievanceQuery: any = {
-          "classification.subService": subServiceId,
+          "classification.service": serviceId,
           assignedOfficer: { $in: eligibleTags.map(t => t.officer) }
         };
         if (subdivision) {
@@ -188,12 +188,12 @@ export class GrievanceService {
     }
 
     // Auto Assignment Logic
-    const subServiceId = classification?.subService;
+    const serviceId = classification?.service;
     let autoAssignFailed = false;
     let subdivision:string|undefined ;
-    if (subServiceId) {
+    if (serviceId) {
       subdivision = location?.subdivision ;
-      const assignedOfficerId = await GrievanceService.autoAssignOfficer(subServiceId, subdivision);
+      const assignedOfficerId = await GrievanceService.autoAssignOfficer(serviceId, subdivision);
       if (assignedOfficerId) {
         payloadToCreate.assignedOfficer = assignedOfficerId;
         payloadToCreate.assignedAt = new Date();
@@ -209,7 +209,7 @@ export class GrievanceService {
     }
     if (autoAssignFailed) {
       // Tagging Gap Alert if no officer found for this subservice and ward
-      NotificationService.notifyTaggingGap(subServiceId, subdivision, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
+      NotificationService.notifyTaggingGap(serviceId, subdivision, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
     }
 
     const officer:any = await User.findById(createdBy).populate("role").lean();
@@ -272,9 +272,9 @@ export class GrievanceService {
     }
 
     // Handle Field Visit Auto-Generation
-    if (classification?.subService) {
-      const subServiceDoc = await SubService.findById(classification.subService);
-      if (subServiceDoc && subServiceDoc.fieldVisit) {
+    if (classification?.service) {
+      const serviceDocSLA = await Service.findById(classification.service);
+      if (serviceDocSLA && serviceDocSLA.fieldVisit) {
         const visitSeq = await getNextSequenceValue(`visit_${year}`);
         const visitSeqString = String(visitSeq).padStart(4, "0");
         const visitId = `FV-${year}-${visitSeqString}`;

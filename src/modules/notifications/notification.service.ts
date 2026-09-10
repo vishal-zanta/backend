@@ -120,18 +120,18 @@ export class NotificationService {
     let subServiceName = String(subServiceId);
     try {
       // Lazy load to avoid circular dependencies and get the friendly name
-      const { SubService } = await import('../services/subService.model.js');
-      const subService = await SubService.findById(subServiceId).select('title titleHindi');
-      if (subService) {
-        subServiceName = subService.title || subService.titleHindi || subServiceName;
+      const { Service } = await import('../services/service.model.js');
+      const serviceDoc = await Service.findById(subServiceId).select('title titleHindi');
+      if (serviceDoc) {
+        subServiceName = serviceDoc.title || serviceDoc.titleHindi || subServiceName;
       }
     } catch (e) {
-      console.error("Error looking up SubService for Tagging Gap notification", e);
+      console.error("Error looking up Service for Tagging Gap notification", e);
     }
     
     const finalWard = ward ? ward : 'N/A';
     const title = "Officer Tagging Gap Alert";
-    const message = `Auto-assignment failed for Grievance #${grievanceRef || 'Unknown'} - SubService (${subServiceName}) and Ward (${finalWard}). No eligible officer tagging found.`;
+    const message = `Auto-assignment failed for Grievance #${grievanceRef || 'Unknown'} - Service (${subServiceName}) and Ward (${finalWard}). No eligible officer tagging found.`;
     await this.sendToRole('ADMIN', { title, message, type: 'ALERT', referenceId: grievanceId, referenceModel: grievanceId ? 'Grievance' : undefined, metadata: { subServiceId, subServiceName, ward: finalWard, grievanceRef } });
   }
 }

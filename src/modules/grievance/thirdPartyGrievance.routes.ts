@@ -20,7 +20,6 @@ router.get('/metadata/complaint-sources', ComplaintSourceController.getSources);
 router.get('/metadata/demographics', DemographyController.getDemographies);
 router.get('/metadata/departments', DepartmentController.getDepartments);
 router.get('/metadata/services', ServiceController.getServices);
-router.get('/metadata/sub-services', ServiceController.getSubServices);
 
 router.post('/', upload.array('files', 5, 'grievance'), ThirdPartyGrievanceController.registerGrievance);
 router.get('/track', ThirdPartyGrievanceController.trackGrievances);

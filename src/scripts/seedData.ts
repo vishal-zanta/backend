@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import connectDB from "../db/mongo.js";
 import { Role } from "../modules/roles/role.model.js";
 import { Service } from "../modules/services/service.model.js";
-import { SubService } from "../modules/services/subService.model.js";
 import { ComplaintSource } from "../modules/complaintSource/complaintSource.model.js";
 import { Demography } from "../modules/demography/demography.model.js";
 import { Ulb } from "../modules/demography/ulb.model.js";
@@ -437,19 +436,13 @@ const runSeed = async () => {
       const deptId = departmentMap[s.department];
       const service = await Service.findOneAndUpdate(
         { title: s.title },
-        { $set: { title: s.title, titleHindi: s.titleHindi, department: deptId } },
+        { $set: { title: s.title, titleHindi: s.titleHindi, department: deptId, sla: s.subServices && s.subServices.length > 0 ? s.subServices[0].sla : 24, geoTagged: s.subServices && s.subServices.length > 0 ? s.subServices[0].geoTagged : false, fieldVisit: s.subServices && s.subServices.length > 0 ? s.subServices[0].fieldVisit : false } },
         { upsert: true, new: true }
       );
 
-      for (const sub of s.subServices) {
-        await SubService.findOneAndUpdate(
-          { title: sub.title, service: service._id },
-          { $set: { ...sub, service: service._id } },
-          { upsert: true, new: true }
-        );
-      }
+      
     }
-    console.log("Services and Sub-services seeded.");
+    console.log("Services seeded.");
 
     // 4. Seed Demography
     const districtIdMap: Record<string, mongoose.Types.ObjectId> = {};
@@ -496,9 +489,9 @@ const runSeed = async () => {
     const adminRole = await Role.findOne({ level: "Admin" });
     const patnaDistrict = await Demography.findOne({ name: "Patna" });
     const streetLightService = await Service.findOne({ title: "Hand Pump tube well problem" });
-    const subServices = await SubService.find({ service: streetLightService?._id });
+    
 
-    if (l1Role && l2Role && patnaDistrict && streetLightService && subServices.length > 0) {
+    if (l1Role && l2Role && patnaDistrict && streetLightService && true) {
       const createOfficer = async (userCode: string, name: string, email: string, phone: string, roleId: mongoose.Types.ObjectId) => {
         let user = await User.findOne({ email });
         if (!user) {
@@ -541,7 +534,7 @@ const runSeed = async () => {
             $set: {
               officer: officerId,
               service: [streetLightService._id],
-              services: subServices.map(s => s._id),
+              services: streetLightService ? [streetLightService._id] : [],
               district: patnaDistrict._id,
               active: true
             }
@@ -566,7 +559,7 @@ const runSeed = async () => {
     const frequencyId = await getOptionId("Evidence Frequency", "one_time");
     const beneficiaryId = await getOptionId("Affected Beneficiaries", "self");
     const complaintSource = await ComplaintSource.findOne({ title: "Website" });
-    const allSubServices = await SubService.find().limit(5);
+    const allSubServices = [];
     const l1UserGrievance = await User.findOne({ email: "l1@example.com" });
     const l2UserGrievance = await User.findOne({ email: "l2@example.com" });
     const districtPatna = await Demography.findOne({ name: "Patna" });

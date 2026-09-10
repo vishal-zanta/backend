@@ -11,7 +11,6 @@ import exifr from "exifr";
 
 import { GrievanceService } from "./grievance.service.js";
 import { CaptchaService } from "../captcha/captcha.service.js";
-import { SubService } from "../services/subService.model.js";
 import { Service } from "../services/service.model.js";
 import { Department } from "../departments/department.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
@@ -40,10 +39,8 @@ export class GrievanceController {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.service: Reference does not exist" });
       }));
     }
-    if (data.classification?.subService) {
-      checks.push(SubService.exists({ _id: data.classification.subService }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.subService: Reference does not exist" });
-      }));
+    if (data.classification?.service) {
+      
     }
     if (data.classification?.nature) {
       checks.push(Option.exists({ _id: data.classification.nature }).then(exists => {
@@ -86,13 +83,13 @@ export class GrievanceController {
   /**
    * Helper to attach SLA hours to a single grievance
    */
-  static attachSlaToGrievance = async (grievance: any) => {
+    static attachSlaToGrievance = async (grievance: any) => {
     let slaHours;
-    const subServiceId = grievance.classification?.subService?._id;
-    const officerRoleId = grievance.assignedOfficer?.role?._id;
+    const serviceId = grievance.classification?.service?._id || grievance.classification?.service;
+    const officerRoleId = grievance.assignedOfficer?.role?._id || grievance.assignedOfficer?.role;
 
-    if (subServiceId && officerRoleId) {
-      const slaConfig = await SlaConfig.findOne({ subService: subServiceId, active: true });
+    if (serviceId && officerRoleId) {
+      const slaConfig = await SlaConfig.findOne({ service: serviceId, active: true });
       if (slaConfig && slaConfig.escalations) {
         const roleSla = slaConfig.escalations.find((e: any) => e.role.toString() === officerRoleId.toString());
         if (roleSla) {
@@ -106,21 +103,21 @@ export class GrievanceController {
   /**
    * Helper to attach SLA hours to an array of grievances
    */
-  private static async attachSlaToGrievancesList(grievances: any[], defaultOfficerRoleId?: string) {
-    const subServiceIds = grievances.map((g: any) => g.classification?.subService?._id || g.classification?.subService);
-    const slaConfigs = await SlaConfig.find({ subService: { $in: subServiceIds }, active: true });
+    private static async attachSlaToGrievancesList(grievances: any[], defaultOfficerRoleId?: string) {
+    const serviceIds = grievances.map((g: any) => g.classification?.service?._id || g.classification?.service);
+    const slaConfigs = await SlaConfig.find({ service: { $in: serviceIds }, active: true });
     
     const slaConfigMap = new Map();
     for (const config of slaConfigs) {
-      slaConfigMap.set(config.subService.toString(), config);
+      slaConfigMap.set(config.service.toString(), config);
     }
 
     return grievances.map((g: any) => {
-      const subServiceId = g.classification?.subService?._id?.toString() || g.classification?.subService?.toString();
+      const serviceId = g.classification?.service?._id?.toString() || g.classification?.service?.toString();
       const officerRoleId = defaultOfficerRoleId || g.assignedOfficer?.role?._id?.toString() || g.assignedOfficer?.role?.toString();
       
-      if (subServiceId && officerRoleId) {
-        const config = slaConfigMap.get(subServiceId);
+      if (serviceId && officerRoleId) {
+        const config = slaConfigMap.get(serviceId);
         if (config && config.escalations) {
           const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
           if (roleSla) {
@@ -313,17 +310,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate({
-        path: "classification.subService",
-        select: "title titleHindi sla service",
-        populate: {
-          path: "service",
-          select: "title titleHindi department",
-          populate: {
-            path: "department"
-          }
-        }
-      })
+      .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
       .populate({
         path: "assignedOfficer",
         select: "name role",
@@ -359,15 +346,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 401, message: "Unauthorized. Citizen not found." });
     }
 
-    const grievance = await Grievance.findById(id).populate({
-      path: "classification.subService",
-      populate: {
-        path: "service",
-        populate: {
-          path: "department"
-        }
-      }
-    })
+    const grievance = await Grievance.findById(id).populate({ path: "classification.service", populate: { path: "department" } })
     .populate("classification.department")
     .populate("classification.service")
     .populate("classification.nature").populate("impact.affectedBeneficiary")
@@ -553,7 +532,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       { $match: { createdAt: { $gte: currentStart, $lt: now } } },
       {
         $group: {
-          _id: "$classification.subService",
+          _id: "$classification.service",
           count: { $sum: 1 }
         }
       },
@@ -562,14 +541,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           from: "subservices",
           localField: "_id",
           foreignField: "_id",
-          as: "subServiceDetails"
+          as: "serviceDetails"
         }
       },
-      { $unwind: { path: "$subServiceDetails", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$serviceDetails", preserveNullAndEmptyArrays: true } },
       {
         $project: {
-          name: "$subServiceDetails.title",
-          titleHindi: "$subServiceDetails.titleHindi",
+          name: "$serviceDetails.title",
+          titleHindi: "$serviceDetails.titleHindi",
           count: 1
         }
       }
@@ -657,7 +636,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
   });
 
   /**
-   * Get all grievances (for agents/admins) with search across ID, mobile, and subService name
+   * Get all grievances (for agents/admins) with search across ID, mobile, and service name
    */
   static getAllGrievances = asyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -690,15 +669,15 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     if (search) {
       const searchRegex = new RegExp(search, "i");
-      let subServiceIds: any[] = [];
+      let serviceIds: any[] = [];
       
-      // Look up matching subServices by name
+      // Look up matching services by name
       try {
         
-        const matchingSubServices = await SubService.find({ name: searchRegex }).select("_id");
-        subServiceIds = matchingSubServices.map(s => s._id);
+        const matchingServices = await Service.find({ title: searchRegex }).select("_id");
+        serviceIds = matchingServices.map(s => s._id);
       } catch (e) {
-        console.error("Failed to lookup SubService for search", e);
+        console.error("Failed to lookup Service for search", e);
       }
 
       query.$or = [
@@ -707,9 +686,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         
       ];
 
-      // If any subServices matched the search string by name, include them in the OR clause
-      if (subServiceIds.length > 0) {
-        query.$or.push({ "classification.subService": { $in: subServiceIds } });
+      // If any services matched the search string by name, include them in the OR clause
+      if (serviceIds.length > 0) {
+        query.$or.push({ "classification.service": { $in: serviceIds } });
       }
     }
 
@@ -721,17 +700,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate({
-        path: "classification.subService",
-        select: "title titleHindi sla service",
-        populate: {
-          path: "service",
-          select: "title titleHindi department",
-          populate: {
-            path: "department"
-          }
-        }
-      })
+      .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
       .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .populate({
         path: "assignedOfficer",
@@ -882,8 +851,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       let searchSubServiceIds: any[] = [];
       
       try {
-        const matchingSubServices = await SubService.find({ name: searchRegex }).select("_id");
-        searchSubServiceIds = matchingSubServices.map(s => s._id);
+        const matchingServices = await Service.find({ title: searchRegex }).select("_id");
+        searchSubServiceIds = matchingServices.map(s => s._id);
       } catch (e) {}
 
       query.$or = [
@@ -892,7 +861,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       ];
 
       if (searchSubServiceIds.length > 0) {
-        query.$or.push({ "classification.subService": { $in: searchSubServiceIds } });
+        query.$or.push({ "classification.service": { $in: searchSubServiceIds } });
       }
     }
 
@@ -904,17 +873,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("classification.department")
       .populate("classification.service")
       .populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate({
-        path: "classification.subService",
-        select: "title titleHindi sla service",
-        populate: {
-          path: "service",
-          select: "title titleHindi department",
-          populate: {
-            path: "department"
-          }
-        }
-      })
+      .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
       .populate("location.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi").populate("citizenInfo.address.district", "name nameHindi")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
@@ -1366,12 +1325,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 400, message: "No images provided." });
     }
 
-    const grievance: any = await Grievance.findById(id).populate("classification.subService");
+    const grievance: any = await Grievance.findById(id).populate("classification.service");
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
 
-    const isGeotagMandatory = grievance.classification?.subService?.geoTagged === true;
+    const isGeotagMandatory = grievance.classification?.service?.geoTagged === true;
 
     const newGeotaggedImages = [];
 
@@ -1444,15 +1403,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
   static getAdminGrievanceById = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 
-    const grievance = await Grievance.findById(id).populate({
-      path: "classification.subService",
-      populate: { 
-        path: "service",
-        populate: {
-          path: "department"
-        }
-      }
-    })
+    const grievance = await Grievance.findById(id).populate({ path: "classification.service", populate: { path: "department" } })
     .populate("classification.department")
     .populate("classification.service")
     .populate("classification.nature").populate("impact.affectedBeneficiary")
@@ -1496,15 +1447,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 401, message: "Unauthorized. Officer not found." });
     }
 
-    const grievance = await Grievance.findById(id).populate({
-      path: "classification.subService",
-      populate: { 
-        path: "service",
-        populate: {
-          path: "department"
-        }
-      }
-    })
+    const grievance = await Grievance.findById(id).populate({ path: "classification.service", populate: { path: "department" } })
     .populate("classification.department")
     .populate("classification.service")
     .populate("classification.nature").populate("impact.affectedBeneficiary")
@@ -1524,7 +1467,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const assignedOfficerId = grievance.assignedOfficer?._id.toString();
 
-    // Verify ownership: either explicitly assigned OR subService falls under their tags
+    // Verify ownership: either explicitly assigned OR service falls under their tags
     const isOwner = 
       (assignedOfficerId === officerId.toString())
 // console.log(assignedOfficerId,officerId)

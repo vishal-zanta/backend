@@ -7,7 +7,6 @@ import { GrievanceService } from './grievance.service.js';
 import { createGrievanceByAgentSchema } from './grievance.validation.js';
 import { ComplaintSource } from '../complaintSource/complaintSource.model.js';
 import { Demography } from '../demography/demography.model.js';
-import { SubService } from '../services/subService.model.js';
 import { GrievanceController } from './grievance.controller.js';
 import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';
@@ -83,39 +82,18 @@ export class ThirdPartyGrievanceController {
       query['location.district'] = { $in: divisionIds };
     }
 
-    let allowedSubServiceIds: string[] | null = null;
-
-    if (department) {
-      const departmentIds = (department as string).split(',').map(id => id.trim());
-      const services = await Service.find({ department: { $in: departmentIds } });
-      const serviceIds = services.map(s => s._id);
-
-      const subServices = await SubService.find({ service: { $in: serviceIds } });
-      allowedSubServiceIds = subServices.map(s => s._id.toString());
-    }
-
+    
+    let allowedServiceIds: string[] | null = null;
     if (service) {
-      const serviceIds = (service as string).split(',').map(id => id.trim());
-      const subServices = await SubService.find({ service: { $in: serviceIds } });
-      const currentIds = subServices.map(s => s._id.toString());
-      if (allowedSubServiceIds) {
-        allowedSubServiceIds = allowedSubServiceIds.filter(id => currentIds.includes(id));
-      } else {
-        allowedSubServiceIds = currentIds;
-      }
+      allowedServiceIds = (service as string).split(',');
+    } else if (department) {
+      const depIds = (department as string).split(',');
+      const services = await Service.find({ department: { $in: depIds } });
+      allowedServiceIds = services.map(s => s._id.toString());
     }
 
-    if (subService) {
-      const subServiceIds = (subService as string).split(',').map(id => id.trim());
-      if (allowedSubServiceIds) {
-        allowedSubServiceIds = allowedSubServiceIds.filter(id => subServiceIds.includes(id));
-      } else {
-        allowedSubServiceIds = subServiceIds;
-      }
-    }
-
-    if (allowedSubServiceIds !== null) {
-      query['classification.subService'] = { $in: allowedSubServiceIds };
+    if (allowedServiceIds !== null) {
+      query['classification.service'] = { $in: allowedServiceIds };
     }
 
     if (startDate || endDate) {
@@ -139,7 +117,7 @@ export class ThirdPartyGrievanceController {
       .select("grievanceId status assignedPriority createdAt updatedAt classification location citizenInfo impact")
       .populate("classification.department")
       .populate("classification.service").populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate("classification.subService", "title")
+      .populate("classification.service", "title")
       .populate("location.district", "name").populate("citizenInfo.address.district", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -168,15 +146,7 @@ export class ThirdPartyGrievanceController {
     const grievance = await Grievance.findOne({
       $or: [{ _id: id.length === 24 ? id : null }, { grievanceId: id }],
       sourceApiKey: apiKeyDoc._id
-    }).populate({
-      path: "classification.subService",
-      populate: { 
-        path: "service",
-        populate: {
-          path: "department"
-        }
-      }
-    })
+    }).populate({ path: "classification.service", populate: { path: "department" } })
     .populate("classification.department")
     .populate("classification.service").populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({

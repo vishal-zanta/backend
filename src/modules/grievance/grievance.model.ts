@@ -40,7 +40,6 @@ export interface IGrievance extends Document {
   classification: {
     department: mongoose.Types.ObjectId;
     service: mongoose.Types.ObjectId;
-    subService: mongoose.Types.ObjectId;
     scheme?: string;
     nature: mongoose.Types.ObjectId;
     isSeasonal?: boolean;
@@ -167,11 +166,6 @@ const GrievanceSchema = new Schema<IGrievance>(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Service",
         required: true,
-      },
-      subService: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "SubService",
-        // required: true,
       },
       scheme: String,
       nature: {

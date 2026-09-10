@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { OfficerTagging } from './officerTagging.model.js';
 import { User } from '../users/user.model.js';
-import { SubService } from '../services/subService.model.js';
+import { Service } from '../services/service.model.js';
 import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
@@ -10,9 +10,9 @@ import { Role } from '../roles/role.model.js';
 
 export class OfficerTaggingController {
   static createTagging = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["officer", "services", "wards","service","district"], req.body);
+    validateRequestFields(["officer", "services", "wards","district"], req.body);
     
-    const { officer, services, wards,service,district } = req.body;
+    const { officer, services, wards,district } = req.body;
 
     const userExists = await User.findById(officer);
     if (!userExists) {
@@ -21,7 +21,7 @@ export class OfficerTaggingController {
 
     // Verify subservices
     if (services && services.length > 0) {
-      const validServices = await SubService.find({ _id: { $in: services } });
+      const validServices = await Service.find({ _id: { $in: services } });
       if (validServices.length !== services.length) {
         throw new ApiError({ status: 400, message: 'One or more provided Sub-Services are invalid' });
       }
@@ -32,7 +32,6 @@ export class OfficerTaggingController {
       if (!existingTagging.active) {
         existingTagging.services = services;
         existingTagging.wards = wards;
-        existingTagging.service = service;
         existingTagging.district = district;
         existingTagging.active = true;
         await existingTagging.save();
@@ -74,7 +73,7 @@ export class OfficerTaggingController {
         }
       })
       .populate('services', 'title titleHindi')
-      .populate('service', 'title titleHindi department')
+      
       .populate('district', 'name nameHindi')
       .skip(skip)
       .limit(limit);
@@ -91,7 +90,7 @@ export class OfficerTaggingController {
 
   static updateTagging = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { services, wards, service, district } = req.body;
+    const { services, wards, district } = req.body;
     
     const tagging = await OfficerTagging.findById(id);
     if (!tagging) {
@@ -99,7 +98,7 @@ export class OfficerTaggingController {
     }
 
     if (services) {
-      const validServices = await SubService.find({ _id: { $in: services } });
+      const validServices = await Service.find({ _id: { $in: services } });
       if (validServices.length !== services.length) {
         throw new ApiError({ status: 400, message: 'One or more provided Sub-Services are invalid' });
       }
@@ -108,10 +107,6 @@ export class OfficerTaggingController {
 
     if (wards) {
       tagging.wards = wards;
-    }
-
-    if (service) {
-      tagging.service = service;
     }
 
     if (district) {

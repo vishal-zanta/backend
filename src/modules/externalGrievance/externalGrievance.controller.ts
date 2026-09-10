@@ -6,6 +6,7 @@ import { ExternalGrievance } from './externalGrievance.model.js';
 import { createExternalGrievanceSchema } from './externalGrievance.validation.js';
 import { ExternalIntegrationService } from './integrationFactory.js';
 import { TimelineService } from '../timeline/timeline.service.js';
+import { timelineTemplates } from '../timeline/timeline.template.js';
 
 export class ExternalGrievanceController {
   
@@ -32,6 +33,19 @@ export class ExternalGrievanceController {
       departmentPayload,
       status: externalStatus || "OPEN",
       apiSyncStatus: "PENDING" // Pending sync status
+    });
+
+    await TimelineService.logEvent({
+      grievanceId: grievance._id as any,
+      type: "COMPLAINT_REGISTERED",
+      actor: {
+        id: (req as any).user?._id || null,
+        name: (req as any).user?.name || "System",
+        role: (req as any).user?.role?.level || "System"
+      },
+      metadata: {
+        description: timelineTemplates.COMPLAINT_REGISTERED(complaintId || grievance._id.toString(), "System")
+      }
     });
 
     return new ApiResponse({

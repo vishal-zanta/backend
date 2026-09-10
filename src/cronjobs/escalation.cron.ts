@@ -17,10 +17,7 @@ export const checkAndEscalateGrievances = async () => {
       status: { $nin: ["CLOSED", "RESOLVED"] },
     })
       .populate("assignedOfficer")
-      .populate({
-        path: "classification.subService",
-        populate: { path: "service" }
-      });
+      .populate({ path: "classification.service", populate: { path: "department" } });
 
     if (!activeGrievances.length) return;
 
@@ -42,13 +39,13 @@ export const checkAndEscalateGrievances = async () => {
     // console.log(allSlaConfigs, "allSlaConfigs")
     const slaConfigMap = new Map();
     for (const config of allSlaConfigs) {
-      slaConfigMap.set(config.subService.toString(), config);
+      slaConfigMap.set(config.service.toString(), config);
     }
 
     for (const grievance of activeGrievances) {
       console.log("complain",grievance.grievanceId)
-      const subServiceId = grievance.classification?.subService?._id?.toString();
-      const departmentId = (grievance.classification?.subService as any)?.service?.department?.toString();
+      const subServiceId = grievance.classification?.service?._id?.toString();
+      const departmentId = (grievance.classification?.service as any)?.department?.toString();
       
       console.log(subServiceId,"subServiceId")
       if (!subServiceId || !departmentId) continue;

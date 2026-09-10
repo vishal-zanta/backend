@@ -7,7 +7,7 @@ export interface ISlaEscalation {
 }
 
 export interface ISlaConfig extends Document {
-  subService: mongoose.Types.ObjectId;
+  service: mongoose.Types.ObjectId;
   escalations: ISlaEscalation[];
   officer: boolean;
   active: boolean;
@@ -23,9 +23,9 @@ const slaEscalationSchema = new Schema<ISlaEscalation>({
 }, { _id: false });
 
 const slaConfigSchema = new Schema<ISlaConfig>({
-  subService: {
+  service: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SubService',
+    ref: 'Service',
     required: true,
     unique: true
   },
