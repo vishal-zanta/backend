@@ -138,15 +138,90 @@ export class FieldVisitController {
                 'grievance.createdAt':1
               }
             },
-            {$lookup:{
-                   from: 'demographies',
-          localField: 'grievance.location.district',
-          foreignField: '_id',
-          as: 'grievance.location.district'
-
+            {
+              $lookup: {
+                from: 'divisions',
+                localField: 'grievance.location.division',
+                foreignField: '_id',
+                as: 'grievance.location.division'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.division",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'districts',
+                localField: 'grievance.location.district',
+                foreignField: '_id',
+                as: 'grievance.location.district'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.district",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'subdivisions',
+                localField: 'grievance.location.subdivision',
+                foreignField: '_id',
+                as: 'grievance.location.subdivision'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.subdivision",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'blocks',
+                localField: 'grievance.location.block',
+                foreignField: '_id',
+                as: 'grievance.location.block'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.block",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'panchayats',
+                localField: 'grievance.location.panchayat',
+                foreignField: '_id',
+                as: 'grievance.location.panchayat'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.panchayat",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'thanas',
+                localField: 'grievance.location.thana',
+                foreignField: '_id',
+                as: 'grievance.location.thana'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.thana",
+                preserveNullAndEmptyArrays: true
+              }
             }
-          },
-          {$unwind:"$grievance.location.district"}
           ]
         }
       }

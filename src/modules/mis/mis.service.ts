@@ -185,7 +185,7 @@ async function getSummaryReport(match: Record<string, unknown>) {
     { $sort: { total: -1 } },
     {
       $lookup: {
-        from: "addresses",
+        from: "districts",
         localField: "_id",
         foreignField: "_id",
         as: "districtDetails"
@@ -267,7 +267,7 @@ async function getOfficerRankingReport(match: Record<string, unknown>) {
     },
     {
       $lookup: {
-        from: "addresses",
+        from: "districts",
         localField: "officer.district",
         foreignField: "_id",
         as: "officerDistrict",

@@ -621,7 +621,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       },
       {
         $lookup: {
-          from: "addresses",
+          from: "districts",
           localField: "_id",
           foreignField: "_id",
           as: "districtDetails"
