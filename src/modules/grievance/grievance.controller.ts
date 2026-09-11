@@ -134,7 +134,7 @@ export class GrievanceController {
     static attachSlaToGrievance = async (grievance: any) => {
     let slaHours;
     const serviceId = grievance.classification?.service?._id || grievance.classification?.service;
-    const officerRoleId = grievance.assignedOfficer?.role?._id || grievance.assignedOfficer?.role;
+    const officerRoleId = grievance.assignedOfficer?.roles?.[0]?._id || grievance.assignedOfficer?.roles?.[0];
 
     if (serviceId && officerRoleId) {
       const slaConfig = await SlaConfig.findOne({ service: serviceId, active: true });
@@ -162,12 +162,15 @@ export class GrievanceController {
 
     return grievances.map((g: any) => {
       const serviceId = g.classification?.service?._id?.toString() || g.classification?.service?.toString();
-      const officerRoleId = defaultOfficerRoleId || g.assignedOfficer?.role?._id?.toString() || g.assignedOfficer?.role?.toString();
+      const assignedRoles = g.assignedOfficer?.roles || [];
+      const roleIds = assignedRoles.map((r: any) => r._id?.toString() || r.toString());
+      if (defaultOfficerRoleId && !roleIds.includes(defaultOfficerRoleId)) roleIds.push(defaultOfficerRoleId);
       
-      if (serviceId && officerRoleId) {
+      if (serviceId && roleIds.length > 0) {
         const config = slaConfigMap.get(serviceId);
         if (config && config.escalations) {
-          const roleSla = config.escalations.find((e: any) => e.role.toString() === officerRoleId);
+          // Find the SLA for any of the officer's roles (pick the first matching one)
+          const roleSla = config.escalations.find((e: any) => roleIds.includes(e.role.toString()));
           if (roleSla) {
             g.slaHours = roleSla.slaHours;
           }
@@ -363,9 +366,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
       .populate({
         path: "assignedOfficer",
-        select: "name role",
+        select: "name roles",
         populate: {
-          path: "role",
+          path: "roles",
           select: "_id level designationEnglish designationHindi"
         }
       })
@@ -402,9 +405,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     .populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
-      select: "name role",
+      select: "name roles",
       populate: {
-        path: "role"
+        path: "roles"
       }
     }).populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.division", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.subdivision", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
 
@@ -588,7 +591,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       },
       {
         $lookup: {
-          from: "subservices",
+          from: "services",
           localField: "_id",
           foreignField: "_id",
           as: "serviceDetails"
@@ -618,7 +621,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       },
       {
         $lookup: {
-          from: "demographies",
+          from: "addresses",
           localField: "_id",
           foreignField: "_id",
           as: "districtDetails"
@@ -628,7 +631,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       {
         $project: {
           _id: 1,
-          name: { $ifNull: ["$districtDetails.name", "$_id"] },
+          name: { $ifNull: ["$districtDetails.name_en", "$_id"] },
           total: 1,
           resolved: 1,
           pending: 1,
@@ -754,9 +757,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local")
       .populate({
         path: "assignedOfficer",
-        select: "name role",
+        select: "name roles",
         populate: {
-          path: "role",
+          path: "roles",
           select: "_id level designationEnglish"
         }
       })
@@ -930,7 +933,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .limit(pagination.limit)
       .lean();
 
-    const officerRoleId = (req as any).user?.role?._id?.toString() || (req as any).user?.role?.toString();
+    const officerRoleId = (req as any).user?.roles?.[0]?._id?.toString() || (req as any).user?.roles?.[0]?.toString();
     const modifiedGrievances = await GrievanceController.attachSlaToGrievancesList(grievances, officerRoleId);
 
     return new ApiResponse({
@@ -1204,10 +1207,10 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       });
     }
 
-    const newOfficer = await User.findById(assignedOfficer).populate("role");
+    const newOfficer = await User.findById(assignedOfficer).populate("roles");
     let description = "Grievance transferred.";
     if (newOfficer) {
-      const roleName = (newOfficer.role as any)?.designationEnglish || "Officer";
+      const roleName = (newOfficer.roles as any)?.[0]?.designationEnglish || "Officer";
       description = timelineTemplates.ASSIGNED(roleName, newOfficer.name);
     }
 
@@ -1216,7 +1219,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       type: "TRANSFERRED",
       actor: {
         name: (req as any).user?.name || "System",
-        role: (req as any).user?.role?.designationEnglish || "System",
+        role: (req as any).user?.roles[0]?.designationEnglish || "System",
       },
       metadata: {
         description
@@ -1293,7 +1296,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "RESOLVED",
-          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
           metadata: { description: timelineTemplates.RESOLVED(remarks || "Grievance resolved.") }
         });
       } else if (status === "CLOSED") {
@@ -1302,14 +1305,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "COMPLAINT_CLOSED",
-          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
           metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
         });
       } else if (oldGrievance.status !== status) {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "STATUS_CHANGE" as any,
-          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.role?.level || "OFFICER" },
+          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
           metadata: { description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status) }
         });
       }
@@ -1350,7 +1353,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           actor:{
             id: req.user?.id,
             name: req.user?.name || "System",
-            role: req.user?.role?.level || "System",
+            role: req.user?.roles?.[0]?.level || "System",
           },
           metadata:{
             description:timelineTemplates.PRIORITY_SET(assignedPriority)
@@ -1459,9 +1462,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     .populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
-      select: "name role",
+      select: "name roles",
       populate: {
-        path: "role"
+        path: "roles"
       }
     }).populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.division", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.subdivision", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
 
@@ -1503,9 +1506,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     .populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
-      select: "name role",
+      select: "name roles",
       populate: {
-        path: "role"
+        path: "roles"
       }
     }).populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.division", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.subdivision", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
 

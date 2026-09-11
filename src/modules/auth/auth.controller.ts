@@ -34,7 +34,7 @@ export class AuthController {
         user.lastLogin = new Date();
         await user.save();
 
-        const userData = PasswordHelper.createUserPayload(user, user.role);
+        const userData = PasswordHelper.createUserPayload(user, user.roles);
         return new ApiResponse({ res, status: 200, data: userData, message: 'Password updated and login successful' });
       } catch (error) {
         throw new ApiError({ status: 400, message: 'Invalid or expired token' });
@@ -49,13 +49,13 @@ export class AuthController {
     const user = await User.findOne({
       $or: [{ email: identifier }, { loginId: identifier }],
       status: 'ACTIVE'
-    }).populate('role');
+    }).populate('roles');
 
     if (user && await PasswordHelper.compare(password, user.password)) {
       user.lastLogin = new Date();
       await user.save();
       
-      const userData = PasswordHelper.createUserPayload(user, user.role);
+      const userData = PasswordHelper.createUserPayload(user, user.roles);
       
       return new ApiResponse({ 
         res, 
@@ -74,7 +74,7 @@ export class AuthController {
  static getProfile = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.user as any;
 
-    const user = await User.findById(id).select('-password').populate('role district');
+    const user = await User.findById(id).select('-password').populate('roles district');
 
     if (!user) {
       throw new ApiError({ status: 404, message: 'User not found' });

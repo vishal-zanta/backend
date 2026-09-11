@@ -185,7 +185,7 @@ async function getSummaryReport(match: Record<string, unknown>) {
     { $sort: { total: -1 } },
     {
       $lookup: {
-        from: "demographies",
+        from: "addresses",
         localField: "_id",
         foreignField: "_id",
         as: "districtDetails"
@@ -195,7 +195,7 @@ async function getSummaryReport(match: Record<string, unknown>) {
     {
       $project: {
         _id: 0,
-        district: { $ifNull: ["$districtDetails.name", "$_id"] },
+        district: { $ifNull: ["$districtDetails.name_en", "$_id"] },
         total: 1,
         resolved: 1,
         pending: 1,
@@ -260,15 +260,14 @@ async function getOfficerRankingReport(match: Record<string, unknown>) {
     {
       $lookup: {
         from: "roles",
-        localField: "officer.role",
+        localField: "officer.roles",
         foreignField: "_id",
         as: "role",
       },
     },
-    { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
-        from: "demographies",
+        from: "addresses",
         localField: "officer.district",
         foreignField: "_id",
         as: "officerDistrict",
@@ -280,8 +279,8 @@ async function getOfficerRankingReport(match: Record<string, unknown>) {
   return rows.map((row, index) => ({
     rank: index + 1,
     name: row.officer?.name || "Unknown",
-    designation: row.role?.designationEnglish || "Officer",
-    district: row.officerDistrict?.name || "N/A",
+    designation: row.role?.[0]?.designationEnglish || "Officer",
+    district: row.officerDistrict?.name_en || "N/A",
     resolved: row.resolved,
     slaCompliance:
       row.resolved > 0 ? round1((row.slaCompliant / row.resolved) * 100) : 0,
@@ -297,17 +296,8 @@ async function getServicePerformanceReport(match: Record<string, unknown>) {
     { $match: match },
     {
       $lookup: {
-        from: "subservices",
-        localField: "classification.subService",
-        foreignField: "_id",
-        as: "subService",
-      },
-    },
-    { $unwind: { path: "$subService", preserveNullAndEmptyArrays: true } },
-    {
-      $lookup: {
         from: "services",
-        localField: "subService.service",
+        localField: "classification.service",
         foreignField: "_id",
         as: "service",
       },
@@ -364,21 +354,12 @@ async function getServicePerformanceReport(match: Record<string, unknown>) {
 }
 
 async function getBlockWiseReport(match: Record<string, unknown>) {
-  const ruralDistricts = await DistrictModel.find({}).select("name_en")
-    .lean();
-  const ruralNames = ruralDistricts.map((d) => d.name_en);
+  const ruralDistricts = await DistrictModel.find({}).select("_id").lean();
+  const ruralIds = ruralDistricts.map((d) => d._id);
 
-  const ruralFilter =
-    ruralNames.length > 0
-      ? {
-          $or: ruralNames.map((name) => ({
-            "location.district": {
-              $regex: `^${escapeRegex(name)}$`,
-              $options: "i",
-            },
-          })),
-        }
-      : {};
+  const ruralFilter = ruralIds.length > 0
+    ? { "location.district": { $in: ruralIds } }
+    : {};
 
   const ruralMatch = { ...match, ...ruralFilter };
 
@@ -447,7 +428,7 @@ async function getIvrStatsReport(match: Record<string, unknown>) {
 
   // Grievances created via IVR channel or by call-centre agents
   const agentUsers = agentRoleIds.length
-    ? await User.find({ role: { $in: agentRoleIds } }).select("_id isBreak status").lean()
+    ? await User.find({ roles: { $in: agentRoleIds } }).select("_id isBreak status").lean()
     : [];
   const agentIds = agentUsers.map((u) => u._id);
 
@@ -577,8 +558,8 @@ async function getAgentPerformanceReport(match: Record<string, unknown>) {
 
   const roleIds = agentRoles.map((r) => r._id);
 
-  const agents = await User.find({ role: { $in: roleIds }, status: "ACTIVE" })
-    .select("name isBreak role")
+  const agents = await User.find({ roles: { $in: roleIds }, status: "ACTIVE" })
+    .select("name isBreak roles")
     .lean();
 
   if (agents.length === 0) return [];

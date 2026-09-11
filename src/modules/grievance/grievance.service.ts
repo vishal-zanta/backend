@@ -51,7 +51,7 @@ export class GrievanceService {
       for (const level of sortedLevels) {
         const roleId = level.role;
         
-        const eligibleUsers = await User.find({ role: roleId, status: 'ACTIVE' }).select('_id');
+        const eligibleUsers = await User.find({ roles: roleId, status: 'ACTIVE' }).select('_id');
         const userIds = eligibleUsers.map(u => u._id);
 
         if (userIds.length === 0) continue;
@@ -228,12 +228,12 @@ export class GrievanceService {
       NotificationService.notifyTaggingGap(serviceId, subdivision, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
     }
 
-    const officer:any = await User.findById(createdBy).populate("role").lean();
+    const officer:any = await User.findById(createdBy).populate("roles").lean();
 
     let actorId = createdBy || citizen?._id;
     let actorName = officer?.name || "CITIZEN";
-    let actorRole = officer?.role?.level || "CITIZEN";
-    let descriptionRole = officer?.role?.level || "CITIZEN";
+    let actorRole = officer?.roles?.[0]?.level || "CITIZEN";
+    let descriptionRole = officer?.roles?.[0]?.level || "CITIZEN";
 
     if (sourceApiKey) {
       const { ApiKey } = await import("../apiKey/apiKey.model.js");
@@ -263,7 +263,7 @@ export class GrievanceService {
     NotificationService.notifyNewComplaint(newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
 
     if (newGrievance.assignedOfficer) {
-      const assignedUser: any = await User.findById(newGrievance.assignedOfficer).populate("role").lean();
+      const assignedUser: any = await User.findById(newGrievance.assignedOfficer).populate("roles").lean();
       if (assignedUser) {
         await TimelineService.logEvent({
           grievanceId: newGrievance._id,
@@ -271,10 +271,10 @@ export class GrievanceService {
           actor: {
             id: actorId,
             name: actorRole === "API_KEY" ? actorName : (officer?.name || "SYSTEM"),
-            role: actorRole === "API_KEY" ? actorRole : (officer?.role?.level || "SYSTEM"),
+            role: actorRole === "API_KEY" ? actorRole : (officer?.roles?.[0]?.level || "SYSTEM"),
           },
           metadata: {
-            description: timelineTemplates.ASSIGNED(assignedUser?.role?.level || "Officer", assignedUser.name)
+            description: timelineTemplates.ASSIGNED(assignedUser?.roles?.[0]?.level || "Officer", assignedUser.name)
           }
         });
         
@@ -306,8 +306,8 @@ export class GrievanceService {
     
     // If created from an Email, link it and mark as CONVERTED
     if (emailId) {
-      await Email.findOneAndUpdate(
-        { emailId },
+      await Email.findByIdAndUpdate(
+         emailId ,
         { 
           status: 'CONVERTED', 
           grievance: newGrievance._id,

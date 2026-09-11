@@ -20,16 +20,26 @@ export const checkPermission = (requiredPermissions: ApiPermission | ApiPermissi
         });
       }
 
-      // If user has no role or permissions are missing
-      if (!user.role || !Array.isArray(user.role.permissions)) {
+      // If user has no roles
+      if (!user.roles || !Array.isArray(user.roles)) {
         throw new ApiError({
           status: StatusCodes.FORBIDDEN,
-          message: "Access denied. No permissions assigned to your role.",
+          message: "Access denied. No roles assigned.",
+        });
+      }
+
+      // Aggregate all permissions from all assigned roles
+      const allPermissions = user.roles.flatMap((r: any) => r.permissions || []);
+
+      if (allPermissions.length === 0) {
+        throw new ApiError({
+          status: StatusCodes.FORBIDDEN,
+          message: "Access denied. No permissions assigned to your roles.",
         });
       }
 
       // Bypass check if user has the master ALL permission
-      if (user.role.permissions.includes("ALL")) {
+      if (allPermissions.includes("ALL")) {
         return next();
       }
 
@@ -38,7 +48,7 @@ export const checkPermission = (requiredPermissions: ApiPermission | ApiPermissi
         : [requiredPermissions];
 
       const hasPermission = permsToCheck.some((perm) => 
-        user.role.permissions.includes(perm)
+        allPermissions.includes(perm)
       );
 
       if (!hasPermission) {

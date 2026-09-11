@@ -44,7 +44,7 @@ export class NotificationService {
       });
       if (!role) return;
 
-      const users = await User.find({ role: role._id, status: 'ACTIVE' }).select('_id');
+      const users = await User.find({ roles: role._id, status: 'ACTIVE' }).select('_id');
       const notifications = users.map(u => ({
         recipient: u._id,
         ...data

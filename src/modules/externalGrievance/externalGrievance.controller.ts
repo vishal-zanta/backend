@@ -41,7 +41,7 @@ export class ExternalGrievanceController {
       actor: {
         id: (req as any).user?._id || null,
         name: (req as any).user?.name || "System",
-        role: (req as any).user?.role?.level || "System"
+        role: (req as any).user?.roles?.[0]?.level || "System"
       },
       metadata: {
         description: timelineTemplates.COMPLAINT_REGISTERED(complaintId || grievance._id.toString(), "System")

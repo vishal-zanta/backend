@@ -10,7 +10,7 @@ import { User } from "../modules/users/user.model.js";
   id?: string;
   name: string;
   email?: string;
-  role?: any;
+  roles?: any[];
 
   phone?: string;
   status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
@@ -119,7 +119,7 @@ async function fetchUser(userId: string): Promise<IUser> {
   let user: any = await User
     .findOne({_id:userId, status: 'ACTIVE'})
     .select('-password')
-    .populate('role')
+    .populate('roles')
     .lean()
     .exec();
 

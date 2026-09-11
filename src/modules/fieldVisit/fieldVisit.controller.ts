@@ -216,7 +216,7 @@ export class FieldVisitController {
     }
 
     if (eventsToLog.length > 0 && officerId) {
-      const officer = await User.findById(officerId).populate('role');
+      const officer = await User.findById(officerId).populate('roles');
       if (officer) {
         for (const desc of eventsToLog) {
           await TimelineService.logEvent({
@@ -225,7 +225,7 @@ export class FieldVisitController {
             actor: {
               id: officer._id ,
               name: officer.name || 'Officer',
-              role: (officer.role as any)?.level || 'OFFICER'
+              role: (officer.roles as any)?.[0]?.level || 'OFFICER'
             },
             metadata: {
               description: timelineTemplates.FIELD_VISIT(desc)

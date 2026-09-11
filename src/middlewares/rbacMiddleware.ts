@@ -19,22 +19,18 @@ export const authorizeRoles = (...allowedRoles: AppRole[]) => {
         });
       }
 
-      // Check if user has a role object populated and its designationEnglish
-      const userRole = user.role?.level;
-
-      if (!userRole) {
+      if (!user.roles || !Array.isArray(user.roles) || user.roles.length === 0) {
         throw new ApiError({
           status: StatusCodes.FORBIDDEN,
           message: "Access denied. No role assigned.",
         });
       }
       
-      // Admin bypass (optional, but usually helpful. Remove if Admin shouldn't auto-bypass everything)
-      // if (userRole === ROLES.ADMIN) {
-      //   return next();
-      // }
+      const userRoles = user.roles.map((r: any) => r.level);
+      
+      const hasAllowedRole = allowedRoles.some((allowedRole) => userRoles.includes(allowedRole));
 
-      if (!allowedRoles.includes(userRole as AppRole)) {
+      if (!hasAllowedRole) {
         throw new ApiError({
           status: StatusCodes.FORBIDDEN,
           message: `Access denied. Requires one of the following roles: ${allowedRoles.join(", ")}`,

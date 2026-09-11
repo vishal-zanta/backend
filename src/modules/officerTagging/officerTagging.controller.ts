@@ -57,7 +57,7 @@ export class OfficerTaggingController {
       const roles = await Role.find({ department });
       const roleIds = roles.map(r => r._id);
 
-      const users = await User.find({ role: { $in: roleIds } });
+      const users = await User.find({ roles: { $in: roleIds } });
       const userIds = users.map(u => u._id);
 
       query.officer = { $in: userIds };
@@ -66,9 +66,9 @@ export class OfficerTaggingController {
     const taggings = await OfficerTagging.find(query)
       .populate({
         path: 'officer',
-        select: 'name role',
+        select: 'name roles',
         populate: {
-          path: 'role',
+          path: 'roles',
           select: 'designationEnglish designationHindi'
         }
       })

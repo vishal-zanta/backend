@@ -38,7 +38,7 @@ export class ActivityService {
     }
 
     return {
-      count: activeUsers.length,
+      count: new Set(activeUsers.map(u => u.userId)).size,
       users: activeUsers
     };
   }

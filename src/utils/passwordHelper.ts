@@ -10,14 +10,14 @@ export class PasswordHelper {
     return await bcrypt.compare(password, hash);
   }
 
-  static createUserPayload(user: any, role: any) {
+  static createUserPayload(user: any, roles: any[]) {
     return {
       id: user._id || user.id,
       name: user.name,
       email: user.email,
-      role,
+      roles,
 
-      token:generateJwtToken({ id: user._id, role })
+      token:generateJwtToken({ id: user._id, roles })
     };
   }
 

@@ -7,7 +7,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone: string;
-  role: mongoose.Types.ObjectId;
+  roles: mongoose.Types.ObjectId[];
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   // isAdmin: boolean;
   escalatedCount: number;
@@ -51,11 +51,10 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true
   },
-  role: {
+  roles: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Role',
-    // required: true
-  },
+    ref: 'Role'
+  }],
   district: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'District'

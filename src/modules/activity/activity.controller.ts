@@ -9,13 +9,20 @@ export class ActivityController {
  
   static pulse = asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as any;
-    const roleLevel = user.role?.level || 'unknown';
-    ActivityService.recordPulse(user.id, String(roleLevel));
+    
+    if (user.roles && Array.isArray(user.roles) && user.roles.length > 0) {
+      user.roles.forEach((r: any) => {
+        const roleLevel = r.level || 'unknown';
+        ActivityService.recordPulse(user.id, String(roleLevel));
+      });
+    } else {
+      ActivityService.recordPulse(user.id, 'unknown');
+    }
 
     return new ApiResponse({
       res,
       status: 200,
-      message: 'Pulse recorded successfully',
+      message: 'Pulse recorded successfully for all active roles',
     });
   });
 

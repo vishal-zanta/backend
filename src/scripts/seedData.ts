@@ -482,7 +482,7 @@ const runSeed = async () => {
           await user.save();
         } else {
           user.password = "1234";
-          user.role = roleId as any;
+          user.roles = [roleId as any];
           await user.save();
         }
         return user;

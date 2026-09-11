@@ -18,13 +18,13 @@ export class ShiftController {
     const roleIds = roles.map(r => r._id);
 
 
-    const query: any = { role: { $in: roleIds }, status: 'ACTIVE' };
+    const query: any = { roles: { $in: roleIds }, status: 'ACTIVE' };
     const totalCount = await User.countDocuments(query);
     const pagination = buildPagination({ page, limit, totalCount });
 
     const users = await User.find(query)
-      .populate('role', 'designationEnglish designationHindi level')
-      .select('name userCode email role')
+      .populate('roles', 'designationEnglish designationHindi level')
+      .select('name userCode email roles')
       .skip(pagination.offset)
       .limit(pagination.limit);
 
@@ -68,12 +68,12 @@ export class ShiftController {
     }
 
     // Verify target user is CCE or Supervisor
-    const targetUser = await User.findById(userId).populate('role');
+    const targetUser = await User.findById(userId).populate('roles');
     if (!targetUser) {
       throw new ApiError({ status: 404, message: "User not found" });
     }
 
-    const targetUserRole = (targetUser as any).role?.level;
+    const targetUserRole = (targetUser as any).roles?.[0]?.level;
     if (targetUserRole !== 'CCE' && targetUserRole !== 'Supervisor') {
       throw new ApiError({ status: 400, message: "Shifts can only be assigned to CCE or Supervisor roles." });
     }

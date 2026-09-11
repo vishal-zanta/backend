@@ -26,9 +26,10 @@ function generatePrefix(designation: string): string {
 
 export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["name", "role", "password"], req.body);
+    validateRequestFields(["name", "roles", "password"], req.body);
 
-    let { name, email, phone, role, district, password, skills, preferredLanguages, loginId } = req.body;
+    let { name, email, phone, roles, district, password, skills, preferredLanguages, loginId } = req.body;
+    let userRoles = roles || [];
 
     if (email === "") email = undefined;
     if (phone === "") phone = undefined;
@@ -48,7 +49,7 @@ export class UserController {
       throw new ApiError({ status: 400, message: 'User with this email, phone, or loginId already exists' });
     }
 
-    const assignedRole = await Role.findById(role);
+    const assignedRole = await Role.findById(userRoles[0]);
     if (!assignedRole) {
       throw new ApiError({ status: 404, message: 'Role not found' });
     }
@@ -75,7 +76,7 @@ export class UserController {
       existingUser.email = email;
       existingUser.phone = phone;
       existingUser.password = password;
-      existingUser.role = role;
+      if (userRoles.length) existingUser.roles = userRoles;
       existingUser.district = district;
       if (loginId) existingUser.loginId = loginId;
       if (skills) existingUser.skills = skills;
@@ -89,7 +90,7 @@ export class UserController {
         email,
         phone,
         password,
-        role,
+        roles: userRoles,
         district,
         skills,
         preferredLanguages,
@@ -130,7 +131,7 @@ export class UserController {
     
     if (role && typeof(role) =="string") {
       const roleArray = role.split(",");
-      query.role = { $in: roleArray };
+      query.roles = { $in: roleArray };
     }
 
     if (department && typeof department === "string") {
@@ -138,10 +139,10 @@ export class UserController {
       const roles = await Role.find({ department: { $in: deptArray } });
       const roleIds = roles.map(r => r._id.toString());
       
-      if (query.role && query.role.$in) {
-         query.role.$in = query.role.$in.filter((id: string) => roleIds.includes(id));
+      if (query.roles && query.roles.$in) {
+         query.roles.$in = query.roles.$in.filter((id: string) => roleIds.includes(id));
       } else {
-         query.role = { $in: roleIds };
+         query.roles = { $in: roleIds };
       }
     }
 
@@ -200,7 +201,7 @@ export class UserController {
     const skip = (page - 1) * limit;
 
     const users = await User.find(query)
-      .populate({ path: 'role', populate: { path: 'department' } })
+      .populate({ path: 'roles', populate: { path: 'department' } })
       .populate('district')
       .populate('skills')
       .select('-password')
@@ -220,7 +221,8 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    let { name, phone, email, role, status, district, password, skills, preferredLanguages, loginId } = req.body;
+    let { name, phone, email, roles, status, district, password, skills, preferredLanguages, loginId } = req.body;
+    let userRoles = roles || [];
 
     const user = await User.findById(id);
     if (!user) {
@@ -235,7 +237,7 @@ export class UserController {
     if (email === "") user.email = undefined as any;
     else if (email) user.email = email;
     
-    if (role) user.role = role;
+    if (userRoles.length) user.roles = userRoles;
     if (status !== undefined) user.status = status;
     if (district) user.district = district;
     if (skills) user.skills = skills;
@@ -267,12 +269,12 @@ export class UserController {
 
   static deleteUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const user:any = await User.findByIdAndUpdate(id, { status: 'INACTIVE' }, { new: true }).populate("role");
+    const user:any = await User.findByIdAndUpdate(id, { status: 'INACTIVE' }, { new: true }).populate("roles");
     
     if (!user) {
       throw new ApiError({ status: 404, message: 'User not found' });
     }
-    if(user.role?.level===ROLES.ADMIN){
+    if(user.roles?.some((r: any) => r.level===ROLES.ADMIN)){
       throw new ApiError({ status: 400, message: 'Cannot delete an Admin user' });
     
     }

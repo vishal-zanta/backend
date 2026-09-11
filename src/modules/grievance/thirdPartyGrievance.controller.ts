@@ -151,9 +151,9 @@ export class ThirdPartyGrievanceController {
     .populate("classification.service").populate("classification.nature").populate("impact.affectedBeneficiary")
     .populate({
       path: "assignedOfficer",
-      select: "name role",
+      select: "name roles",
       populate: {
-        path: "role"
+        path: "roles"
       }
     }).populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.division", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.subdivision", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
 

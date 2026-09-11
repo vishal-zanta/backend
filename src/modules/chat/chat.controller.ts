@@ -29,8 +29,8 @@ export class ChatController {
 
     const populateConfig = {
       path: 'participants',
-      select: 'name email isBreak status role',
-      populate: { path: 'role' }
+      select: 'name email isBreak status roles',
+      populate: { path: 'roles' }
     };
 
     // Check if conversation exists
@@ -84,7 +84,7 @@ export class ChatController {
           { name: searchRegex },
           { email: searchRegex },
           { loginId: searchRegex },
-          { role: { $in: roleIds } }
+          { roles: { $in: roleIds } }
         ]
       };
       
@@ -131,8 +131,8 @@ export class ChatController {
       paginatedConversations = await Conversation.find(convQuery)
       .populate({
         path: 'participants',
-        select: 'name email loginId isBreak status role',
-        populate: { path: 'role' , select:'designationEnglish designationHindi level' }
+        select: 'name email loginId isBreak status roles',
+        populate: { path: 'roles' , select:'designationEnglish designationHindi level' }
       })
       .populate('lastMessage')
       .sort({ updatedAt: -1 })
@@ -143,7 +143,7 @@ export class ChatController {
       if (remainingLimit > 0) {
         // Fetch some users to fill the rest of the page
         const otherUsers = await User.find(otherUsersQuery)
-        .populate('role').select('name email loginId isBreak status role')
+        .populate('roles').select('name email loginId isBreak status roles')
         .skip(0)
         .limit(remainingLimit);
 
@@ -159,7 +159,7 @@ export class ChatController {
       // Only fetch users
       const userOffset = offset - totalConversations;
       const otherUsers = await User.find(otherUsersQuery)
-      .populate('role').select('name email loginId isBreak status role')
+      .populate('roles').select('name email loginId isBreak status roles')
       .skip(userOffset)
       .limit(limit);
 
