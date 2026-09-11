@@ -1,5 +1,6 @@
 import { Service } from '../services/service.model.js';
 import { Grievance, IAttachment } from "./grievance.model.js";
+import { Email } from "../email/email.model.js";
 import { StorageService } from "../../libs/storage.lib.js";
 import { getNextSequenceValue } from "../../utils/counter.model.js";
 import { State } from "country-state-city";
@@ -119,8 +120,9 @@ export class GrievanceService {
     createdBy?: ObjectId;
     sourceApiKey?: ObjectId;
     channel?: any;
+    emailId?: string;
   }) {
-    const { citizen, classification, evidence, impact, communication, location, citizenInfo, files, createdBy, sourceApiKey, channel } = payload;
+    const { citizen, classification, evidence, impact, communication, location, citizenInfo, files, createdBy, sourceApiKey, channel, emailId } = payload;
 
     // console.log("createdby ",createdBy)
     // Handle File Uploads
@@ -301,6 +303,20 @@ export class GrievanceService {
       }
     }
 
+    
+    // If created from an Email, link it and mark as CONVERTED
+    if (emailId) {
+      await Email.findOneAndUpdate(
+        { emailId },
+        { 
+          status: 'CONVERTED', 
+          grievance: newGrievance._id,
+          complaintId: newGrievance.grievanceId
+        }
+      );
+    }
+
     return newGrievance;
+
   }
 }

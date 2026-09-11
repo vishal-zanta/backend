@@ -54,6 +54,7 @@ export class ThirdPartyGrievanceController {
       citizen,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
+      emailId: req.body.emailId,
       createdBy: apiKeyDoc.createdBy,
       sourceApiKey: apiKeyDoc._id,
       ...validation.data

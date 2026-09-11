@@ -9,7 +9,9 @@
     "build": "tsc",
     "start": "node --import  ./dist/app.js",
     "seed": " npx tsx ./src/scripts/seedData.ts",
-    "seed:address": "npx tsx ./src/scripts/seedAddress.ts"
+    "seed:address": "npx tsx ./src/scripts/seedAddress.ts",
+    "seed:emails": "npx tsx ./src/scripts/seedEmails.ts"
+    
   },
   "keywords": [],
   "author": "",

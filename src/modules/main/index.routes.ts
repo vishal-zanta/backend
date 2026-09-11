@@ -28,6 +28,7 @@ import apiKeyRoutes from "../apiKey/apiKey.routes.js";
 import thirdPartyGrievanceRoutes from "../grievance/thirdPartyGrievance.routes.js";
 import externalGrievanceRoutes from "../externalGrievance/externalGrievance.routes.js";
 import { visitorRoutes } from "../visitor/visitor.routes.js";
+import emailRoutes from "../email/email.routes.js";
 const router = Router();
 
 router.use("/", healthRoutes);
@@ -59,5 +60,6 @@ router.use("/api-keys", apiKeyRoutes);
 router.use("/third-party/grievances", thirdPartyGrievanceRoutes);
 router.use("/external-grievances", externalGrievanceRoutes);
 router.use("/visitors", visitorRoutes);
+router.use("/emails", emailRoutes);
 
 export default router;

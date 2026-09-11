@@ -221,6 +221,7 @@ export class GrievanceController {
       citizen,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
+      emailId: req.body.emailId,
       ...validation.data
     }); 
  
@@ -278,6 +279,7 @@ export class GrievanceController {
       citizen,
       channel,
       files: req.files as Express.Multer.File[] | undefined,
+      emailId: req.body.emailId,
       createdBy: (req as any).user.id,
       ...validation.data
     });
