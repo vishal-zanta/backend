@@ -67,14 +67,16 @@ export class ShiftController {
       throw new ApiError({ status: 400, message: "userId, date, and time are required" });
     }
 
-    // Verify target user is CCE or Supervisor
+    // Verify target user has CCE or Supervisor role
     const targetUser = await User.findById(userId).populate('roles');
     if (!targetUser) {
       throw new ApiError({ status: 404, message: "User not found" });
     }
 
-    const targetUserRole = (targetUser as any).roles?.[0]?.level;
-    if (targetUserRole !== 'CCE' && targetUserRole !== 'Supervisor') {
+    const targetUserRoles = (targetUser as any).roles || [];
+    const hasValidRole = targetUserRoles.some((r: any) => r.level === 'CCE' || r.level === 'Supervisor');
+    
+    if (!hasValidRole) {
       throw new ApiError({ status: 400, message: "Shifts can only be assigned to CCE or Supervisor roles." });
     }
 

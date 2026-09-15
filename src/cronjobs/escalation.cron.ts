@@ -120,7 +120,7 @@ console.log(currentRoleSla,"currentRoleSla")
         const nextRoleId = nextWorkflowLevel.role;
         const nextLevelName = await Role.findById(nextRoleId);
 
-        const eligibleUsers = await User.find({ role: nextRoleId, status: 'ACTIVE' }).select('_id');
+        const eligibleUsers = await User.find({ roles: nextRoleId, status: 'ACTIVE' }).select('_id');
         const userIds = eligibleUsers.map(u => u._id);
 
         if (userIds.length === 0) continue;
