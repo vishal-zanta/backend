@@ -1,19 +1,18 @@
 import { Router } from 'express';
 import { AddressController } from './address.controller.js';
-import { checkPermission } from '../../middlewares/permissionMiddleware.js';
 
 const router = Router();
 
 // Hierarchy Routes
-router.get('/divisions', AddressController.getDivisions);
-router.get('/divisions/:divisionId/districts', AddressController.getDistrictsByDivision);
-router.get('/districts', AddressController.getDistricts); // legacy
-router.get('/subdivisions', AddressController.getSubdivisions);
-router.get('/districts/:districtId/subdivisions', AddressController.getSubdivisionsByDistrict);
-router.get('/districts/:districtId/blocks', AddressController.getBlocksByDistrict); // legacy
-router.get('/subdivisions/:subdivisionId/blocks', AddressController.getBlocksBySubdivision);
-router.get('/blocks/:blockId/panchayats', AddressController.getPanchayatsByBlock);
-router.get('/blocks/:blockId/thanas', AddressController.getThanasByBlock);
+router.get('/districts', AddressController.getDistricts);
+router.get('/districts/:districtId/blocks', AddressController.getBlocksByDistrict);
+router.get('/districts/:districtId/ulbs', AddressController.getUrbanLocalBodiesByDistrict);
 
+router.get('/blocks/:blockId/panchayats', AddressController.getPanchayatsByBlock);
+// router.get('/blocks/:blockId/thanas', AddressController.getThanasByBlock);
+
+router.get('/panchayats/:panchayatId/villages', AddressController.getVillagesByPanchayat);
+
+router.get('/ulbs/:ulbId/wards', AddressController.getWardsByUlb);
 
 export default router;

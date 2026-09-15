@@ -1,60 +1,16 @@
 import { Request, Response } from 'express';
-import { DivisionModel, DistrictModel, SubdivisionModel, BlockModel, PanchayatModel, ThanaModel } from './address.model.js';
+import { DistrictModel, BlockModel, PanchayatModel, VillageModel, UrbanLocalBodyModel, WardModel, ThanaModel } from './address.model.js';
 import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
-import { ApiError } from '../../middlewares/errorHandler.js';
-import mongoose from 'mongoose';
-import { validateRequestFields } from '../../utils/helpers.js';
 
 export class AddressController {
-  
-  // ==========================
-  // HELPER
-  // ==========================
-  private static async resolveIds(param: string, model: any, keyField: string): Promise<string[]> {
-    const ids = param.split(',').map(id => id.trim()).filter(Boolean);
-    const resolved: string[] = [];
-    for (const id of ids) {
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        const doc = await model.findById(id);
-        if (doc) resolved.push((doc as any)[keyField]);
-      } else {
-        resolved.push(id);
-      }
-    }
-    return resolved;
-  }
   
   // ==========================
   // HIERARCHY APIS
   // ==========================
 
   /**
-   * Get subdivisions by division IDs (via query param)
-   * Supports comma-separated IDs
-   */
-  static getSubdivisions = asyncHandler(async (req: Request, res: Response) => {
-    let query: any = {};
-    if (req.query.divisionId) {
-      const resolvedDivIds = await AddressController.resolveIds(req.query.divisionId as string, DivisionModel, 'division_id');
-      const districts = await DistrictModel.find({ division_id: { $in: resolvedDivIds } }).select('district_id').lean();
-      const districtIds = districts.map((d: any) => d.district_id);
-      query.district_id = { $in: districtIds };
-    }
-    const subdivisions = await SubdivisionModel.find(query).sort({ name_en: 1 }).lean();
-    return new ApiResponse({ res, status: 200, data: subdivisions, message: 'Subdivisions fetched successfully' });
-  });
-
-  /**
-   * Get all divisions
-   */
-  static getDivisions = asyncHandler(async (req: Request, res: Response) => {
-    const divisions = await DivisionModel.find({}).sort({ name_en: 1 }).lean();
-    return new ApiResponse({ res, status: 200, data: divisions, message: 'Divisions fetched successfully' });
-  });
-
-  /**
-   * Get all districts (optional, backwards compatibility)
+   * Get all districts
    */
   static getDistricts = asyncHandler(async (req: Request, res: Response) => {
     const districts = await DistrictModel.find({}).sort({ name_en: 1 }).lean();
@@ -62,71 +18,23 @@ export class AddressController {
   });
 
   /**
-   * Get districts for a specific division
-   */
-  static getDistrictsByDivision = asyncHandler(async (req: Request, res: Response) => {
-    const { divisionId } = req.params;
-    let query: any = { division_id: divisionId };
-    
-    if (mongoose.Types.ObjectId.isValid(divisionId as string)) {
-      const division = await DivisionModel.findById(divisionId);
-      if (!division) throw new ApiError({ status: 404, message: "Division not found" });
-      query = { division_id: division.division_id };
-    }
-
-    const districts = await DistrictModel.find(query).sort({ name_en: 1 }).lean();
-    return new ApiResponse({ res, status: 200, data: districts, message: 'Districts fetched successfully' });
-  });
-
-  /**
-   * Get subdivisions for a specific district
-   */
-  static getSubdivisionsByDistrict = asyncHandler(async (req: Request, res: Response) => {
-    const { districtId } = req.params;
-    let query: any = { district_id: districtId };
-    
-    if (mongoose.Types.ObjectId.isValid(districtId as string)) {
-      const district = await DistrictModel.findById(districtId);
-      if (!district) throw new ApiError({ status: 404, message: "District not found" });
-      query = { district_id: district.district_id };
-    }
-
-    const subdivisions = await SubdivisionModel.find(query).sort({ name_en: 1 }).lean();
-    return new ApiResponse({ res, status: 200, data: subdivisions, message: 'Subdivisions fetched successfully' });
-  });
-
-  /**
-   * Get blocks for a specific district (Legacy fallback if needed)
+   * Get blocks for a specific district
    */
   static getBlocksByDistrict = asyncHandler(async (req: Request, res: Response) => {
     const { districtId } = req.params;
-    let query: any = { district_id: districtId };
-    
-    if (mongoose.Types.ObjectId.isValid(districtId as string)) {
-      const district = await DistrictModel.findById(districtId);
-      if (!district) throw new ApiError({ status: 404, message: "District not found" });
-      query = { district_id: district.district_id };
-    }
-
-    const blocks = await BlockModel.find(query).sort({ name_en: 1 }).lean();
+    const district=await DistrictModel.findById(districtId)
+    const blocks = await BlockModel.find({ district_id: Number(district?.lgd_district_code) }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: blocks, message: 'Blocks fetched successfully' });
   });
 
   /**
-   * Get blocks for a specific subdivision
+   * Get Urban Local Bodies for a specific district
    */
-  static getBlocksBySubdivision = asyncHandler(async (req: Request, res: Response) => {
-    const { subdivisionId } = req.params;
-    let query: any = { subdivision_id: subdivisionId };
-    
-    if (mongoose.Types.ObjectId.isValid(subdivisionId as string)) {
-      const subdivision = await SubdivisionModel.findById(subdivisionId);
-      if (!subdivision) throw new ApiError({ status: 404, message: "Subdivision not found" });
-      query = { subdivision_id: subdivision.subdivision_id };
-    }
-
-    const blocks = await BlockModel.find(query).sort({ name_en: 1 }).lean();
-    return new ApiResponse({ res, status: 200, data: blocks, message: 'Blocks fetched successfully' });
+  static getUrbanLocalBodiesByDistrict = asyncHandler(async (req: Request, res: Response) => {
+    const { districtId } = req.params;
+    const district=await DistrictModel.findById(districtId)
+    const ulbs = await UrbanLocalBodyModel.find({ district_id: Number(district?.lgd_district_code) }).sort({ name_en: 1 }).lean();
+    return new ApiResponse({ res, status: 200, data: ulbs, message: 'Urban Local Bodies fetched successfully' });
   });
 
   /**
@@ -134,16 +42,29 @@ export class AddressController {
    */
   static getPanchayatsByBlock = asyncHandler(async (req: Request, res: Response) => {
     const { blockId } = req.params;
-    let query: any = { block_id: blockId };
-
-    if (mongoose.Types.ObjectId.isValid(blockId as string)) {
-      const block = await BlockModel.findById(blockId);
-      if (!block) throw new ApiError({ status: 404, message: "Block not found" });
-      query = { block_id: block.block_id };
-    }
-
-    const panchayats = await PanchayatModel.find(query).sort({ name_en: 1 }).lean();
+    const block=await BlockModel.findById(blockId)
+    const panchayats = await PanchayatModel.find({ block_id: Number(block?.lgd_block_code) }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: panchayats, message: 'Panchayats fetched successfully' });
+  });
+
+  /**
+   * Get villages for a specific panchayat
+   */
+  static getVillagesByPanchayat = asyncHandler(async (req: Request, res: Response) => {
+    const { panchayatId } = req.params;
+    const panchayat=await PanchayatModel.findById(panchayatId);
+    const villages = await VillageModel.find({ panchayat_id: Number(panchayat?.lgd_gp_code) }).sort({ name_en: 1 }).lean();
+    return new ApiResponse({ res, status: 200, data: villages, message: 'Villages fetched successfully' });
+  });
+
+  /**
+   * Get wards for a specific Urban Local Body
+   */
+  static getWardsByUlb = asyncHandler(async (req: Request, res: Response) => {
+    const { ulbId } = req.params;
+    const ulb=await UrbanLocalBodyModel.findById(ulbId)
+    const wards = await WardModel.find({ ulb_id: Number(ulb?.lgd_ulb_code) }).sort({ ward_number: 1 }).lean();
+    return new ApiResponse({ res, status: 200, data: wards, message: 'Wards fetched successfully' });
   });
 
   /**
@@ -151,17 +72,17 @@ export class AddressController {
    */
   static getThanasByBlock = asyncHandler(async (req: Request, res: Response) => {
     const { blockId } = req.params;
-    let query: any = { block_ids: blockId };
-
-    if (mongoose.Types.ObjectId.isValid(blockId as string)) {
-      const block = await BlockModel.findById(blockId);
-      if (!block) throw new ApiError({ status: 404, message: "Block not found" });
-      query = { block_ids: block.block_id };
-    }
-
-    const thanas = await ThanaModel.find(query).sort({ name_en: 1 }).lean();
+    const thanas = await ThanaModel.find({ lgd_block_codes: Number(blockId) }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: thanas, message: 'Thanas fetched successfully' });
   });
 
+  /**
+   * Get thanas for a specific ulb
+   */
+  static getThanasByUlb = asyncHandler(async (req: Request, res: Response) => {
+    const { ulbId } = req.params;
+    const thanas = await ThanaModel.find({ lgd_ulb_codes: Number(ulbId) }).sort({ name_en: 1 }).lean();
+    return new ApiResponse({ res, status: 200, data: thanas, message: 'Thanas fetched successfully' });
+  });
 
-  }
+}

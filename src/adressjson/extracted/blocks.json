@@ -1,0 +1,3224 @@
+[
+  {
+    "lgd_block_code": 1624,
+    "name_en": "Araria",
+    "name_local": "अररिया",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1625,
+    "name_en": "Bhargama",
+    "name_local": "भरगामा",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1626,
+    "name_en": "Forbesganj",
+    "name_local": "फोरबिसगंज",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1627,
+    "name_en": "Jokihat",
+    "name_local": "जोकीहाट",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1628,
+    "name_en": "Kursakanta",
+    "name_local": "कुर्साकांटा",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1629,
+    "name_en": "Narpatganj",
+    "name_local": "नरपतगंज",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1630,
+    "name_en": "Palasi",
+    "name_local": "पलासी",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1631,
+    "name_en": "Raniganj",
+    "name_local": "रानीगंज",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 1632,
+    "name_en": "Sikty",
+    "name_local": "सीकटी",
+    "district_id": 188
+  },
+  {
+    "lgd_block_code": 6505,
+    "name_en": "Arwal",
+    "name_local": "अरवल",
+    "district_id": 611
+  },
+  {
+    "lgd_block_code": 6506,
+    "name_en": "Kaler",
+    "name_local": "कलेर",
+    "district_id": 611
+  },
+  {
+    "lgd_block_code": 6507,
+    "name_en": "Kapri",
+    "name_local": "करपी",
+    "district_id": 611
+  },
+  {
+    "lgd_block_code": 6509,
+    "name_en": "Kurtha",
+    "name_local": "कुर्था",
+    "district_id": 611
+  },
+  {
+    "lgd_block_code": 6508,
+    "name_en": "Sonbhadra-Bansi-Surajpur",
+    "name_local": "सोनभद्र बंशी सुर्यापूर",
+    "district_id": 611
+  },
+  {
+    "lgd_block_code": 1633,
+    "name_en": "Aurangabad",
+    "name_local": "औरंगाबाद",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1634,
+    "name_en": "Barun",
+    "name_local": "बारुण",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1635,
+    "name_en": "Daudnagar",
+    "name_local": "दाउदनगर",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1636,
+    "name_en": "Deo",
+    "name_local": "देव",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1637,
+    "name_en": "Goh",
+    "name_local": "गोह",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1638,
+    "name_en": "Haspura",
+    "name_local": "हसपुरा",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1639,
+    "name_en": "Kutumba",
+    "name_local": "कुटुम्बा",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1640,
+    "name_en": "Madanpur",
+    "name_local": "मदनपुर",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1641,
+    "name_en": "Nabinagar",
+    "name_local": "नबीनगर",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1642,
+    "name_en": "Obra",
+    "name_local": "ओबरा",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1643,
+    "name_en": "Rafiganj",
+    "name_local": "रफीगंज",
+    "district_id": 189
+  },
+  {
+    "lgd_block_code": 1644,
+    "name_en": "Amarpur",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1645,
+    "name_en": "Banka",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1646,
+    "name_en": "Barahat",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1647,
+    "name_en": "Bausi",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1648,
+    "name_en": "Belhar",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1649,
+    "name_en": "Chandan",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1650,
+    "name_en": "Dhuraiya",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1651,
+    "name_en": "Fullidumar",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1652,
+    "name_en": "Katoria",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1653,
+    "name_en": "Rajaun",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1654,
+    "name_en": "Shambhuganj",
+    "name_local": "",
+    "district_id": 190
+  },
+  {
+    "lgd_block_code": 1655,
+    "name_en": "Bachhwara",
+    "name_local": "बछवाड़ा",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1656,
+    "name_en": "Bakhri",
+    "name_local": "बखरी",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1657,
+    "name_en": "Ballia",
+    "name_local": "बलिया",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1658,
+    "name_en": "Barauni",
+    "name_local": "बरौनी",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1659,
+    "name_en": "Begusarai",
+    "name_local": "बेगूसराय",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1660,
+    "name_en": "Bhagwanpur",
+    "name_local": "भगवानपुर",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1661,
+    "name_en": "Birpur",
+    "name_local": "वीरपुर",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1662,
+    "name_en": "Cheria Bariarpur",
+    "name_local": "चेरियाबरियारपुर",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1663,
+    "name_en": "Chhaurahi",
+    "name_local": "छौड़ाही",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1664,
+    "name_en": "Dandari",
+    "name_local": "डंडारी",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1665,
+    "name_en": "Gadhpura",
+    "name_local": "गढ़पुरा",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1666,
+    "name_en": "Khodawandpur",
+    "name_local": "खोदावन्दपुर",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1667,
+    "name_en": "Mansurchak",
+    "name_local": "मंसूरचक",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1668,
+    "name_en": "Matihani",
+    "name_local": "मटिहानी",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1669,
+    "name_en": "Nawkothi",
+    "name_local": "नावकोठी",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1670,
+    "name_en": "Sahebpur Kamal",
+    "name_local": "साहेबपुरकमाल",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1671,
+    "name_en": "Samho Akha Kurha",
+    "name_local": "शाम्हो अकहा कुरहा",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1672,
+    "name_en": "Teghra",
+    "name_local": "तेघड़ा",
+    "district_id": 191
+  },
+  {
+    "lgd_block_code": 1673,
+    "name_en": "Bihpur",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1675,
+    "name_en": "Gopalpur",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1676,
+    "name_en": "Goradih",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1677,
+    "name_en": "Ismailpur",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1678,
+    "name_en": "Jagdishpur",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1674,
+    "name_en": "Kahalgaon",
+    "name_local": "Colgong",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1679,
+    "name_en": "Kharik",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1680,
+    "name_en": "Narayanpur",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1681,
+    "name_en": "Nathnagar",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1682,
+    "name_en": "Naugachhia",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1683,
+    "name_en": "Pirpainti",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1684,
+    "name_en": "Rangrachowk",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1685,
+    "name_en": "Sabour",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1686,
+    "name_en": "Shahkund",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1687,
+    "name_en": "Sonhaula",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1688,
+    "name_en": "Sultanganj",
+    "name_local": "",
+    "district_id": 192
+  },
+  {
+    "lgd_block_code": 1689,
+    "name_en": "Agiaon",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1690,
+    "name_en": "Ara",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1691,
+    "name_en": "Barhara",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1692,
+    "name_en": "Behea",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1693,
+    "name_en": "Charpokhari",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1694,
+    "name_en": "Garhani",
+    "name_local": "गड़हनी",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1695,
+    "name_en": "Jagdishpur",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1696,
+    "name_en": "Koilwar",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1697,
+    "name_en": "Piro",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1698,
+    "name_en": "Sahar",
+    "name_local": "सहार",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1699,
+    "name_en": "Sandesh",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1700,
+    "name_en": "Shahpur",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1701,
+    "name_en": "Tarari",
+    "name_local": "",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1702,
+    "name_en": "Udwantnagar",
+    "name_local": "उदवंतनगर",
+    "district_id": 193
+  },
+  {
+    "lgd_block_code": 1703,
+    "name_en": "Brahmpur",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1704,
+    "name_en": "Buxar",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1705,
+    "name_en": "Chakki",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1706,
+    "name_en": "Chausa",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1707,
+    "name_en": "Chougain",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1708,
+    "name_en": "Dumraon",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1709,
+    "name_en": "Itarhi",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1710,
+    "name_en": "Kesath",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1711,
+    "name_en": "Nawanagar",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1712,
+    "name_en": "Rajpur",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1713,
+    "name_en": "Simri",
+    "name_local": "",
+    "district_id": 194
+  },
+  {
+    "lgd_block_code": 1714,
+    "name_en": "Alinagar",
+    "name_local": "अलीनगर",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1715,
+    "name_en": "Bahadurpur",
+    "name_local": "बहादुरपुर",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1716,
+    "name_en": "Baheri",
+    "name_local": "बहेरी",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1717,
+    "name_en": "Benipur",
+    "name_local": "बेनीपुर",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1718,
+    "name_en": "Biraul",
+    "name_local": "बिरौल",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1719,
+    "name_en": "Darbhanga",
+    "name_local": "दरभंगा",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1720,
+    "name_en": "Gaurabauram",
+    "name_local": "गौरबौरम",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1721,
+    "name_en": "Ghanshyampur",
+    "name_local": "घनश्यामपुर",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1722,
+    "name_en": "Hanuman Nagar",
+    "name_local": "हनुमाननगर",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1723,
+    "name_en": "Hayaghat",
+    "name_local": "हायाघाट",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1724,
+    "name_en": "Jale",
+    "name_local": "जाले",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1725,
+    "name_en": "Keotirunway",
+    "name_local": "केवटी",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1726,
+    "name_en": "Kiratpur",
+    "name_local": "किरतपुर",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1727,
+    "name_en": "Kusheshwar Asthan",
+    "name_local": "कुशेश्वर स्थान",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1728,
+    "name_en": "Kusheswar Asthan East",
+    "name_local": "कुशेश्वर स्थान पूर्वी",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1729,
+    "name_en": "Manigachhi",
+    "name_local": "मनीगाछी",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1730,
+    "name_en": "Singhwara",
+    "name_local": "सिंघवारा",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1731,
+    "name_en": "Tardih",
+    "name_local": "तारडीह",
+    "district_id": 195
+  },
+  {
+    "lgd_block_code": 1732,
+    "name_en": "Amas",
+    "name_local": "आमस",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1733,
+    "name_en": "Atri",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1734,
+    "name_en": "Bankey Bazar",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1735,
+    "name_en": "Barachatti",
+    "name_local": "बाराचट्टी",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1736,
+    "name_en": "Belaganj",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1737,
+    "name_en": "Bodhgaya",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1738,
+    "name_en": "Dobhi",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1739,
+    "name_en": "Dumaria",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1740,
+    "name_en": "Fatehpur",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1741,
+    "name_en": "Gaya Town",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1742,
+    "name_en": "Guraru",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1743,
+    "name_en": "Gurua",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1744,
+    "name_en": "Imamganj",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1745,
+    "name_en": "Khizarsarai",
+    "name_local": "खिज़रसराय",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1746,
+    "name_en": "Konch",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1747,
+    "name_en": "Manpur",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1748,
+    "name_en": "Mohanpur",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1749,
+    "name_en": "Mohra",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1750,
+    "name_en": "Neemchak Bathani",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1751,
+    "name_en": "Paraiya",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1752,
+    "name_en": "Sherghatty",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1753,
+    "name_en": "Tankuppa",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1754,
+    "name_en": "Tekari",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1755,
+    "name_en": "Wazirganj",
+    "name_local": "",
+    "district_id": 196
+  },
+  {
+    "lgd_block_code": 1756,
+    "name_en": "Baikunthpur",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1757,
+    "name_en": "Barauli",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1758,
+    "name_en": "Bhorey",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1759,
+    "name_en": "Bijaipur",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1760,
+    "name_en": "Gopalganj",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1761,
+    "name_en": "Hathua",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1762,
+    "name_en": "Kataiya",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1763,
+    "name_en": "Kuchaikote",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1764,
+    "name_en": "Manjha",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1765,
+    "name_en": "Panchdeori",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1766,
+    "name_en": "Phulwariya",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1767,
+    "name_en": "Sidhwaliya",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1768,
+    "name_en": "Thawe",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1769,
+    "name_en": "Uchkagaon",
+    "name_local": "",
+    "district_id": 197
+  },
+  {
+    "lgd_block_code": 1770,
+    "name_en": "Barhat",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1771,
+    "name_en": "Chakai",
+    "name_local": "चकाई",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1772,
+    "name_en": "Gidhor",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1773,
+    "name_en": "Islamnagar Aliganj",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1774,
+    "name_en": "Jamui",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1775,
+    "name_en": "Jhajha",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1776,
+    "name_en": "Khaira",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1777,
+    "name_en": "Laxmipur",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1778,
+    "name_en": "Sikandra",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1779,
+    "name_en": "Sono",
+    "name_local": "",
+    "district_id": 198
+  },
+  {
+    "lgd_block_code": 1780,
+    "name_en": "Ghoshi",
+    "name_local": "घोषी",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1781,
+    "name_en": "Hulasganj",
+    "name_local": "हुलासगंज",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1782,
+    "name_en": "Jehanabad",
+    "name_local": "जहानाबाद",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1783,
+    "name_en": "Kako",
+    "name_local": "काको",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1784,
+    "name_en": "Makhdumpur",
+    "name_local": "मखदुमपुर",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1785,
+    "name_en": "Modanganj",
+    "name_local": "मोदनगंज",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1786,
+    "name_en": "Ratni Faridpur",
+    "name_local": "रतनीफरीदपुर",
+    "district_id": 199
+  },
+  {
+    "lgd_block_code": 1787,
+    "name_en": "Adhaura",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1788,
+    "name_en": "Bhabua",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1789,
+    "name_en": "Bhagwanpur",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1790,
+    "name_en": "Chainpur",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1791,
+    "name_en": "Chand",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1792,
+    "name_en": "Durgawati",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1793,
+    "name_en": "Kudra",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1794,
+    "name_en": "Mohania",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1795,
+    "name_en": "Nuaon",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1796,
+    "name_en": "Ramgarh",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1797,
+    "name_en": "Rampur",
+    "name_local": "",
+    "district_id": 200
+  },
+  {
+    "lgd_block_code": 1798,
+    "name_en": "Amdabad",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1799,
+    "name_en": "Azamnagar",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1800,
+    "name_en": "Balrampur",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1801,
+    "name_en": "Barari",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1802,
+    "name_en": "Barsoi",
+    "name_local": "बारसोई",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1803,
+    "name_en": "Dandkhora",
+    "name_local": "डंडखोरा",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1804,
+    "name_en": "Falka",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1805,
+    "name_en": "Hasanganj",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1806,
+    "name_en": "Kadwa",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1807,
+    "name_en": "Katihar",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1808,
+    "name_en": "Korha",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1809,
+    "name_en": "Kursela",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1810,
+    "name_en": "Manihari",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1811,
+    "name_en": "Mansahi",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1812,
+    "name_en": "Pranpur",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1813,
+    "name_en": "Sameli",
+    "name_local": "",
+    "district_id": 201
+  },
+  {
+    "lgd_block_code": 1814,
+    "name_en": "Alauli",
+    "name_local": "",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1815,
+    "name_en": "Beldaur",
+    "name_local": "बेलदौर",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1816,
+    "name_en": "Chautham",
+    "name_local": "",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1817,
+    "name_en": "Gogri",
+    "name_local": "",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1818,
+    "name_en": "Khagaria",
+    "name_local": "",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1819,
+    "name_en": "Mansi",
+    "name_local": "",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1820,
+    "name_en": "Parbatta",
+    "name_local": "",
+    "district_id": 202
+  },
+  {
+    "lgd_block_code": 1821,
+    "name_en": "Bahadurganj",
+    "name_local": "बहादुरगंज",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1822,
+    "name_en": "Dighalbank",
+    "name_local": "",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1823,
+    "name_en": "Kishanganj",
+    "name_local": "",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1824,
+    "name_en": "Kochadhaman",
+    "name_local": "कोचाधामन",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1825,
+    "name_en": "Pothia",
+    "name_local": "",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1826,
+    "name_en": "Terhagachh",
+    "name_local": "टेढ़ागाछ",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1827,
+    "name_en": "Thakurganj",
+    "name_local": "",
+    "district_id": 203
+  },
+  {
+    "lgd_block_code": 1828,
+    "name_en": "Barahiya",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1829,
+    "name_en": "Channan",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1830,
+    "name_en": "Halsi",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1831,
+    "name_en": "Lakhisarai",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1832,
+    "name_en": "Pipariya",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1833,
+    "name_en": "Ramgarh Chowk",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1834,
+    "name_en": "Surajgarha",
+    "name_local": "",
+    "district_id": 204
+  },
+  {
+    "lgd_block_code": 1835,
+    "name_en": "Alamnagar",
+    "name_local": "आलमनगर",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1836,
+    "name_en": "Bihariganj",
+    "name_local": "बिहारीगंज",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1837,
+    "name_en": "Chausa",
+    "name_local": "चौसा",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1838,
+    "name_en": "Gamhariya",
+    "name_local": "गम्हरिया",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1839,
+    "name_en": "Ghelarh",
+    "name_local": "घेलाढ",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1840,
+    "name_en": "Gwalpara",
+    "name_local": "ग्वालपारा",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1841,
+    "name_en": "Kumarkhand",
+    "name_local": "कुमारखंड",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1842,
+    "name_en": "Madhepura",
+    "name_local": "मधेपुरा",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1843,
+    "name_en": "Murliganj",
+    "name_local": "मुरलीगंज",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1844,
+    "name_en": "Purani",
+    "name_local": "पुरैनी",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1845,
+    "name_en": "Shankarpur",
+    "name_local": "शंकरपुर",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1846,
+    "name_en": "Singheshwar",
+    "name_local": "सिंघेश्वर",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1847,
+    "name_en": "Udakishunganj",
+    "name_local": "उदाकिशुनगंज",
+    "district_id": 205
+  },
+  {
+    "lgd_block_code": 1848,
+    "name_en": "Andhratharhi",
+    "name_local": "अंधराठाढ़ी",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1849,
+    "name_en": "Babu Barhi",
+    "name_local": "बाबूबरही",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1850,
+    "name_en": "Basopatti",
+    "name_local": "बासोपट्टी",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1851,
+    "name_en": "Benipatti",
+    "name_local": "बेनीपट्टी",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1852,
+    "name_en": "Bisfi",
+    "name_local": "बिस्फी",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1853,
+    "name_en": "Ghoghardiha",
+    "name_local": "घोघरडीहा",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1854,
+    "name_en": "Harlakhi",
+    "name_local": "हरलाखी",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1855,
+    "name_en": "Jainagar",
+    "name_local": "जयनगर",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1856,
+    "name_en": "Jhanjharpur",
+    "name_local": "झंझारपुर",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1857,
+    "name_en": "Kaluahi",
+    "name_local": "कलुआही",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1858,
+    "name_en": "Khajauli",
+    "name_local": "खजौली",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1859,
+    "name_en": "Ladania",
+    "name_local": "लदनिया",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1860,
+    "name_en": "Lakhnaur",
+    "name_local": "लखनौर",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1861,
+    "name_en": "Laukaha (Khutauna)",
+    "name_local": "खुटौना",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1862,
+    "name_en": "Laukahi",
+    "name_local": "लौकही",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1863,
+    "name_en": "Madhepur",
+    "name_local": "मधेपुर",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1865,
+    "name_en": "Madhwapur",
+    "name_local": "मधवापुर",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1866,
+    "name_en": "Pandaul",
+    "name_local": "पंडौल",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1867,
+    "name_en": "Phulparas",
+    "name_local": "फुलपरास",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1864,
+    "name_en": "Rahika",
+    "name_local": "रहिका",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1868,
+    "name_en": "Rajnagar",
+    "name_local": "राजनगर",
+    "district_id": 206
+  },
+  {
+    "lgd_block_code": 1869,
+    "name_en": "Asarganj",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1870,
+    "name_en": "Bariyarpur",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1871,
+    "name_en": "Dharhara",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1872,
+    "name_en": "Jamalpur",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1873,
+    "name_en": "Kharagpur",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1874,
+    "name_en": "Munger Sadar",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1875,
+    "name_en": "Sangrampur",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1876,
+    "name_en": "Tarapur",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1877,
+    "name_en": "Tetiabambar",
+    "name_local": "",
+    "district_id": 207
+  },
+  {
+    "lgd_block_code": 1878,
+    "name_en": "Aurai",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1879,
+    "name_en": "Bandra",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1880,
+    "name_en": "Bochahan",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1881,
+    "name_en": "Gaighat",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1882,
+    "name_en": "Kanti",
+    "name_local": "काँटी",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1883,
+    "name_en": "Katra",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1884,
+    "name_en": "Kurhani",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1885,
+    "name_en": "Marwan",
+    "name_local": "मड़वन",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1886,
+    "name_en": "Minapur",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1887,
+    "name_en": "Motipur",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1888,
+    "name_en": "Muraul",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1889,
+    "name_en": "Mushahari",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1890,
+    "name_en": "Paroo",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1891,
+    "name_en": "Sahebganj",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1892,
+    "name_en": "Sakra",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1893,
+    "name_en": "Saraiya",
+    "name_local": "",
+    "district_id": 208
+  },
+  {
+    "lgd_block_code": 1894,
+    "name_en": "Asthawan",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1895,
+    "name_en": "Ben",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1896,
+    "name_en": "Biharsharif",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1897,
+    "name_en": "Bind",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1898,
+    "name_en": "Chandi",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1899,
+    "name_en": "Ekangarsarai",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1900,
+    "name_en": "Giriak",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1901,
+    "name_en": "Harnaut",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1902,
+    "name_en": "Hilsa",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1903,
+    "name_en": "Islampur",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1904,
+    "name_en": "Karai Parsurai",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1905,
+    "name_en": "Katrisarai",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1906,
+    "name_en": "Nagar Nausa",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1907,
+    "name_en": "Noorsarai",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1908,
+    "name_en": "Parbalpur",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1909,
+    "name_en": "Rahui",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1910,
+    "name_en": "Rajgir",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1911,
+    "name_en": "Sarmera",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1912,
+    "name_en": "Silao",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1913,
+    "name_en": "Tharthari",
+    "name_local": "",
+    "district_id": 209
+  },
+  {
+    "lgd_block_code": 1914,
+    "name_en": "Akbarpur",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1915,
+    "name_en": "Gobindpur",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1916,
+    "name_en": "Hisua",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1917,
+    "name_en": "Kashichak",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1918,
+    "name_en": "Kawakole",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1919,
+    "name_en": "Mescaur",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1920,
+    "name_en": "Nardiganj",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1921,
+    "name_en": "Narhat",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1922,
+    "name_en": "Nawada",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1923,
+    "name_en": "Pakri Barawan",
+    "name_local": "PAKRIBARAWAN",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1924,
+    "name_en": "Rajauli",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1925,
+    "name_en": "Roh",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1926,
+    "name_en": "Sirdala",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1927,
+    "name_en": "Warisaliganj",
+    "name_local": "",
+    "district_id": 210
+  },
+  {
+    "lgd_block_code": 1928,
+    "name_en": "Bagaha-I",
+    "name_local": "बगहा-1",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1929,
+    "name_en": "Bagaha-Ii",
+    "name_local": "बगहा-2",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1930,
+    "name_en": "Bairia",
+    "name_local": "बैरिया",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1931,
+    "name_en": "Bettiah",
+    "name_local": "बेतिया",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1932,
+    "name_en": "Bhitaha",
+    "name_local": "भितहां",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1933,
+    "name_en": "Chanpatia",
+    "name_local": "चनपटिया",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1934,
+    "name_en": "Gaunaha",
+    "name_local": "गौनाहा",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1935,
+    "name_en": "Jogapatti",
+    "name_local": "योगापट्टी",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1936,
+    "name_en": "Lauriya",
+    "name_local": "लौरिया",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1937,
+    "name_en": "Madhubani",
+    "name_local": "मधुबनी",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1938,
+    "name_en": "Mainatand",
+    "name_local": "मैनाटांड",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1939,
+    "name_en": "Majhaulia",
+    "name_local": "मझौलिया",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1940,
+    "name_en": "Narkatiaganj",
+    "name_local": "नरकटियागंज",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1941,
+    "name_en": "Nautan",
+    "name_local": "नौतन",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1942,
+    "name_en": "Piprasi",
+    "name_local": "पिपरासी",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1943,
+    "name_en": "Ramnagar",
+    "name_local": "रामनगर",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1944,
+    "name_en": "Sikta",
+    "name_local": "सिकटा",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1945,
+    "name_en": "Thakrahan",
+    "name_local": "ठकराहां",
+    "district_id": 211
+  },
+  {
+    "lgd_block_code": 1946,
+    "name_en": "Athamalgola",
+    "name_local": "अथमलगोला",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1947,
+    "name_en": "Bakhtiarpur",
+    "name_local": "बख्तियारपुर",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1948,
+    "name_en": "Barh",
+    "name_local": "बाढ",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1949,
+    "name_en": "Belchchi",
+    "name_local": "बेलछी",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1950,
+    "name_en": "Bihta",
+    "name_local": "बिहटा",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1951,
+    "name_en": "Bikram",
+    "name_local": "बिक्रम",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1952,
+    "name_en": "Daniyawan",
+    "name_local": "दनियावां",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1953,
+    "name_en": "Dhanarua",
+    "name_local": "धनरूआ",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1954,
+    "name_en": "Dinapur",
+    "name_local": "दानापुर",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1955,
+    "name_en": "Dulhin Bazar",
+    "name_local": "दुल्हिन बाजार",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1956,
+    "name_en": "Fatuha",
+    "name_local": "फतुहॉ",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1957,
+    "name_en": "Ghoswari",
+    "name_local": "घोसवरी",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1958,
+    "name_en": "Khusrupur",
+    "name_local": "खुसरुपुर",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1959,
+    "name_en": "Maner",
+    "name_local": "मनेर",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1960,
+    "name_en": "Masaurhi",
+    "name_local": "मसौढ़ी",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1961,
+    "name_en": "Mokama",
+    "name_local": "मोकामा",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1962,
+    "name_en": "Naubatpur",
+    "name_local": "नौबतपुर",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1963,
+    "name_en": "Paliganj",
+    "name_local": "पालीगंज",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1964,
+    "name_en": "Pandarak",
+    "name_local": "पंडारक",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1965,
+    "name_en": "Patna Sadar",
+    "name_local": "पटना सदर",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 7568,
+    "name_en": "Patna Sadar - Didarganj",
+    "name_local": "पटना सदर - दीदारगंज",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 7566,
+    "name_en": "Patna Sadar - Patliputra",
+    "name_local": "पटना सदर- पाटलिपुत्र",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 7567,
+    "name_en": "Patna Sadar - Patna City",
+    "name_local": "पटना सदर - पटना सिटी",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1966,
+    "name_en": "Phulwari",
+    "name_local": "फुलवारीशरीफ",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1967,
+    "name_en": "Punpun",
+    "name_local": "पुनपुन",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1968,
+    "name_en": "Sampatchak",
+    "name_local": "संपतचक",
+    "district_id": 212
+  },
+  {
+    "lgd_block_code": 1969,
+    "name_en": "Adapur",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1970,
+    "name_en": "Areraj",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1971,
+    "name_en": "Banjariya",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1972,
+    "name_en": "Bankatwa",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1973,
+    "name_en": "Chakia (Pipra)",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1974,
+    "name_en": "Chawradano",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1975,
+    "name_en": "Chiraiya",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1976,
+    "name_en": "Dhaka",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1977,
+    "name_en": "Ghorasahan",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1978,
+    "name_en": "Harsidhi",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1979,
+    "name_en": "Kalyanpur",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1980,
+    "name_en": "Kesaria",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1981,
+    "name_en": "Kotwa",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1982,
+    "name_en": "Madhuban",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1983,
+    "name_en": "Mehsi",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1984,
+    "name_en": "Motihari",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1985,
+    "name_en": "Paharpur",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1986,
+    "name_en": "Pakridayal",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1987,
+    "name_en": "Patahi",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1988,
+    "name_en": "Phenhara",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1989,
+    "name_en": "Pipra Kothi",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1990,
+    "name_en": "Ramgarhwa",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1991,
+    "name_en": "Raxaul",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1992,
+    "name_en": "Sangrampur",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1993,
+    "name_en": "Sugauli",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1994,
+    "name_en": "Tetariya",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1995,
+    "name_en": "Turkaulia",
+    "name_local": "",
+    "district_id": 213
+  },
+  {
+    "lgd_block_code": 1996,
+    "name_en": "Amour",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 1997,
+    "name_en": "Baisa",
+    "name_local": "बैसा",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 1998,
+    "name_en": "Baisi",
+    "name_local": "बायसी",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 1999,
+    "name_en": "Banmankhi",
+    "name_local": "बनमनखी",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2000,
+    "name_en": "Barhara",
+    "name_local": "बड़हरा कोठी",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2001,
+    "name_en": "Bhawanipur",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2002,
+    "name_en": "Dagraua",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2003,
+    "name_en": "Dhamdaha",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2004,
+    "name_en": "Jalalgarh",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2005,
+    "name_en": "Kasba",
+    "name_local": "कसबा",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2006,
+    "name_en": "Krityanand Nagar",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2007,
+    "name_en": "Purnia East",
+    "name_local": "पूर्णिया पूर्व",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2008,
+    "name_en": "Rupouli",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2009,
+    "name_en": "Srinagar",
+    "name_local": "",
+    "district_id": 214
+  },
+  {
+    "lgd_block_code": 2010,
+    "name_en": "Akorhigola",
+    "name_local": "अकोढ़ीगोला",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2011,
+    "name_en": "Bikramganj",
+    "name_local": "बिक्रमगंज",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2012,
+    "name_en": "Chenari",
+    "name_local": "चेनारी",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2013,
+    "name_en": "Dawath",
+    "name_local": "दावथ",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2014,
+    "name_en": "Dehri",
+    "name_local": "डेहरी",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2015,
+    "name_en": "Dinara",
+    "name_local": "दिनारा",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2016,
+    "name_en": "Karakat",
+    "name_local": "काराकाट",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2017,
+    "name_en": "Kargahar",
+    "name_local": "करगहर",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2018,
+    "name_en": "Kochas",
+    "name_local": "कोचस",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2019,
+    "name_en": "Nasriganj",
+    "name_local": "नासरीगंज",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2020,
+    "name_en": "Nawhatta",
+    "name_local": "नौहट्टा",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2021,
+    "name_en": "Nokha",
+    "name_local": "नोखा",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2022,
+    "name_en": "Rajpur",
+    "name_local": "राजपुर",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2023,
+    "name_en": "Rohtas",
+    "name_local": "रोहतास",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2024,
+    "name_en": "Sanjhouli",
+    "name_local": "संझौली",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2025,
+    "name_en": "Sasaram",
+    "name_local": "सासाराम",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2026,
+    "name_en": "Sheosagar",
+    "name_local": "शिवसागर",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2027,
+    "name_en": "Surajpura",
+    "name_local": "सूर्यपुरा",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2028,
+    "name_en": "Tilouthu",
+    "name_local": "तिलौथू",
+    "district_id": 215
+  },
+  {
+    "lgd_block_code": 2029,
+    "name_en": "Banma Itahari",
+    "name_local": "बनमा इटहरी",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2030,
+    "name_en": "Kahara",
+    "name_local": "कहरा",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2031,
+    "name_en": "Mahishi",
+    "name_local": "महिषी",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2032,
+    "name_en": "Nauhatta",
+    "name_local": "नवहट्टा",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2033,
+    "name_en": "Patarghat",
+    "name_local": "पतरघट",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2034,
+    "name_en": "Salkhua",
+    "name_local": "सलखुआ",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2035,
+    "name_en": "Sattar Kattaiya",
+    "name_local": "सत्तरकटैया",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2036,
+    "name_en": "Simri Bakhtiarpur",
+    "name_local": "सिमरीबख्तियारपुर",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2037,
+    "name_en": "Sonbarsa",
+    "name_local": "सोनबरसा",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2038,
+    "name_en": "Sour Bazar",
+    "name_local": "सौरबाजार",
+    "district_id": 216
+  },
+  {
+    "lgd_block_code": 2039,
+    "name_en": "Bibhutipur",
+    "name_local": "विभुतिपूर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2040,
+    "name_en": "Bithan",
+    "name_local": "बिठान",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2041,
+    "name_en": "Dalsinghsarai",
+    "name_local": "दलसिंह सराय",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2042,
+    "name_en": "Hasanpur",
+    "name_local": "हसनपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2043,
+    "name_en": "Kalyanpur",
+    "name_local": "कल्याणपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2044,
+    "name_en": "Khanpur",
+    "name_local": "खानपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2045,
+    "name_en": "Mohanpur",
+    "name_local": "मोहनपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2046,
+    "name_en": "Mohiuddinagar",
+    "name_local": "मोहिउद्दीन नगर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2047,
+    "name_en": "Morwa",
+    "name_local": "मोरवा",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2048,
+    "name_en": "Patori",
+    "name_local": "पटोरी",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2049,
+    "name_en": "Pusa",
+    "name_local": "पूसा",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2050,
+    "name_en": "Rosera",
+    "name_local": "रोसड़ा",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2051,
+    "name_en": "Samastipur",
+    "name_local": "समस्तीपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2052,
+    "name_en": "Sarairanjan",
+    "name_local": "सरायरंजन",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2053,
+    "name_en": "Shivaji Nagar",
+    "name_local": "शिवाजीनगर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2054,
+    "name_en": "Singhia",
+    "name_local": "सिंघिया",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2055,
+    "name_en": "Tajpur",
+    "name_local": "ताजपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2056,
+    "name_en": "Ujiarpur",
+    "name_local": "उजियारपुर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2057,
+    "name_en": "Vidyapati Nagar",
+    "name_local": "विद्यापतिनगर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2058,
+    "name_en": "Warisnagar",
+    "name_local": "वारिसनगर",
+    "district_id": 217
+  },
+  {
+    "lgd_block_code": 2059,
+    "name_en": "Amnour",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2060,
+    "name_en": "Baniapur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2061,
+    "name_en": "Chhapra",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2062,
+    "name_en": "Dariapur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2063,
+    "name_en": "Dighwara",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2064,
+    "name_en": "Ekma",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2065,
+    "name_en": "Garkha",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2066,
+    "name_en": "Isuapur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2067,
+    "name_en": "Jalalpur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2068,
+    "name_en": "Lahladpur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2069,
+    "name_en": "Maker",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2070,
+    "name_en": "Manjhi",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2071,
+    "name_en": "Marhaurah",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2072,
+    "name_en": "Mashrakh",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2073,
+    "name_en": "Nagra",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2074,
+    "name_en": "Panapur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2075,
+    "name_en": "Parsa",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2076,
+    "name_en": "Revelganj",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2077,
+    "name_en": "Sonepur",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2078,
+    "name_en": "Taraiya",
+    "name_local": "",
+    "district_id": 218
+  },
+  {
+    "lgd_block_code": 2079,
+    "name_en": "Ariari",
+    "name_local": "अरियरी",
+    "district_id": 219
+  },
+  {
+    "lgd_block_code": 2080,
+    "name_en": "Barbigha",
+    "name_local": "बरबीघा",
+    "district_id": 219
+  },
+  {
+    "lgd_block_code": 2081,
+    "name_en": "Chewara",
+    "name_local": "चेवाड़ा",
+    "district_id": 219
+  },
+  {
+    "lgd_block_code": 2082,
+    "name_en": "Ghatkusumbha",
+    "name_local": "घाटकुसुम्भा",
+    "district_id": 219
+  },
+  {
+    "lgd_block_code": 2084,
+    "name_en": "Sheikhpura",
+    "name_local": "शेखपुरा",
+    "district_id": 219
+  },
+  {
+    "lgd_block_code": 2083,
+    "name_en": "Shekhopur Sarai",
+    "name_local": "शेखोपुरसराय",
+    "district_id": 219
+  },
+  {
+    "lgd_block_code": 2085,
+    "name_en": "Dumari Katsari",
+    "name_local": "डुमरी कटसरी",
+    "district_id": 220
+  },
+  {
+    "lgd_block_code": 2086,
+    "name_en": "Piprahi",
+    "name_local": "पिपराही",
+    "district_id": 220
+  },
+  {
+    "lgd_block_code": 2087,
+    "name_en": "Purnahiya",
+    "name_local": "पुरनहिया",
+    "district_id": 220
+  },
+  {
+    "lgd_block_code": 2088,
+    "name_en": "Sheohar",
+    "name_local": "शिवहर",
+    "district_id": 220
+  },
+  {
+    "lgd_block_code": 2089,
+    "name_en": "Tariyani",
+    "name_local": "तरियानी",
+    "district_id": 220
+  },
+  {
+    "lgd_block_code": 2090,
+    "name_en": "Bairgania",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2091,
+    "name_en": "Bajpatti",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2092,
+    "name_en": "Bathanaha",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2093,
+    "name_en": "Belsand",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2094,
+    "name_en": "Bokhra",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2095,
+    "name_en": "Choraut",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2096,
+    "name_en": "Dumra",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2097,
+    "name_en": "Majorganj",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2098,
+    "name_en": "Nanpur",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2099,
+    "name_en": "Parihar",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2100,
+    "name_en": "Parsauni",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2101,
+    "name_en": "Pupri",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2102,
+    "name_en": "Riga",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2103,
+    "name_en": "Runnisaidpur",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2104,
+    "name_en": "Sonbarsa",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2105,
+    "name_en": "Suppi",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2106,
+    "name_en": "Sursand",
+    "name_local": "",
+    "district_id": 221
+  },
+  {
+    "lgd_block_code": 2107,
+    "name_en": "Andar",
+    "name_local": "आन्दर",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2108,
+    "name_en": "Barharia",
+    "name_local": "बड़हरिया",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2109,
+    "name_en": "Basantpur",
+    "name_local": "बसंतपुर",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2110,
+    "name_en": "Bhagwanpur Hat",
+    "name_local": "भगवानपुर हाट",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2111,
+    "name_en": "Darauli",
+    "name_local": "दरौली",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2112,
+    "name_en": "Daraundha",
+    "name_local": "दरौन्दा",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2113,
+    "name_en": "Goriakothi",
+    "name_local": "गोरेयाकोठी",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2114,
+    "name_en": "Guthani",
+    "name_local": "गुठनी",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2115,
+    "name_en": "Hasan Pura",
+    "name_local": "हसनपुरा",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2116,
+    "name_en": "Hussainganj",
+    "name_local": "हुसैनगंज",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2117,
+    "name_en": "Lakri Nabiganj",
+    "name_local": "लकड़ी नबीगंज",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2118,
+    "name_en": "Maharajganj",
+    "name_local": "महराजगंज",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2119,
+    "name_en": "Mairwa",
+    "name_local": "मैरवा",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2120,
+    "name_en": "Nautan",
+    "name_local": "नौतन",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2121,
+    "name_en": "Pachrukhi",
+    "name_local": "पचरुखी",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2122,
+    "name_en": "Raghunathpur",
+    "name_local": "रघुनाथपुर",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2123,
+    "name_en": "Siswan",
+    "name_local": "सिसवन",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2124,
+    "name_en": "Siwan",
+    "name_local": "सिवान सदर",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2125,
+    "name_en": "Ziradei",
+    "name_local": "जीरादेई",
+    "district_id": 222
+  },
+  {
+    "lgd_block_code": 2126,
+    "name_en": "Basantpur",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2127,
+    "name_en": "Chhatapur",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2128,
+    "name_en": "Kishanpur",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2129,
+    "name_en": "Marauna",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2130,
+    "name_en": "Nirmali",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2131,
+    "name_en": "Pipra",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2132,
+    "name_en": "Pratapganj",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2133,
+    "name_en": "Raghopur",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2134,
+    "name_en": "Saraigarh Bhaptiyahi",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2135,
+    "name_en": "Supaul",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2136,
+    "name_en": "Tribeniganj",
+    "name_local": "",
+    "district_id": 223
+  },
+  {
+    "lgd_block_code": 2137,
+    "name_en": "Bhagwanpur",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2138,
+    "name_en": "Bidupur",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2139,
+    "name_en": "Chehrakala",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2140,
+    "name_en": "Desri",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2141,
+    "name_en": "Garaul",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2142,
+    "name_en": "Hajipur",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2143,
+    "name_en": "Jandaha",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2144,
+    "name_en": "Lalganj",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2145,
+    "name_en": "Mahnar",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2146,
+    "name_en": "Mahua",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2147,
+    "name_en": "Patedhi Belsar",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2148,
+    "name_en": "Patepur",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2149,
+    "name_en": "Raghopur",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2150,
+    "name_en": "Rajapakar",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2151,
+    "name_en": "Sahdei Buzurg",
+    "name_local": "",
+    "district_id": 224
+  },
+  {
+    "lgd_block_code": 2152,
+    "name_en": "Vaishali",
+    "name_local": "",
+    "district_id": 224
+  }
+]

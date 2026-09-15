@@ -1,238 +1,89 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 // ==========================================
-// 1. Division Schema
+// 1. District Schema
 // ==========================================
-export interface IDivision extends Document {
-  division_id: string;
-  sahyog_id?: string;
-  name_en: string;
-  name_local?: string;
-}
+const DistrictSchema = new Schema({
+  lgd_district_code: { type: Number, required: true, unique: true, index: true },
+  name_en: { type: String, required: true },
+  name_local: { type: String },
+  sahyog_district_id: { type: Number }
+}, { timestamps: true });
 
-const DivisionSchema = new Schema<IDivision>({
-  division_id: { type: String, required: true, unique: true, index: true },
-  sahyog_id: { type: String },
+// ==========================================
+// 2. Block Schema
+// ==========================================
+const BlockSchema = new Schema({
+  lgd_block_code: { type: Number, required: true, unique: true, index: true },
+  district_id: { type: Number, required: true, index: true },
   name_en: { type: String, required: true },
   name_local: { type: String }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-DivisionSchema.virtual('districts', {
-  ref: 'District',
-  localField: 'division_id',
-  foreignField: 'division_id',
-  justOne: false
-});
+}, { timestamps: true });
 
 // ==========================================
-// 2. District Schema
+// 3. Panchayat Schema
 // ==========================================
-export interface IDistrict extends Document {
-  district_id: string;
-  division_id?: string;
-  sahyog_id?: string;
-  name_en: string;
-  name_local?: string;
-  lgd_code?: number;
-}
-
-const DistrictSchema = new Schema<IDistrict>({
-  district_id: { type: String, required: true, unique: true, index: true },
-  division_id: { type: String, index: true },
-  sahyog_id: { type: String },
-  name_en: { type: String, required: true },
-  name_local: { type: String },
-  lgd_code: { type: Number }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-DistrictSchema.virtual('division', {
-  ref: 'Division',
-  localField: 'division_id',
-  foreignField: 'division_id',
-  justOne: true
-});
-
-DistrictSchema.virtual('subdivisions', {
-  ref: 'Subdivision',
-  localField: 'district_id',
-  foreignField: 'district_id',
-  justOne: false
-});
-
-DistrictSchema.virtual('blocks', {
-  ref: 'Block',
-  localField: 'district_id',
-  foreignField: 'district_id',
-  justOne: false
-});
-
-// ==========================================
-// 3. Subdivision Schema
-// ==========================================
-export interface ISubdivision extends Document {
-  subdivision_id: string;
-  district_id: string;
-  sahyog_id?: string;
-  name_en: string;
-  name_local?: string;
-}
-
-const SubdivisionSchema = new Schema<ISubdivision>({
-  subdivision_id: { type: String, required: true, unique: true, index: true },
-  district_id: { type: String, required: true, index: true },
-  sahyog_id: { type: String },
+const PanchayatSchema = new Schema({
+  lgd_gp_code: { type: Number, required: true, unique: true, index: true },
+  block_id: { type: Number, required: true, index: true },
   name_en: { type: String, required: true },
   name_local: { type: String }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-SubdivisionSchema.virtual('district', {
-  ref: 'District',
-  localField: 'district_id',
-  foreignField: 'district_id',
-  justOne: true
-});
-
-SubdivisionSchema.virtual('blocks', {
-  ref: 'Block',
-  localField: 'subdivision_id',
-  foreignField: 'subdivision_id',
-  justOne: false
-});
+}, { timestamps: true });
 
 // ==========================================
-// 4. Block Schema
+// 4. Village Schema
 // ==========================================
-export interface IBlock extends Document {
-  block_id: string;
-  district_id: string;
-  subdivision_id?: string;
-  sahyog_id?: string;
-  name_en: string;
-  name_local?: string;
-  lgd_code?: number;
-}
+const VillageSchema = new Schema({
+  lgd_village_code: { type: Number, required: true, unique: true, index: true },
+  panchayat_id: { type: Number, required: true, index: true },
+  block_id: { type: Number, required: true, index: true },
+  name_en: { type: String, required: true }
+}, { timestamps: true });
 
-const BlockSchema = new Schema<IBlock>({
-  block_id: { type: String, required: true, unique: true, index: true },
-  district_id: { type: String, required: true, index: true },
-  subdivision_id: { type: String, index: true },
-  sahyog_id: { type: String },
+// ==========================================
+// 5. Urban Local Body Schema
+// ==========================================
+const UrbanLocalBodySchema = new Schema({
+  lgd_ulb_code: { type: Number, required: true, unique: true, index: true },
+  district_id: { type: Number, required: true, index: true },
   name_en: { type: String, required: true },
   name_local: { type: String },
-  lgd_code: { type: Number }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-BlockSchema.virtual('district', {
-  ref: 'District',
-  localField: 'district_id',
-  foreignField: 'district_id',
-  justOne: true
-});
-
-BlockSchema.virtual('subdivision', {
-  ref: 'Subdivision',
-  localField: 'subdivision_id',
-  foreignField: 'subdivision_id',
-  justOne: true
-});
-
-BlockSchema.virtual('panchayats', {
-  ref: 'Panchayat',
-  localField: 'block_id',
-  foreignField: 'block_id',
-  justOne: false
-});
-
-BlockSchema.virtual('thanas', {
-  ref: 'Thana',
-  localField: 'block_id',
-  foreignField: 'block_ids',
-  justOne: false
-});
+  type_en: { type: String },
+  type_local: { type: String },
+  type_code: { type: Number },
+  census_2001_code: { type: String },
+  district_source: { type: String }
+}, { timestamps: true });
 
 // ==========================================
-// 5. Panchayat Schema
+// 6. Ward Schema
 // ==========================================
-export interface IPanchayat extends Document {
-  panchayat_id: string;
-  block_id: string;
-  name_en: string;
-  name_local?: string;
-  lgd_code?: number;
-}
-
-const PanchayatSchema = new Schema<IPanchayat>({
-  panchayat_id: { type: String, required: true, unique: true, index: true },
-  block_id: { type: String, required: true, index: true },
-  name_en: { type: String, required: true },
-  name_local: { type: String },
-  lgd_code: { type: Number }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-PanchayatSchema.virtual('block', {
-  ref: 'Block',
-  localField: 'block_id',
-  foreignField: 'block_id',
-  justOne: true
-});
+const WardSchema = new Schema({
+  lgd_ward_code: { type: Number, required: true, unique: true, index: true },
+  ulb_id: { type: Number, required: true, index: true },
+  ward_number: { type: Number, required: true },
+  ward_name: { type: String, required: true }
+}, { timestamps: true });
 
 // ==========================================
-// 6. Thana Schema
+// 7. Thana Schema
 // ==========================================
-export interface IThana extends Document {
-  thanas_id: string;
-  sahyog_id?: string;
-  name_en: string;
-  name_local?: string;
-  block_ids: string[];
-}
-
-const ThanaSchema = new Schema<IThana>({
+const ThanaSchema = new Schema({
   thanas_id: { type: String, required: true, unique: true, index: true },
   sahyog_id: { type: String },
   name_en: { type: String, required: true },
   name_local: { type: String },
-  block_ids: [{ type: String, index: true }]
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-ThanaSchema.virtual('blocks', {
-  ref: 'Block',
-  localField: 'block_ids',
-  foreignField: 'block_id',
-  justOne: false
-});
+  lgd_block_codes: [{ type: Number, index: true }],
+  lgd_ulb_codes: [{ type: Number, index: true }]
+}, { timestamps: true });
 
 // ==========================================
 // Export Models
 // ==========================================
-export const DivisionModel = mongoose.model<IDivision>('Division', DivisionSchema);
-export const DistrictModel = mongoose.model<IDistrict>('District', DistrictSchema);
-export const SubdivisionModel = mongoose.model<ISubdivision>('Subdivision', SubdivisionSchema);
-export const BlockModel = mongoose.model<IBlock>('Block', BlockSchema);
-export const PanchayatModel = mongoose.model<IPanchayat>('Panchayat', PanchayatSchema);
-export const ThanaModel = mongoose.model<IThana>('Thana', ThanaSchema);
-
+export const DistrictModel = mongoose.model('District', DistrictSchema);
+export const BlockModel = mongoose.model('Block', BlockSchema);
+export const PanchayatModel = mongoose.model('Panchayat', PanchayatSchema);
+export const VillageModel = mongoose.model('Village', VillageSchema);
+export const UrbanLocalBodyModel = mongoose.model('UrbanLocalBody', UrbanLocalBodySchema);
+export const WardModel = mongoose.model('Ward', WardSchema);
+export const ThanaModel = mongoose.model('Thana', ThanaSchema);

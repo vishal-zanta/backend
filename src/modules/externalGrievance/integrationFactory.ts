@@ -1,3 +1,4 @@
+import { FoodDepartmentService } from "./departments/food.service.js";
 import { HealthDepartmentService } from "./departments/health.service.js";
 import { EducationDepartmentService } from "./departments/education.service.js";
 
@@ -24,6 +25,11 @@ export class ExternalIntegrationService {
       this.tokenCache[departmentCode] = "education-static-key";
       return this.tokenCache[departmentCode];
     }
+    else if (departmentCode === "FOOD") {
+      console.log(`[IntegrationService] Food Dept uses payload auth, no token exchange required.`);
+      this.tokenCache[departmentCode] = "food-static-key";
+      return this.tokenCache[departmentCode];
+    }
     
     throw new Error(`No auth configuration for ${departmentCode}`);
   }
@@ -38,6 +44,9 @@ export class ExternalIntegrationService {
     } 
     else if (departmentCode === "EDUCATION") {
       return await EducationDepartmentService.createGrievance(payload);
+    }
+    else if (departmentCode === "FOOD") {
+      return await FoodDepartmentService.createGrievance(payload);
     }
     else {
       throw new Error(`No integration setup for ${departmentCode}`);
@@ -86,6 +95,9 @@ export class ExternalIntegrationService {
       else if (departmentCode === "EDUCATION") {
         return await EducationDepartmentService.getStatus(externalComplaintId);
       }
+      else if (departmentCode === "FOOD") {
+        return await FoodDepartmentService.getStatus(externalComplaintId);
+      }
       return null;
     } catch (error: any) {
       console.error(`[IntegrationService] Failed to fetch status for ${externalComplaintId}:`, error?.message);
@@ -104,6 +116,9 @@ export class ExternalIntegrationService {
       const masterType = (type || 'categories') as any;
       return await EducationDepartmentService.getMasterData(masterType, params);
     }
+    if (departmentCode === "FOOD") {
+      return []; // Master data not currently exposed by Food API
+    }
     throw new Error(`Master data not configured for department: ${departmentCode}`);
   }
 
@@ -116,6 +131,9 @@ export class ExternalIntegrationService {
     }
     if (departmentCode === "EDUCATION") {
       return await EducationDepartmentService.getMasterData('districts');
+    }
+    if (departmentCode === "FOOD") {
+      return [];
     }
     throw new Error(`District data not configured for department: ${departmentCode}`);
   }

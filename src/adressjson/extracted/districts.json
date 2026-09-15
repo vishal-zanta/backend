@@ -1,0 +1,230 @@
+[
+  {
+    "lgd_district_code": 188,
+    "name_en": "Araria",
+    "name_local": "अररिया",
+    "sahyog_district_id": 209
+  },
+  {
+    "lgd_district_code": 611,
+    "name_en": "Arwal",
+    "name_local": "अरवल",
+    "sahyog_district_id": 240
+  },
+  {
+    "lgd_district_code": 189,
+    "name_en": "Aurangabad",
+    "name_local": "औरंगाबाद",
+    "sahyog_district_id": 235
+  },
+  {
+    "lgd_district_code": 190,
+    "name_en": "Banka",
+    "name_local": "बांका",
+    "sahyog_district_id": 225
+  },
+  {
+    "lgd_district_code": 191,
+    "name_en": "Begusarai",
+    "name_local": "बेगूसराय",
+    "sahyog_district_id": 222
+  },
+  {
+    "lgd_district_code": 192,
+    "name_en": "Bhagalpur",
+    "name_local": "भागलपुर",
+    "sahyog_district_id": 224
+  },
+  {
+    "lgd_district_code": 193,
+    "name_en": "Bhojpur",
+    "name_local": "भोजपुर",
+    "sahyog_district_id": 231
+  },
+  {
+    "lgd_district_code": 194,
+    "name_en": "Buxar",
+    "name_local": "बक्सर",
+    "sahyog_district_id": 232
+  },
+  {
+    "lgd_district_code": 195,
+    "name_en": "Darbhanga",
+    "name_local": "दरभंगा",
+    "sahyog_district_id": 215
+  },
+  {
+    "lgd_district_code": 196,
+    "name_en": "Gaya",
+    "name_local": "गया",
+    "sahyog_district_id": 236
+  },
+  {
+    "lgd_district_code": 197,
+    "name_en": "Gopalganj",
+    "name_local": "गोपालगंज",
+    "sahyog_district_id": 217
+  },
+  {
+    "lgd_district_code": 198,
+    "name_en": "Jamui",
+    "name_local": "जमुई",
+    "sahyog_district_id": 238
+  },
+  {
+    "lgd_district_code": 199,
+    "name_en": "Jehanabad",
+    "name_local": "जहानाबाद",
+    "sahyog_district_id": 239
+  },
+  {
+    "lgd_district_code": 200,
+    "name_en": "Kaimur (Bhabua)",
+    "name_local": "कैमूर ( भभुआ )",
+    "sahyog_district_id": 233
+  },
+  {
+    "lgd_district_code": 201,
+    "name_en": "Katihar",
+    "name_local": "कटिहार",
+    "sahyog_district_id": 212
+  },
+  {
+    "lgd_district_code": 202,
+    "name_en": "Khagaria",
+    "name_local": "खगड़िया",
+    "sahyog_district_id": 223
+  },
+  {
+    "lgd_district_code": 203,
+    "name_en": "Kishanganj",
+    "name_local": "किशनगंज",
+    "sahyog_district_id": 210
+  },
+  {
+    "lgd_district_code": 204,
+    "name_en": "Lakhisarai",
+    "name_local": "लखीसराय",
+    "sahyog_district_id": 227
+  },
+  {
+    "lgd_district_code": 205,
+    "name_en": "Madhepura",
+    "name_local": "मधेपुरा",
+    "sahyog_district_id": 213
+  },
+  {
+    "lgd_district_code": 206,
+    "name_en": "Madhubani",
+    "name_local": "मधुबनी",
+    "sahyog_district_id": 207
+  },
+  {
+    "lgd_district_code": 207,
+    "name_en": "Munger",
+    "name_local": "मुंगेर",
+    "sahyog_district_id": 226
+  },
+  {
+    "lgd_district_code": 208,
+    "name_en": "Muzaffarpur",
+    "name_local": "मुजफ्फरपुर",
+    "sahyog_district_id": 216
+  },
+  {
+    "lgd_district_code": 209,
+    "name_en": "Nalanda",
+    "name_local": "नालंदा",
+    "sahyog_district_id": 229
+  },
+  {
+    "lgd_district_code": 210,
+    "name_en": "Nawada",
+    "name_local": "नवादा",
+    "sahyog_district_id": 237
+  },
+  {
+    "lgd_district_code": 211,
+    "name_en": "Pashchim Champaran",
+    "name_local": "पश्चिम चम्पारण",
+    "sahyog_district_id": 203
+  },
+  {
+    "lgd_district_code": 212,
+    "name_en": "Patna",
+    "name_local": "पटना",
+    "sahyog_district_id": 230
+  },
+  {
+    "lgd_district_code": 213,
+    "name_en": "Purbi Champaran",
+    "name_local": "पूर्वी चंपारण",
+    "sahyog_district_id": 204
+  },
+  {
+    "lgd_district_code": 214,
+    "name_en": "Purnia",
+    "name_local": "पूर्णिया",
+    "sahyog_district_id": 211
+  },
+  {
+    "lgd_district_code": 215,
+    "name_en": "Rohtas",
+    "name_local": "रोहतास",
+    "sahyog_district_id": 234
+  },
+  {
+    "lgd_district_code": 216,
+    "name_en": "Saharsa",
+    "name_local": "सहरसा",
+    "sahyog_district_id": 214
+  },
+  {
+    "lgd_district_code": 217,
+    "name_en": "Samastipur",
+    "name_local": "समस्तीपुर",
+    "sahyog_district_id": 221
+  },
+  {
+    "lgd_district_code": 218,
+    "name_en": "Saran",
+    "name_local": "सारण",
+    "sahyog_district_id": 219
+  },
+  {
+    "lgd_district_code": 219,
+    "name_en": "Sheikhpura",
+    "name_local": "शेखपुरा",
+    "sahyog_district_id": 228
+  },
+  {
+    "lgd_district_code": 220,
+    "name_en": "Sheohar",
+    "name_local": "शिवहर",
+    "sahyog_district_id": 205
+  },
+  {
+    "lgd_district_code": 221,
+    "name_en": "Sitamarhi",
+    "name_local": "सीतामढी",
+    "sahyog_district_id": 206
+  },
+  {
+    "lgd_district_code": 222,
+    "name_en": "Siwan",
+    "name_local": "सिवान",
+    "sahyog_district_id": 218
+  },
+  {
+    "lgd_district_code": 223,
+    "name_en": "Supaul",
+    "name_local": "सुपौल",
+    "sahyog_district_id": 208
+  },
+  {
+    "lgd_district_code": 224,
+    "name_en": "Vaishali",
+    "name_local": "वैशाली",
+    "sahyog_district_id": 220
+  }
+]

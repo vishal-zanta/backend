@@ -389,6 +389,7 @@ const runSeed = async () => {
     // 0. Seed Departments
     const uniqueDepartments = [...new Set(servicesData.map(s => s.department))];
     if (!uniqueDepartments.includes("Education Dept")) uniqueDepartments.push("Education Dept");
+    if (!uniqueDepartments.includes("Food & Consumer Protection Department")) uniqueDepartments.push("Food & Consumer Protection Department");
     
     const departmentMap: Record<string, mongoose.Types.ObjectId> = {};
     for (const dept of uniqueDepartments) {
