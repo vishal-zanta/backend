@@ -80,12 +80,17 @@ export interface IGrievance extends Document {
   resolvedReason?: string;
   status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
   address?: {
+    isUrban?: boolean;
     addressLine?: string;
+    addressLine2?: string;
     district?: string;
+    block?: string;
     panchayat?: string;
-    pincode?: string;
-    subdivision?: string;
     thana?: string;
+    village?: string;
+    pincode?: string;
+    urbanPanchayat?: string;
+    ward?: string;
     state?: string;
     city?: string;
   };
@@ -321,13 +326,17 @@ const GrievanceSchema = new Schema<IGrievance>(
       ref: "ApiKey",
     },
     address: {
-      isUrban:Boolean,
+      isUrban: Boolean,
       addressLine: String,
+      addressLine2: String,
       district: String,
+      block: String,
       panchayat: String,
-      pincode: String,
-      subdivision: String,
       thana: String,
+      village: String,
+      pincode: String,
+      urbanPanchayat: String,
+      ward: String,
       state: String,
       city: String,
     },
