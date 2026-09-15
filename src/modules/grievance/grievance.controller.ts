@@ -86,11 +86,7 @@ export class GrievanceController {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.panchayat: Reference does not exist" });
       }));
     }
-    if (data.citizenInfo?.address?.thana) {
-      checks.push(ThanaModel.exists({ _id: data.citizenInfo.address.thana }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.thana: Reference does not exist" });
-      }));
-    }
+   
     
     if (data.impact?.affectedBeneficiary) {
 
@@ -174,7 +170,7 @@ export class GrievanceController {
 
     // Parse nested objects from form-data.
     // In form-data, objects like 'classification' are often sent as JSON strings.
-    let classification, evidence, impact, communication, location, citizenInfo;
+    let classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd;
     const dbWebsiteSourceId=await ComplaintSource.findOne({title:RegExp("^website$", "i")})
     const channel = dbWebsiteSourceId;
     console.log("Received form-data:", req.body);
@@ -185,6 +181,12 @@ export class GrievanceController {
       communication = typeof req.body.communication === "string" ? JSON.parse(req.body.communication) : req.body.communication;
       location = typeof req.body.location === "string" ? JSON.parse(req.body.location) : req.body.location;
       citizenInfo = typeof req.body.citizenInfo === "string" ? JSON.parse(req.body.citizenInfo) : req.body.citizenInfo;
+      if (req.body.address) {
+        address = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
+      }
+      if (req.body.isCrpEqualPerAdd !== undefined) {
+        isCrpEqualPerAdd = typeof req.body.isCrpEqualPerAdd === "string" ? JSON.parse(req.body.isCrpEqualPerAdd) : req.body.isCrpEqualPerAdd;
+      }
     } catch (e) {
       throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
     }
@@ -193,7 +195,7 @@ export class GrievanceController {
     if (!citizenInfo) citizenInfo = {};
     citizenInfo.mobile = citizen.mobile;
 
-    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
+    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd };
     console.log(impact);
     const validation = createGrievanceSchema.safeParse(parsedBody);
     if (!validation.success) {
@@ -230,7 +232,7 @@ export class GrievanceController {
     // req.user contains the authenticated officer info
     
     // Parse nested objects from form-data.
-    let classification, evidence, impact, communication, location, citizenInfo;
+    let classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd;
     const channel = req.body.channel;
     try {
       classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
@@ -239,11 +241,17 @@ export class GrievanceController {
       communication = typeof req.body.communication === "string" ? JSON.parse(req.body.communication) : req.body.communication;
       location = typeof req.body.location === "string" ? JSON.parse(req.body.location) : req.body.location;
       citizenInfo = typeof req.body.citizenInfo === "string" ? JSON.parse(req.body.citizenInfo) : req.body.citizenInfo;
+      if (req.body.address) {
+        address = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
+      }
+      if (req.body.isCrpEqualPerAdd !== undefined) {
+        isCrpEqualPerAdd = typeof req.body.isCrpEqualPerAdd === "string" ? JSON.parse(req.body.isCrpEqualPerAdd) : req.body.isCrpEqualPerAdd;
+      }
     } catch (e) {
       throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
     }
 
-    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo };
+    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd };
     console.log(parsedBody,"parseBody",req.body.impact);
     const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
     if (!validation.success) {
@@ -356,7 +364,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           select: "_id level designationEnglish designationHindi"
         }
       })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local")
+      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -393,7 +401,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -738,7 +746,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("classification.service")
       .populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local")
+      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
       .populate({
         path: "assignedOfficer",
         select: "name roles",
@@ -911,7 +919,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("classification.service")
       .populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local")
+      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit)
@@ -1450,7 +1458,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1494,7 +1502,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });

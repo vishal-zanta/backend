@@ -115,6 +115,7 @@ export class GrievanceService {
     impact?: any;
     communication?: any;
     location?: any;
+    address?: any;
     citizenInfo: any;
     files?: Express.Multer.File[];
     createdBy?: ObjectId;
@@ -122,7 +123,7 @@ export class GrievanceService {
     channel?: any;
     emailId?: string;
   }) {
-    const { citizen, classification, evidence, impact, communication, location, citizenInfo, files, createdBy, sourceApiKey, channel, emailId } = payload;
+    const { citizen, classification, evidence, impact, communication, location, address, citizenInfo, files, createdBy, sourceApiKey, channel, emailId } = payload;
 
     // console.log("createdby ",createdBy)
     // Handle File Uploads
@@ -179,6 +180,7 @@ export class GrievanceService {
       communication,
       grievanceId,
       location,
+      address,
       status: "OPEN",
       createdBy,
       sourceApiKey,

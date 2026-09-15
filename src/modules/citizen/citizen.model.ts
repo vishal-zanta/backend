@@ -8,16 +8,17 @@ export interface ICitizen extends Document {
   preferredLanguage?: string;
   additionalInfo?: any;
   address?: {
+    isUrban?: boolean;
     addressLine?: string;
-    city?: string;
-    state?: string;
-    division?: mongoose.Types.ObjectId;
-    district?: mongoose.Types.ObjectId;
-    subdivision?: mongoose.Types.ObjectId;
     block?: mongoose.Types.ObjectId;
+    district?: mongoose.Types.ObjectId;
     panchayat?: mongoose.Types.ObjectId;
-    thana?: mongoose.Types.ObjectId;
+    thana?: string;
+    village?: mongoose.Types.ObjectId;
     pincode?: string;
+    urbanPanchayat?: mongoose.Types.ObjectId;
+    ward?: mongoose.Types.ObjectId;
+    landmark?: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -58,16 +59,17 @@ const CitizenSchema = new Schema<ICitizen>(
       },
 
       address: {
+        isUrban: Boolean,
         addressLine: String,
-        city: String,
-        state: String,
-        division: { type: mongoose.Schema.Types.ObjectId, ref: 'Division' },
-        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
-        subdivision: { type: mongoose.Schema.Types.ObjectId, ref: 'Subdivision' },
         block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
+        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
         panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
-        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
+        thana: String,
+        village: { type: mongoose.Schema.Types.ObjectId, ref: 'Village' },
         pincode: String,
+        urbanPanchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'UrbanLocalBody' },
+        ward: { type: mongoose.Schema.Types.ObjectId, ref: 'Ward' },
+        landmark: String,
       },
     
   },

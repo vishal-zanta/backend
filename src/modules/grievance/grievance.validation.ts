@@ -11,8 +11,7 @@ const optionalBoolean = z.preprocess(
   z.boolean().optional()
 );
 
-// Helpers to sanitize text inputs by trimming leading/trailing spaces 
-// and replacing multiple consecutive spaces with a single space.
+// Helpers to sanitize text inputs
 const requiredText = (msg: string) => 
   z.string({ message: msg })
    .trim()
@@ -24,34 +23,156 @@ const optionalText = z.string()
   .transform(val => val.replace(/\s+/g, ' '))
   .optional();
 
-const addressSchema = z.object({
-  addressLine: z.string().min(1, "Address details are required"),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  division: mongoId.optional(),
+const locationOrPermanentAddress = z.object({
+  isUrban: optionalBoolean.default(false),
+  addressLine: z
+    .string()
+    .min(1, "Field is required")
+    .max(50, "Address details cannot exceed 50 characters"),
+    
   district: mongoId,
-  subdivision: mongoId,
-  block: mongoId.optional(),
-  panchayat: mongoId,
-  thana: mongoId,
-  pincode: z.string().min(1, "Pincode is required"),
+
+  //rural
+  block: mongoId.optional().or(z.literal("")),
+  panchayat: mongoId.optional().or(z.literal("")),
+  thana:
+    z.string()
+    .max(50, "Thana cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  village: mongoId.optional().or(z.literal("")),
+
+  pincode: z
+    .string()
+    .max(6, "Pincode cannot exceed 6 characters")
+    .optional()
+    .or(z.literal("")),
+
+  // urban
+  urbanPanchayat: mongoId.optional().or(z.literal("")),
+  ward: mongoId.optional().or(z.literal("")),
+    
+  // common
+  landmark: z
+    .string()
+    .max(50, "Landmark cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+    
+  state: z
+    .string()
+    .max(50, "State cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  city: z
+    .string()
+    .max(50, "City cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
-
-const rootAddressSchema = z.object({
-  addressLine: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  district: z.string().optional(),
-  subdivision: z.string().optional(),
-  panchayat: z.string().optional(),
-  thana: z.string().optional(),
-  pincode: z.string().optional(),
+const finalAddressSchema = z.object({
+  addressLine: z
+    .string()
+    .max(50, "Address details cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  district: z
+    .string()
+    .max(50, "District cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  panchayat: z
+    .string()
+    .max(50, "Panchayat cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  subdivision: z
+    .string()
+    .max(50, "Subdivision cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  thana: z
+    .string()
+    .max(50, "Thana cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  pincode: z
+    .string()
+    .max(6, "Pincode cannot exceed 6 characters")
+    .optional()
+    .or(z.literal("")),
+  state: z
+    .string()
+    .max(50, "State cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  city: z
+    .string()
+    .max(50, "City cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
-export const createGrievanceSchema = z.object({
+const addressSchema = locationOrPermanentAddress.superRefine((data, ctx) => {
+  if (!!data.isUrban) {
+    const requiredKeys = ["urbanPanchayat", "ward"] as const;
+    requiredKeys.forEach((key) => {
+      if (!data[key] || data[key].trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Field is required",
+          path: [key],
+        });
+      }
+    });
+  } else {
+    const requiredKeys = ["block", "panchayat"] as const;
+    requiredKeys.forEach((key) => {
+      if (!data[key] || data[key].trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Field is required",
+          path: [key],
+        });
+      }
+    });
+  }
+});
+
+const correspondenceAddressSchema = finalAddressSchema.superRefine(
+  (data, ctx) => {
+    if (!data.state || data.state.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Field is required",
+        path: ["state"],
+      });
+    }
+
+    if (data.state === "Bihar") {
+      // Logic handled
+    } else {
+      const requiredKeys = ["addressLine", "city"] as const;
+      requiredKeys.forEach((key) => {
+        if (!data[key] || data[key].trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Field is required",
+            path: [key],
+          });
+        }
+      });
+    }
+  },
+);
+
+export const grievanceSchema = z.object({
   citizenInfo: z.object({
-    fullName: z.string().optional(),
+    fullName: z
+      .string()
+      .min(1, "Name is required")
+      .max(50, "Full name cannot exceed 50 characters"),
     mobile: z
       .string()
       .min(13, "Mobile number must be at least 10 digits")
@@ -62,21 +183,25 @@ export const createGrievanceSchema = z.object({
       .max(13, "Mobile number cannot exceed 10 digits")
       .optional()
       .or(z.literal("")),
-    email: z.string().email("Enter a valid email").optional().or(z.literal("")),
-    // preferredLanguage: z.string().min(1, "Preferred language is required"),
+    email: z
+      .string()
+      .email("Enter a valid email")
+      .max(50, "Email cannot exceed 50 characters")
+      .optional()
+      .or(z.literal("")),
     address: addressSchema,
   }),
   classification: z.object({
-    // subService: z.string().min(1, "Sub-service is required"),
     nature: z.string().min(1, "Grievance type is required"),
     service: mongoId,
     department: mongoId,
-    isSeasonal: optionalBoolean,
-    seasonalType: z.string().optional(),
   }),
   evidence: z.object({
-    details: z.string().optional(),
-  }).optional(),
+    details: z
+      .string()
+      .min(1, "Brief description is required")
+      .max(1000, "Brief description cannot exceed 1000 characters"),
+  }),
   impact: z.object({
     affectedBeneficiary: z.string().min(1, "Affected beneficiary is required"),
     vulnerability: z.object({
@@ -85,25 +210,16 @@ export const createGrievanceSchema = z.object({
       personWithDisability: optionalBoolean,
       economicallyWeakerSection: optionalBoolean,
     }).optional(),
-    publicImpact: z.string().optional(),
-  }).optional(),
+  }),
   communication: z.object({
     feedbackConsent: optionalBoolean,
   }).optional(),
-  address: rootAddressSchema.optional(),
-  location: z.object({
-    division: mongoId,
-    district: mongoId,
-    subdivision: mongoId,
-    block: mongoId,
-    panchayat: mongoId,
-    pincode: z
-      .string()
-      .min(1, "Pincode is required")
-      .regex(/^8\d{5}$/, "Enter a valid pin code of Bihar"),
-  }),
+  isCrpEqualPerAdd: optionalBoolean,
+  address: correspondenceAddressSchema.optional(),
+  location: addressSchema,
 });
 
+export const createGrievanceSchema = grievanceSchema;
 export const createGrievanceByAgentSchema = createGrievanceSchema;
 
 export const submitFeedbackSchema = z.object({

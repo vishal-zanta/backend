@@ -62,7 +62,7 @@ const WardSchema = new Schema({
   lgd_ward_code: { type: Number, required: true, unique: true, index: true },
   ulb_id: { type: Number, required: true, index: true },
   ward_number: { type: Number, required: true },
-  ward_name: { type: String, required: true }
+  name_en: { type: String, required: true }
 }, { timestamps: true });
 
 // ==========================================

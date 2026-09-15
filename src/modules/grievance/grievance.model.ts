@@ -27,16 +27,17 @@ export interface IGrievance extends Document {
     email?: string;
     preferredLanguage?: string;
     address?: {
+      isUrban?: boolean;
       addressLine?: string;
-      city?: string;
-      state?: string;
-      division?: mongoose.Types.ObjectId;
-      district?: mongoose.Types.ObjectId;
-      subdivision?: mongoose.Types.ObjectId;
       block?: mongoose.Types.ObjectId;
+      district?: mongoose.Types.ObjectId;
       panchayat?: mongoose.Types.ObjectId;
-      thana?: mongoose.Types.ObjectId;
+      thana?: string;
+      village?: mongoose.Types.ObjectId;
       pincode?: string;
+      urbanPanchayat?: mongoose.Types.ObjectId;
+      ward?: mongoose.Types.ObjectId;
+      landmark?: string;
     };
   };
   classification: {
@@ -52,7 +53,6 @@ export interface IGrievance extends Document {
     attachments?: IAttachment[];
   };
   impact?: {
-    urgency?: "NORMAL" | "URGENT" | "CRITICAL";
     affectedBeneficiary: mongoose.Types.ObjectId;
     vulnerability?: {
       seniorCitizen?: boolean;
@@ -60,7 +60,7 @@ export interface IGrievance extends Document {
       personWithDisability?: boolean;
       economicallyWeakerSection?: boolean;
     };
-    publicImpact: mongoose.Types.ObjectId;
+    publicImpact?: mongoose.Types.ObjectId;
   };
   previousReferenceGrievanceId?: mongoose.Types.ObjectId;
   communication?: {
@@ -81,21 +81,28 @@ export interface IGrievance extends Document {
   status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
   address?: {
     addressLine?: string;
-    city?: string;
-    state?: string;
     district?: string;
-    subdivision?: string;
     panchayat?: string;
-    thana?: string;
     pincode?: string;
+    subdivision?: string;
+    thana?: string;
+    state?: string;
+    city?: string;
   };
   location?: {
-    division: mongoose.Types.ObjectId;
-    district: mongoose.Types.ObjectId;
-    subdivision: mongoose.Types.ObjectId;
-    block: mongoose.Types.ObjectId;
-    panchayat: mongoose.Types.ObjectId;
+    isUrban?: boolean;
+    addressLine?: string;
+    district?: mongoose.Types.ObjectId;
+    block?: mongoose.Types.ObjectId;
+    panchayat?: mongoose.Types.ObjectId;
+    thana?: string;
+    village?: mongoose.Types.ObjectId;
     pincode?: string;
+    urbanPanchayat?: mongoose.Types.ObjectId;
+    ward?: mongoose.Types.ObjectId;
+    landmark?: string;
+    state?: string;
+    city?: string;
   };
   escalationLevel?: number;
   geotaggedImages?: IGeotaggedImage[];
@@ -155,16 +162,18 @@ const GrievanceSchema = new Schema<IGrievance>(
       email: String,
       preferredLanguage: String,
       address: {
-        addressLine: String,
-        city: String,
-        state: String,
-        division: { type: mongoose.Schema.Types.ObjectId, ref: 'Division' },
-        district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
-        subdivision: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
-        panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
-        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
-        pincode: String,
-      },
+      isUrban: Boolean,
+      addressLine: String,
+      block:{ type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
+      district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
+      panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
+      thana: String,
+      village: { type: mongoose.Schema.Types.ObjectId, ref: 'Village' },
+      pincode: String,
+      urbanPanchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'UrbanLocalBody' },
+      ward: { type: mongoose.Schema.Types.ObjectId, ref: 'Ward' },
+      landmark: String,
+    },
     },
     classification: {
       department: {
@@ -269,13 +278,19 @@ const GrievanceSchema = new Schema<IGrievance>(
       default: "OPEN",
     },
     location: {
-      division: { type: mongoose.Schema.Types.ObjectId, ref: "Division" },
-      district: { type: mongoose.Schema.Types.ObjectId, ref: "District" },
-      subdivision: { type: mongoose.Schema.Types.ObjectId, ref: "Subdivision" },
-      block: { type: mongoose.Schema.Types.ObjectId, ref: "Block" },
-      panchayat: { type: mongoose.Schema.Types.ObjectId, ref: "Panchayat" },
-      thana: { type: mongoose.Schema.Types.ObjectId, ref: "Thana" },
+      isUrban: Boolean,
+      addressLine: String,
+      district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
+      block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
+      panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
+      thana: String,
+      village: { type: mongoose.Schema.Types.ObjectId, ref: 'Village' },
       pincode: String,
+      urbanPanchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'UrbanLocalBody' },
+      ward: { type: mongoose.Schema.Types.ObjectId, ref: 'Ward' },
+      landmark: String,
+      state: String,
+      city: String,
     },
     escalationLevel: {
       type: Number,
@@ -306,6 +321,7 @@ const GrievanceSchema = new Schema<IGrievance>(
       ref: "ApiKey",
     },
     address: {
+      isUrban:Boolean,
       addressLine: String,
       district: String,
       panchayat: String,
