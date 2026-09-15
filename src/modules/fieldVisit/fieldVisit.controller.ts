@@ -208,6 +208,20 @@ export class FieldVisitController {
                 preserveNullAndEmptyArrays: true
               }
             },
+            {
+              $lookup: {
+                from: 'villages',
+                localField: 'grievance.location.village',
+                foreignField: '_id',
+                as: 'grievance.location.village'
+              }
+            },
+            {
+              $unwind: {
+                path: "$grievance.location.village",
+                preserveNullAndEmptyArrays: true
+              }
+            },
            
             
             
