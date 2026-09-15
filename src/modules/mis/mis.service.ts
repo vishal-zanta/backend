@@ -370,7 +370,7 @@ async function getBlockWiseReport(match: Record<string, unknown>) {
         _id: {
           block: {
             $ifNull: [
-              "$location.subdivision",
+              "$location.block",
               { $ifNull: ["$location.panchayat", "Unknown"] },
             ],
           },

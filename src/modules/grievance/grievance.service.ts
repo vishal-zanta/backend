@@ -37,7 +37,7 @@ export class GrievanceService {
    * Determine the best officer to assign to a grievance based on workflow levels,
    * tagged sub-services, and wards (round-robin).
    */
-  static async autoAssignOfficer(serviceId: string, subdivision: string): Promise<string | null> {
+  static async autoAssignOfficer(serviceId: string, location: any): Promise<string | null> {
     try {
       const serviceDoc = await Service.findById(serviceId);
       if (!serviceDoc || !serviceDoc.department) return null;
@@ -62,8 +62,15 @@ export class GrievanceService {
           active: true
         };
         
-        if (subdivision) {
-          tagQuery.subdivisions = subdivision;
+        const locationConditions = [];
+        if (location?.district) locationConditions.push({ districts: location.district });
+        if (location?.block) locationConditions.push({ blocks: location.block });
+        if (location?.panchayat) locationConditions.push({ panchayats: location.panchayat });
+        if (location?.urbanPanchayat) locationConditions.push({ urbanPanchayats: location.urbanPanchayat });
+        if (location?.ward) locationConditions.push({ wards: location.ward });
+
+        if (locationConditions.length > 0) {
+          tagQuery.$or = locationConditions;
         }
         
         const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
@@ -76,9 +83,12 @@ export class GrievanceService {
           "classification.service": serviceId,
           assignedOfficer: { $in: eligibleTags.map(t => t.officer) }
         };
-        if (subdivision) {
-          lastGrievanceQuery["location.subdivision"] = subdivision;
-        }
+        
+        if (location?.district) lastGrievanceQuery["location.district"] = location.district;
+        if (location?.block) lastGrievanceQuery["location.block"] = location.block;
+        if (location?.panchayat) lastGrievanceQuery["location.panchayat"] = location.panchayat;
+        if (location?.urbanPanchayat) lastGrievanceQuery["location.urbanPanchayat"] = location.urbanPanchayat;
+        if (location?.ward) lastGrievanceQuery["location.ward"] = location.ward;
         
         const lastGrievance = await Grievance.findOne(lastGrievanceQuery)
           .sort({ createdAt: -1 })
@@ -208,10 +218,8 @@ export class GrievanceService {
     // Auto Assignment Logic
     const serviceId = classification?.service;
     let autoAssignFailed = false;
-    let subdivision= location.subdivision;
     if (serviceId) {
-      subdivision = location?.subdivision ;
-      const assignedOfficerId = await GrievanceService.autoAssignOfficer(serviceId, subdivision);
+      const assignedOfficerId = await GrievanceService.autoAssignOfficer(serviceId, location);
       if (assignedOfficerId) {
         payloadToCreate.assignedOfficer = assignedOfficerId;
         payloadToCreate.assignedAt = new Date();
@@ -227,7 +235,8 @@ export class GrievanceService {
     }
     if (autoAssignFailed) {
       // Tagging Gap Alert if no officer found for this subservice and ward
-      NotificationService.notifyTaggingGap(serviceId, subdivision, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
+      const locStr = location?.block || location?.ward || location?.district;
+      NotificationService.notifyTaggingGap(serviceId, locStr, newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
     }
 
     const officer:any = await User.findById(createdBy).populate("roles").lean();

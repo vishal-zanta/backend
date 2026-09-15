@@ -155,10 +155,15 @@ export class UserController {
     }
 
     const untagged = req.query.untagged;
-    const services = req.query.services; 
-    const subdivision = req.query.subdivisions ; 
+    const services = req.query.services;
+    const districts = req.query.districts;
+    const blocks = req.query.blocks;
+    const panchayats = req.query.panchayats;
+    const urbanPanchayats = req.query.urbanPanchayats;
+    const wards = req.query.wards;
+    const areaType = req.query.areaType;
 
-    if (untagged === 'true' || services || subdivision) {
+    if (untagged === 'true' || services || districts || blocks || panchayats || urbanPanchayats || wards || areaType) {
       // Find matching taggings
       let taggingQuery: any = { active: true };
       let performTaggingQuery = false;
@@ -172,12 +177,28 @@ export class UserController {
         performTaggingQuery = true;
       }
 
-      if (subdivision) {
-        let subdivisionArray: string[] = [];
-        if (typeof subdivision === 'string') {
-          subdivisionArray = subdivision.split(",");
-        }
-        taggingQuery.subdivisions = { $in: subdivisionArray };
+      if (districts) {
+        taggingQuery.districts = { $in: typeof districts === 'string' ? districts.split(",") : [] };
+        performTaggingQuery = true;
+      }
+      if (blocks) {
+        taggingQuery.blocks = { $in: typeof blocks === 'string' ? blocks.split(",") : [] };
+        performTaggingQuery = true;
+      }
+      if (panchayats) {
+        taggingQuery.panchayats = { $in: typeof panchayats === 'string' ? panchayats.split(",") : [] };
+        performTaggingQuery = true;
+      }
+      if (urbanPanchayats) {
+        taggingQuery.urbanPanchayats = { $in: typeof urbanPanchayats === 'string' ? urbanPanchayats.split(",") : [] };
+        performTaggingQuery = true;
+      }
+      if (wards) {
+        taggingQuery.wards = { $in: typeof wards === 'string' ? wards.split(",") : [] };
+        performTaggingQuery = true;
+      }
+      if (areaType) {
+        taggingQuery.areaType = { $in: typeof areaType === 'string' ? areaType.split(",") : [] };
         performTaggingQuery = true;
       }
 
@@ -191,7 +212,7 @@ export class UserController {
         const allTaggings = await OfficerTagging.find({ active: true, services: { $exists: true, $not: { $size: 0 } } }).select('officer');
         const allTaggedOfficerIds = allTaggings.map(t => t.officer);
         
-        // If we already have a $in query (from services or subdivisions), we merge them via $nin.
+        // If we already have a $in query, we merge them via $nin.
         query._id = { ...query._id, $nin: allTaggedOfficerIds };
       }
     }

@@ -18,70 +18,86 @@ export class AddressController {
   });
 
   /**
-   * Get blocks for a specific district
+   * Get blocks for specific district(s)
    */
   static getBlocksByDistrict = asyncHandler(async (req: Request, res: Response) => {
     const { districtId } = req.params;
-    const district=await DistrictModel.findById(districtId)
-    const blocks = await BlockModel.find({ district_id: Number(district?.lgd_district_code) }).sort({ name_en: 1 }).lean();
+    const districtIds = (districtId as string).split(',');
+    const districts = await DistrictModel.find({ _id: { $in: districtIds } });
+    const lgdCodes = districts.map(d => Number(d.lgd_district_code)).filter(c => !isNaN(c));
+    const blocks = await BlockModel.find({ district_id: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: blocks, message: 'Blocks fetched successfully' });
   });
 
   /**
-   * Get Urban Local Bodies for a specific district
+   * Get Urban Local Bodies for specific district(s)
    */
   static getUrbanLocalBodiesByDistrict = asyncHandler(async (req: Request, res: Response) => {
     const { districtId } = req.params;
-    const district=await DistrictModel.findById(districtId)
-    const ulbs = await UrbanLocalBodyModel.find({ district_id: Number(district?.lgd_district_code) }).sort({ name_en: 1 }).lean();
+    const districtIds = (districtId as string).split(',');
+    const districts = await DistrictModel.find({ _id: { $in: districtIds } });
+    const lgdCodes = districts.map(d => Number(d.lgd_district_code)).filter(c => !isNaN(c));
+    const ulbs = await UrbanLocalBodyModel.find({ district_id: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: ulbs, message: 'Urban Local Bodies fetched successfully' });
   });
 
   /**
-   * Get panchayats for a specific block
+   * Get panchayats for specific block(s)
    */
   static getPanchayatsByBlock = asyncHandler(async (req: Request, res: Response) => {
     const { blockId } = req.params;
-    const block=await BlockModel.findById(blockId)
-    const panchayats = await PanchayatModel.find({ block_id: Number(block?.lgd_block_code) }).sort({ name_en: 1 }).lean();
+    const blockIds = (blockId as string).split(',');
+    const blocks = await BlockModel.find({ _id: { $in: blockIds } });
+    const lgdCodes = blocks.map(b => Number(b.lgd_block_code)).filter(c => !isNaN(c));
+    const panchayats = await PanchayatModel.find({ block_id: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: panchayats, message: 'Panchayats fetched successfully' });
   });
 
   /**
-   * Get villages for a specific panchayat
+   * Get villages for specific panchayat(s)
    */
   static getVillagesByPanchayat = asyncHandler(async (req: Request, res: Response) => {
     const { panchayatId } = req.params;
-    const panchayat=await PanchayatModel.findById(panchayatId);
-    const villages = await VillageModel.find({ panchayat_id: Number(panchayat?.lgd_gp_code) }).sort({ name_en: 1 }).lean();
+    const panchayatIds = (panchayatId as string).split(',');
+    const panchayats = await PanchayatModel.find({ _id: { $in: panchayatIds } });
+    const lgdCodes = panchayats.map(p => Number(p.lgd_gp_code)).filter(c => !isNaN(c));
+    const villages = await VillageModel.find({ panchayat_id: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: villages, message: 'Villages fetched successfully' });
   });
 
   /**
-   * Get wards for a specific Urban Local Body
+   * Get wards for specific Urban Local Body(ies)
    */
   static getWardsByUlb = asyncHandler(async (req: Request, res: Response) => {
     const { ulbId } = req.params;
-    const ulb=await UrbanLocalBodyModel.findById(ulbId)
-    const wards = await WardModel.find({ ulb_id: Number(ulb?.lgd_ulb_code) }).sort({ ward_number: 1 }).lean();
+    const ulbIds = (ulbId as string).split(',');
+    const ulbs = await UrbanLocalBodyModel.find({ _id: { $in: ulbIds } });
+    const lgdCodes = ulbs.map(u => Number(u.lgd_ulb_code)).filter(c => !isNaN(c));
+    const wards = await WardModel.find({ ulb_id: { $in: lgdCodes } }).sort({ ward_number: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: wards, message: 'Wards fetched successfully' });
   });
 
   /**
-   * Get thanas for a specific block
+   * Get thanas for specific block(s)
    */
   static getThanasByBlock = asyncHandler(async (req: Request, res: Response) => {
     const { blockId } = req.params;
-    const thanas = await ThanaModel.find({ lgd_block_codes: Number(blockId) }).sort({ name_en: 1 }).lean();
+    const blockIds = (blockId as string).split(',');
+    const blocks = await BlockModel.find({ _id: { $in: blockIds } });
+    const lgdCodes = blocks.map(b => Number(b.lgd_block_code)).filter(c => !isNaN(c));
+    const thanas = await ThanaModel.find({ lgd_block_codes: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: thanas, message: 'Thanas fetched successfully' });
   });
 
   /**
-   * Get thanas for a specific ulb
+   * Get thanas for specific ulb(s)
    */
   static getThanasByUlb = asyncHandler(async (req: Request, res: Response) => {
     const { ulbId } = req.params;
-    const thanas = await ThanaModel.find({ lgd_ulb_codes: Number(ulbId) }).sort({ name_en: 1 }).lean();
+    const ulbIds = (ulbId as string).split(',');
+    const ulbs = await UrbanLocalBodyModel.find({ _id: { $in: ulbIds } });
+    const lgdCodes = ulbs.map(u => Number(u.lgd_ulb_code)).filter(c => !isNaN(c));
+    const thanas = await ThanaModel.find({ lgd_ulb_codes: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: thanas, message: 'Thanas fetched successfully' });
   });
 

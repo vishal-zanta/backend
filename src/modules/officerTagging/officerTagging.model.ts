@@ -3,8 +3,13 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IOfficerTagging extends Document {
   officer: mongoose.Types.ObjectId;
   services: mongoose.Types.ObjectId[];
-  subdivisions: mongoose.Types.ObjectId[];
-  divisions: mongoose.Types.ObjectId[];
+  blocks: mongoose.Types.ObjectId[];
+  panchayats: mongoose.Types.ObjectId[];
+  urbanPanchayats: mongoose.Types.ObjectId[];
+  wards: mongoose.Types.ObjectId[];
+  areaType:string[];
+  districts:mongoose.Types.ObjectId[];
+
 
   active: boolean;
   createdAt: Date;
@@ -23,13 +28,27 @@ const officerTaggingSchema = new Schema<IOfficerTagging>({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Service'
   }],
-  subdivisions:[{
+
+  areaType:[String],
+  districts:[{
      type: mongoose.Schema.Types.ObjectId,
-    ref: 'Subdivision'
+    ref: 'District'
   }],
-  divisions:[{
+  blocks:[{
      type: mongoose.Schema.Types.ObjectId,
-    ref: 'Division'
+    ref: 'Block'
+  }],
+  panchayats:[{
+     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Panchayat'
+  }],
+  urbanPanchayats:[{
+     type: mongoose.Schema.Types.ObjectId,
+    ref: 'UrbanLocalBody'
+  }],
+  wards:[{
+     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Ward'
   }],
   active: {
     type: Boolean,

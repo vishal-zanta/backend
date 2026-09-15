@@ -748,6 +748,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
       .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
       .populate("location.village", "name_en name_local")
+      .populate("location.urbanPanchayat", "name_en name_local")
+      .populate("location.ward", "name_en name_local")
       .populate({
         path: "assignedOfficer",
         select: "name roles",
@@ -920,7 +922,11 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("classification.service")
       .populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
+      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local")
+      .populate("location.panchayat", "name_en name_local")
+      .populate("location.village", "name_en name_local")
+      .populate("location.urbanPanchayat", "name_en name_local")
+      .populate("location.ward", "name_en name_local")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit)

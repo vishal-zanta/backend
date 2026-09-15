@@ -69,17 +69,12 @@ export class ThirdPartyGrievanceController {
   });
 
   static trackGrievances = asyncHandler(async (req: Request, res: Response) => {
-    const { grievanceId, division, department, service, subService, startDate, endDate } = req.query;
+    const { grievanceId, department, service, subService, startDate, endDate } = req.query;
     const apiKeyDoc = (req as any).apiKey;
     
     const query: any = { sourceApiKey: apiKeyDoc._id };
     if (grievanceId) {
       query.grievanceId = grievanceId;
-    }
-    
-    if (division) {
-      const divisionIds = (division as string).split(',').map(id => id.trim());
-      query['location.district'] = { $in: divisionIds };
     }
 
     
@@ -118,7 +113,7 @@ export class ThirdPartyGrievanceController {
       .populate("classification.department")
       .populate("classification.service").populate("classification.nature").populate("impact.affectedBeneficiary")
       .populate("classification.service", "title")
-      .populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local")
+      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -155,7 +150,7 @@ export class ThirdPartyGrievanceController {
       populate: {
         path: "roles"
       }
-    }).populate("location.division", "name_en name_local").populate("location.district", "name_en name_local").populate("location.subdivision", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.division", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.subdivision", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found" });

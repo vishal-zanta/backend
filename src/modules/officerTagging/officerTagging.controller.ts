@@ -10,9 +10,10 @@ import { Role } from '../roles/role.model.js';
 
 export class OfficerTaggingController {
   static createTagging = asyncHandler(async (req: Request, res: Response) => {
-    validateRequestFields(["officer", "services", "subdivisions", "divisions"], req.body);
+    // Note: We don't strictly require all these new fields, just allow them
+    validateRequestFields(["officer", "services"], req.body);
     
-    const { officer, services, subdivisions, divisions } = req.body;
+    const { officer, services, blocks, panchayats, urbanPanchayats, wards, areaType, districts } = req.body;
 
     const userExists = await User.findById(officer);
     if (!userExists) {
@@ -31,8 +32,12 @@ export class OfficerTaggingController {
     if (existingTagging) {
       if (!existingTagging.active) {
         existingTagging.services = services;
-        existingTagging.subdivisions = subdivisions;
-        existingTagging.divisions = divisions;
+        if (blocks) existingTagging.blocks = blocks;
+        if (panchayats) existingTagging.panchayats = panchayats;
+        if (urbanPanchayats) existingTagging.urbanPanchayats = urbanPanchayats;
+        if (wards) existingTagging.wards = wards;
+        if (areaType) existingTagging.areaType = areaType;
+        if (districts) existingTagging.districts = districts;
         existingTagging.active = true;
         await existingTagging.save();
         return new ApiResponse({ res, status: 201, data: existingTagging, message: 'Officer Tagging created successfully' });
@@ -50,6 +55,12 @@ export class OfficerTaggingController {
     const skip = (page - 1) * limit;
 
     const department = req.query.department as string;
+    const district = req.query.district as string;
+    const block = req.query.block as string;
+    const panchayat = req.query.panchayat as string;
+    const urbanPanchayat = req.query.urbanPanchayat as string;
+    const ward = req.query.ward as string;
+    const areaType = req.query.areaType as string;
 
     const query: any = { active: true };
 
@@ -63,6 +74,13 @@ export class OfficerTaggingController {
       query.officer = { $in: userIds };
     }
 
+    if (district) query.districts = district;
+    if (block) query.blocks = block;
+    if (panchayat) query.panchayats = panchayat;
+    if (urbanPanchayat) query.urbanPanchayats = urbanPanchayat;
+    if (ward) query.wards = ward;
+    if (areaType) query.areaType = areaType;
+
     const taggings = await OfficerTagging.find(query)
       .populate({
         path: 'officer',
@@ -73,9 +91,11 @@ export class OfficerTaggingController {
         }
       })
       .populate('services', 'title titleHindi')
-      
-      .populate('divisions', 'name_en name_local')
-      .populate('subdivisions', 'name_en name_local')
+      .populate('districts', 'name_en name_local')
+      .populate('blocks', 'name_en name_local')
+      .populate('panchayats', 'name_en name_local')
+      .populate('urbanPanchayats', 'name_en name_local')
+      .populate('wards', 'name_en name_local ward_number')
       .skip(skip)
       .limit(limit);
       
@@ -91,7 +111,7 @@ export class OfficerTaggingController {
 
   static updateTagging = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { services, subdivisions, divisions } = req.body;
+    const { services, blocks, panchayats, urbanPanchayats, wards, areaType, districts } = req.body;
     
     const tagging = await OfficerTagging.findById(id);
     if (!tagging) {
@@ -106,13 +126,12 @@ export class OfficerTaggingController {
       tagging.services = services;
     }
 
-    if (subdivisions) {
-      tagging.subdivisions = subdivisions;
-    }
-
-    if (divisions) {
-      tagging.divisions = divisions;
-    }
+    if (blocks !== undefined) tagging.blocks = blocks;
+    if (panchayats !== undefined) tagging.panchayats = panchayats;
+    if (urbanPanchayats !== undefined) tagging.urbanPanchayats = urbanPanchayats;
+    if (wards !== undefined) tagging.wards = wards;
+    if (areaType !== undefined) tagging.areaType = areaType;
+    if (districts !== undefined) tagging.districts = districts;
 
     await tagging.save();
     
