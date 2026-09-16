@@ -62,7 +62,7 @@ const seedAddressData = async () => {
     const villages = readJson('villages.json');
     const ulbs = readJson('urban_local_bodies.json');
     const wards = readJson('wards.json');
-    const thanas = readJson('thanas.json');
+    const thanas = readJson('police_stations.json');
 
     console.log(`Loaded ${districts.length} Districts, ${blocks.length} Blocks, ${panchayats.length} Panchayats, ${villages.length} Villages, ${ulbs.length} ULBs, ${wards.length} Wards, ${thanas.length} Thanas.`);
 
@@ -97,7 +97,7 @@ const seedAddressData = async () => {
     if (wards.length) await WardModel.bulkWrite(makeBulkOps(wards, 'lgd_ward_code'));
 
     console.log("Seeding Thanas in bulk...");
-    if (thanas.length) await ThanaModel.bulkWrite(makeBulkOps(thanas, 'thanas_id'));
+    if (thanas.length) await ThanaModel.bulkWrite(makeBulkOps(thanas, 'code'));
 
     console.log("✅ Address Data Bulk Seeding Completed Successfully.");
     process.exit(0);

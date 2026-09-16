@@ -43,9 +43,15 @@ export class ServiceController {
     const skip = (page - 1) * limit;
 
     const query: any = { active: true };
-    const department = req.query.department as string;
+    const department = req.query.department;
     if (department) {
-      query.department = department;
+      if (Array.isArray(department)) {
+        query.department = { $in: department };
+      } else if (typeof department === 'string' && department.includes(',')) {
+        query.department = { $in: department.split(',') };
+      } else {
+        query.department = department;
+      }
     }
 
     const services = await Service.find(query).populate('department').sort({ createdAt: -1 }).skip(skip).limit(limit);

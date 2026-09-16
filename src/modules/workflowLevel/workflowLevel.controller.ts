@@ -41,11 +41,17 @@ export class WorkflowLevelController {
   });
 
   static getWorkflows = asyncHandler(async (req: Request, res: Response) => {
-    const departmentId = req.query.department as string;
+    const departmentId = req.query.department;
 
     const query: any = { active: true };
     if (departmentId) {
-      query.department = departmentId;
+      if (Array.isArray(departmentId)) {
+        query.department = { $in: departmentId };
+      } else if (typeof departmentId === 'string' && departmentId.includes(',')) {
+        query.department = { $in: departmentId.split(',') };
+      } else {
+        query.department = departmentId;
+      }
     }
 
     const page = parseInt(req.query.page as string) || 1;

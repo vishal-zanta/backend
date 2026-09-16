@@ -54,18 +54,25 @@ export class OfficerTaggingController {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const department = req.query.department as string;
-    const district = req.query.district as string;
-    const block = req.query.block as string;
-    const panchayat = req.query.panchayat as string;
-    const urbanPanchayat = req.query.urbanPanchayat as string;
-    const ward = req.query.ward as string;
+    const department = req.query.department;
+    const district = req.query.district;
+    const block = req.query.block || req.query.blocks;
+    const panchayat = req.query.panchayat;
+    const urbanPanchayat = req.query.urbanPanchayat;
+    const ward = req.query.ward;
     const areaType = req.query.areaType as string;
 
     const query: any = { active: true };
 
     if (department) {
-      const roles = await Role.find({ department });
+      let deptQuery: any = department;
+      if (Array.isArray(department)) {
+        deptQuery = { $in: department };
+      } else if (typeof department === 'string' && department.includes(',')) {
+        deptQuery = { $in: department.split(',') };
+      }
+      
+      const roles = await Role.find({ department: deptQuery });
       const roleIds = roles.map(r => r._id);
 
       const users = await User.find({ roles: { $in: roleIds } });
@@ -74,11 +81,22 @@ export class OfficerTaggingController {
       query.officer = { $in: userIds };
     }
 
-    if (district) query.districts = district;
-    if (block) query.blocks = block;
-    if (panchayat) query.panchayats = panchayat;
-    if (urbanPanchayat) query.urbanPanchayats = urbanPanchayat;
-    if (ward) query.wards = ward;
+    const applyArrayFilter = (field: string, value: any) => {
+      if (!value) return;
+      if (Array.isArray(value)) {
+        query[field] = { $in: value };
+      } else if (typeof value === 'string' && value.includes(',')) {
+        query[field] = { $in: value.split(',') };
+      } else {
+        query[field] = value;
+      }
+    };
+
+    applyArrayFilter('districts', district);
+    applyArrayFilter('blocks', block);
+    applyArrayFilter('panchayats', panchayat);
+    applyArrayFilter('urbanPanchayats', urbanPanchayat);
+    applyArrayFilter('wards', ward);
     if (areaType) query.areaType = areaType;
 
     const taggings = await OfficerTagging.find(query)

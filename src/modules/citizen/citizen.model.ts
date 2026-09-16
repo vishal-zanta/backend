@@ -13,7 +13,7 @@ export interface ICitizen extends Document {
     block?: mongoose.Types.ObjectId;
     district?: mongoose.Types.ObjectId;
     panchayat?: mongoose.Types.ObjectId;
-    thana?: string;
+    thana?: mongoose.Types.ObjectId;
     village?: mongoose.Types.ObjectId;
     pincode?: string;
     urbanPanchayat?: mongoose.Types.ObjectId;
@@ -64,7 +64,7 @@ const CitizenSchema = new Schema<ICitizen>(
         block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
         district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
         panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
-        thana: String,
+        thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
         village: { type: mongoose.Schema.Types.ObjectId, ref: 'Village' },
         pincode: String,
         urbanPanchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'UrbanLocalBody' },

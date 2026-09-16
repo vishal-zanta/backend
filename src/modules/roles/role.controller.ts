@@ -32,11 +32,17 @@ export class RoleController {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const departmentId = req.query.department as string;
+    const departmentId = req.query.department;
 
     const query: any = { active: true };
     if (departmentId) {
-      query.department = departmentId;
+      if (Array.isArray(departmentId)) {
+        query.department = { $in: departmentId };
+      } else if (typeof departmentId === 'string' && departmentId.includes(',')) {
+        query.department = { $in: departmentId.split(',') };
+      } else {
+        query.department = departmentId;
+      }
     }
     const roles = await Role.find(query).populate('department').sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await Role.countDocuments(query);

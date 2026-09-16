@@ -69,12 +69,11 @@ const WardSchema = new Schema({
 // 7. Thana Schema
 // ==========================================
 const ThanaSchema = new Schema({
-  thanas_id: { type: String, required: true, unique: true, index: true },
-  sahyog_id: { type: String },
+  code: { type: String, required: true, unique: true, index: true },
+  district: { type: String },
+  district_id: { type: Number, index: true },
   name_en: { type: String, required: true },
-  name_local: { type: String },
-  lgd_block_codes: [{ type: Number, index: true }],
-  lgd_ulb_codes: [{ type: Number, index: true }]
+  type: { type: String }
 }, { timestamps: true });
 
 // ==========================================

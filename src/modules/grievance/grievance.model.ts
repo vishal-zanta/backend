@@ -32,7 +32,7 @@ export interface IGrievance extends Document {
       block?: mongoose.Types.ObjectId;
       district?: mongoose.Types.ObjectId;
       panchayat?: mongoose.Types.ObjectId;
-      thana?: string;
+      thana?: mongoose.Types.ObjectId;
       village?: mongoose.Types.ObjectId;
       pincode?: string;
       urbanPanchayat?: mongoose.Types.ObjectId;
@@ -100,7 +100,7 @@ export interface IGrievance extends Document {
     district?: mongoose.Types.ObjectId;
     block?: mongoose.Types.ObjectId;
     panchayat?: mongoose.Types.ObjectId;
-    thana?: string;
+    thana?: mongoose.Types.ObjectId;
     village?: mongoose.Types.ObjectId;
     pincode?: string;
     urbanPanchayat?: mongoose.Types.ObjectId;
@@ -172,7 +172,7 @@ const GrievanceSchema = new Schema<IGrievance>(
       block:{ type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
       district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
       panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
-      thana: String,
+      thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
       village: { type: mongoose.Schema.Types.ObjectId, ref: 'Village' },
       pincode: String,
       urbanPanchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'UrbanLocalBody' },
@@ -288,7 +288,7 @@ const GrievanceSchema = new Schema<IGrievance>(
       district: { type: mongoose.Schema.Types.ObjectId, ref: 'District' },
       block: { type: mongoose.Schema.Types.ObjectId, ref: 'Block' },
       panchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'Panchayat' },
-      thana: String,
+      thana: { type: mongoose.Schema.Types.ObjectId, ref: 'Thana' },
       village: { type: mongoose.Schema.Types.ObjectId, ref: 'Village' },
       pincode: String,
       urbanPanchayat: { type: mongoose.Schema.Types.ObjectId, ref: 'UrbanLocalBody' },

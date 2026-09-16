@@ -78,26 +78,14 @@ export class AddressController {
   });
 
   /**
-   * Get thanas for specific block(s)
+   * Get thanas for specific district(s)
    */
-  static getThanasByBlock = asyncHandler(async (req: Request, res: Response) => {
-    const { blockId } = req.params;
-    const blockIds = (blockId as string).split(',');
-    const blocks = await BlockModel.find({ _id: { $in: blockIds } });
-    const lgdCodes = blocks.map(b => Number(b.lgd_block_code)).filter(c => !isNaN(c));
-    const thanas = await ThanaModel.find({ lgd_block_codes: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
-    return new ApiResponse({ res, status: 200, data: thanas, message: 'Thanas fetched successfully' });
-  });
-
-  /**
-   * Get thanas for specific ulb(s)
-   */
-  static getThanasByUlb = asyncHandler(async (req: Request, res: Response) => {
-    const { ulbId } = req.params;
-    const ulbIds = (ulbId as string).split(',');
-    const ulbs = await UrbanLocalBodyModel.find({ _id: { $in: ulbIds } });
-    const lgdCodes = ulbs.map(u => Number(u.lgd_ulb_code)).filter(c => !isNaN(c));
-    const thanas = await ThanaModel.find({ lgd_ulb_codes: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
+  static getThanasByDistrict = asyncHandler(async (req: Request, res: Response) => {
+    const { districtId } = req.params;
+    const districtIds = (districtId as string).split(',');
+    const districts = await DistrictModel.find({ _id: { $in: districtIds } });
+    const lgdCodes = districts.map(d => Number(d.lgd_district_code)).filter(c => !isNaN(c));
+    const thanas = await ThanaModel.find({ district_id: { $in: lgdCodes } }).sort({ name_en: 1 }).lean();
     return new ApiResponse({ res, status: 200, data: thanas, message: 'Thanas fetched successfully' });
   });
 

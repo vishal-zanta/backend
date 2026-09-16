@@ -64,6 +64,11 @@ export class GrievanceController {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid location.panchayat: Reference does not exist" });
       }));
     }
+    if (data.location?.thana) {
+      checks.push(ThanaModel.exists({ _id: data.location.thana }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.thana: Reference does not exist" });
+      }));
+    }
    
 
 
@@ -84,6 +89,11 @@ export class GrievanceController {
     if (data.citizenInfo?.address?.panchayat) {
       checks.push(PanchayatModel.exists({ _id: data.citizenInfo.address.panchayat }).then(exists => {
         if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.panchayat: Reference does not exist" });
+      }));
+    }
+    if (data.citizenInfo?.address?.thana) {
+      checks.push(ThanaModel.exists({ _id: data.citizenInfo.address.thana }).then(exists => {
+        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.thana: Reference does not exist" });
       }));
     }
    
@@ -364,7 +374,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           select: "_id level designationEnglish designationHindi"
         }
       })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
+      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en type")
       .sort({ createdAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit);
@@ -401,7 +411,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("location.thana", "name_en type").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("citizenInfo.address.thana", "name_en type").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -748,6 +758,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
       .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
       .populate("location.village", "name_en name_local")
+      .populate("location.thana", "name_en type")
       .populate("location.urbanPanchayat", "name_en name_local")
       .populate("location.ward", "name_en name_local")
       .populate({
@@ -925,6 +936,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local")
       .populate("location.panchayat", "name_en name_local")
       .populate("location.village", "name_en name_local")
+      .populate("location.thana", "name_en type")
       .populate("location.urbanPanchayat", "name_en name_local")
       .populate("location.ward", "name_en name_local")
       .sort({ createdAt: -1 })
@@ -1465,7 +1477,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("location.thana", "name_en type").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("citizenInfo.address.thana", "name_en type").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -1509,7 +1521,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("location.thana", "name_en type").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("citizenInfo.address.thana", "name_en type").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found." });

@@ -54,14 +54,20 @@ export class SlaConfigController {
 
   static getConfigs = asyncHandler(async (req: Request, res: Response) => {
     const { serviceId } = req.query;
-    const department = req.query.department as string;
+    const department = req.query.department;
 
     const query: any = { active: true };
     
     if (serviceId) {
       query.service = serviceId;
     } else if (department) {
-      const services = await Service.find({ department }).select('_id');
+      let deptQuery: any = department;
+      if (Array.isArray(department)) {
+        deptQuery = { $in: department };
+      } else if (typeof department === 'string' && department.includes(',')) {
+        deptQuery = { $in: department.split(',') };
+      }
+      const services = await Service.find({ department: deptQuery }).select('_id');
       const serviceIds = services.map(s => s._id);
       
       query.service = { $in: serviceIds };
