@@ -9,6 +9,7 @@ router.use(authProtect);
 
 router.post('/', checkPermission("USER_MANAGEMENT"), UserController.createUser);
 router.get('/',  UserController.getUsers);
+router.patch('/profile', UserController.updateProfile);
 router.put('/:id', checkPermission("USER_MANAGEMENT"), UserController.updateUser);
 router.delete('/:id', checkPermission("USER_MANAGEMENT"), UserController.deleteUser);
 

@@ -59,6 +59,7 @@ export interface IGrievance extends Document {
       woman?: boolean;
       personWithDisability?: boolean;
       economicallyWeakerSection?: boolean;
+      general?: boolean;
     };
     publicImpact?: mongoose.Types.ObjectId;
   };
@@ -222,6 +223,7 @@ const GrievanceSchema = new Schema<IGrievance>(
         woman: Boolean,
         personWithDisability: Boolean,
         economicallyWeakerSection: Boolean,
+        general: Boolean,
       },
       publicImpact: {
         type: mongoose.Schema.Types.ObjectId,

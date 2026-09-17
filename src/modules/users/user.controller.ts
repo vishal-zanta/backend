@@ -122,16 +122,24 @@ export class UserController {
   });
 
   static getUsers = asyncHandler(async (req: Request, res: Response) => {
-    const { role, search,department } = req.query;
+    const { role, roles, search, department } = req.query;
 
      
     
     
     const query: any = { status: { $ne: 'INACTIVE' } };
     
-    if (role && typeof(role) =="string") {
-      const roleArray = role.split(",");
-      query.roles = { $in: roleArray };
+    const roleParam = roles || role;
+    if (roleParam) {
+      let roleArray: string[] = [];
+      if (typeof roleParam === 'string') {
+        roleArray = roleParam.split(',');
+      } else if (Array.isArray(roleParam)) {
+        roleArray = roleParam as string[];
+      }
+      if (roleArray.length > 0) {
+        query.roles = { $in: roleArray };
+      }
     }
 
     if (department && typeof department === "string") {
@@ -237,6 +245,38 @@ export class UserController {
       status: 200, 
       data: { docs: users, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }, 
       message: 'Users fetched successfully' 
+    });
+  });
+
+  static updateProfile = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id || (req as any).user._id;
+    const { name, password } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError({ status: 404, message: 'User not found' });
+    }
+
+    if (name !== undefined) {
+      user.name = name;
+    }
+
+    if (password !== undefined) {
+      user.password = password;
+      // If the user updates their own password, they might not need a mandatory reset anymore
+      user.isPasswordResetMandatory = false; 
+    }
+
+    await user.save();
+
+    const userResponse = user.toObject();
+    delete (userResponse as any).password;
+
+    return new ApiResponse({ 
+      res, 
+      status: 200, 
+      data: userResponse, 
+      message: 'Profile updated successfully' 
     });
   });
 

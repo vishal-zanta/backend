@@ -117,9 +117,21 @@ export class ExternalIntegrationService {
       return await EducationDepartmentService.getMasterData(masterType, params);
     }
     if (departmentCode === "FOOD") {
-      return []; // Master data not currently exposed by Food API
+      switch (type) {
+        case 'types': return await FoodDepartmentService.getTypes();
+        case 'categories': return await FoodDepartmentService.getCategories();
+        case 'states': return await FoodDepartmentService.getStates();
+        case 'districts': return await FoodDepartmentService.getDistricts(String(params?.stateId || '10'));
+        case 'blocks': return await FoodDepartmentService.getBlocks(String(params?.districtId || ''));
+        case 'panchayats': return await FoodDepartmentService.getPanchayats(String(params?.blockId || ''));
+        case 'villages': return await FoodDepartmentService.getVillages(String(params?.panchayatId || ''));
+        default: 
+          return {
+            types: await FoodDepartmentService.getTypes(),
+            categories: await FoodDepartmentService.getCategories()
+          };
+      }
     }
-    throw new Error(`Master data not configured for department: ${departmentCode}`);
   }
 
   /**
@@ -133,7 +145,7 @@ export class ExternalIntegrationService {
       return await EducationDepartmentService.getMasterData('districts');
     }
     if (departmentCode === "FOOD") {
-      return [];
+      return await FoodDepartmentService.getDistricts('10'); // Default to Bihar state
     }
     throw new Error(`District data not configured for department: ${departmentCode}`);
   }

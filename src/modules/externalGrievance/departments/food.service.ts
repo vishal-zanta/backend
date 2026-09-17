@@ -26,26 +26,23 @@ export class FoodDepartmentService {
     try {
       // payload comes from the frontend or internal system, we map it to Food Dept format
       const foodPayload = {
-        categoryId: payload.categoryId || 101,
-        typeId: payload.typeId || 22,
-        name: payload.complainant?.name || payload.name || "Citizen",
-        stateId: payload.stateId || 10,
-        districtId: payload.location?.districtCode || payload.districtId || 1001,
-        blockId: payload.location?.blockCode || payload.blockId || 100101,
-        panchayatId: payload.location?.panchayatCode || payload.panchayatId || "10010101",
-        villageId: payload.location?.villageCode || payload.villageId || "1001010101",
-        address: payload.complainant?.address || payload.address || "Bihar",
-        mobileNo: payload.complainant?.mobile || payload.mobileNo || 9999999999,
-        grievancesDescription: payload.complaint || payload.grievancesDescription || "No description provided",
-        createdBy: payload.createdBy || "12345",
-        status: payload.status || "P",
-        //  username: USERNAME,
-        // pin: PIN
+        categoryId: Number(payload.categoryId ),
+        typeId: Number(payload.typeId ),
+        name: String( payload.name ),
+        stateId: Number(payload.stateId),
+        districtId: Number( payload.districtId),
+        blockId: Number( payload.blockId ),
+        panchayatId: String(payload.panchayatId ),
+        villageId: String( payload.villageId ),
+        address: String(payload.address),
+        mobileNo: String( payload.mobileNo ),
+        grievancesDescription: String( payload.grievancesDescription ),
+        createdBy: String(payload.createdBy || "1")
       };
 
       const { data } = await foodAxios.post('/grievanceRegistration', foodPayload);
 
-      // Expected response: { resultDescription: "Success", resultcode: "200", grievanceID: "GRV-...", data: {...} }
+      // Expected response: { resultDescription: "Success", resultcode: "200", grievanceID: "GRV-...", data: {...}, assignTo: "...", status: "REGISTERED" }
       if (data?.resultcode !== "200" || !data?.grievanceID) {
         throw new Error(`Failed to create Food Dept grievance: ${data?.resultDescription || JSON.stringify(data)}`);
       }
@@ -53,7 +50,7 @@ export class FoodDepartmentService {
       return {
         complaintId: data.grievanceID,
         mobile: String(foodPayload.mobileNo),
-        status: data.data?.status || 'P',
+        status: data.status || 'REGISTERED',
       };
     } catch (error: any) {
       console.error('[FoodService] Create Grievance Error:', error?.message);
@@ -73,6 +70,8 @@ export class FoodDepartmentService {
         grievanceID
       });
 
+      console.log(JSON.stringify(data));
+
       if (!data || !data.status) {
         console.warn(`[FoodService] Invalid status response for ${grievanceID}`);
         return 'UNKNOWN';
@@ -90,5 +89,57 @@ export class FoodDepartmentService {
       console.error('[FoodService] Get Status Error:', error?.message);
       throw error;
     }
+  }
+  static async uploadFiles(grievanceId: string, files: Express.Multer.File[]): Promise<any> {
+    console.log(`[FoodService] Uploading files for ${grievanceId}`);
+    try {
+      const formData = new FormData();
+      files.forEach((file, index) => {
+        const blob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
+        formData.append(`file${index + 1}`, blob as any, file.originalname);
+      });
+      const { data } = await foodAxios.post(`/grievances/${grievanceId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return data;
+    } catch (error: any) {
+      console.error('[FoodService] Upload Files Error:', error?.message);
+      throw error;
+    }
+  }
+
+  static async getTypes(): Promise<any> {
+    const { data } = await foodAxios.get('/masters/types');
+    return data;
+  }
+
+  static async getCategories(): Promise<any> {
+    const { data } = await foodAxios.get('/masters/categories');
+    return data;
+  }
+
+  static async getStates(): Promise<any> {
+    const { data } = await foodAxios.get('/masters/states');
+    return data;
+  }
+
+  static async getDistricts(stateId: string): Promise<any> {
+    const { data } = await foodAxios.get(`/masters/districts?state_id=${stateId}`);
+    return data;
+  }
+
+  static async getBlocks(districtId: string): Promise<any> {
+    const { data } = await foodAxios.get(`/masters/blocks?district_id=${districtId}`);
+    return data;
+  }
+
+  static async getPanchayats(blockId: string): Promise<any> {
+    const { data } = await foodAxios.get(`/masters/panchayats?block_id=${blockId}`);
+    return data;
+  }
+
+  static async getVillages(panchayatId: string): Promise<any> {
+    const { data } = await foodAxios.get(`/masters/villages?panchayat_id=${panchayatId}`);
+    return data;
   }
 }

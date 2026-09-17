@@ -36,7 +36,7 @@ Submit a new grievance into the CRM.
   - `state` (String, Optional), `villageOrWard` (String, Optional), `pinCode` (String, Optional), `landmark` (String, Optional)
 - `impact` (Stringified JSON, Optional):
   - `affectedBeneficiary` (ObjectId, **Required if impact is passed**): Beneficiary type (Option ID, filtered by type `"Affected Beneficiaries"`).
-  - `vulnerability` (Object, Optional): Object with boolean flags (`seniorCitizen`, `woman`, `personWithDisability`, `economicallyWeakerSection`).
+  - `vulnerability` (Object, Optional): Object with boolean flags (`seniorCitizen`, `woman`, `personWithDisability`, `economicallyWeakerSection`, `general`).
   - `publicImpact` (ObjectId, Optional): The public impact scale (Option ID).
 - `communication` (Stringified JSON, Optional):
   - `preferredMode` (ObjectId, Optional): Preferred communication method (Complaint Source ID).

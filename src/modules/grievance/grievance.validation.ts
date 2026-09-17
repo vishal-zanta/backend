@@ -238,6 +238,7 @@ export const grievanceSchema = z.object({
       woman: optionalBoolean,
       personWithDisability: optionalBoolean,
       economicallyWeakerSection: optionalBoolean,
+      general: optionalBoolean,
     }).optional(),
   }),
   communication: z.object({
