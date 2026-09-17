@@ -13,4 +13,7 @@ router.get('/master-data/:departmentCode', ExternalGrievanceController.getMaster
 router.get('/district-data/:departmentCode', ExternalGrievanceController.getDistrictData);
 router.get('/:id', ExternalGrievanceController.getGrievanceById);
 
+import { upload } from '../../middlewares/uploadMiddleware.js';
+router.post('/:id/files', upload.any(), ExternalGrievanceController.uploadFiles);
+
 export default router;

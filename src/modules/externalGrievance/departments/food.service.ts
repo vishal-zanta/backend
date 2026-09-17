@@ -70,7 +70,7 @@ export class FoodDepartmentService {
         grievanceID
       });
 
-      console.log(JSON.stringify(data));
+      // console.log(JSON.stringify(data));
 
       if (!data || !data.status) {
         console.warn(`[FoodService] Invalid status response for ${grievanceID}`);
@@ -85,6 +85,32 @@ export class FoodDepartmentService {
       if (extStatus === 'C') return 'CLOSED';
       return extStatus;
       
+    } catch (error: any) {
+      console.error('[FoodService] Get Status Error:', error?.message);
+      throw error;
+    }
+  }
+
+  static async getStatusAndDetails(grievanceID: string): Promise<{ status: string; details?: any }> {
+    console.log(`[FoodService] Fetching status for ${grievanceID}`);
+    try {
+      const { data } = await foodAxios.post('/getGrievanceDetails', {
+        username: USERNAME,
+        pin: PIN,
+        grievanceID
+      });
+
+      if (!data || !data.status) {
+        console.warn(`[FoodService] Invalid status response for ${grievanceID}`);
+        return { status: 'UNKNOWN' };
+      }
+
+      let extStatus = data.status;
+      if (extStatus === 'P') extStatus = 'PENDING';
+      else if (extStatus === 'R') extStatus = 'RESOLVED';
+      else if (extStatus === 'C') extStatus = 'CLOSED';
+      
+      return { status: extStatus, details: data };
     } catch (error: any) {
       console.error('[FoodService] Get Status Error:', error?.message);
       throw error;

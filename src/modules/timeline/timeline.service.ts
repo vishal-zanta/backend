@@ -6,7 +6,9 @@ type TimelineEventType =
   | "PRIORITY_SET"
   | "ASSIGNED"
   | "SMS_SENT"
-  | "FIELD_VISIT"
+  | "FIELD_VISIT_STATUS"
+  | "FIELD_VISIT_REMARK"
+  | "FIELD_VISIT_SCHEDULE"
   | "ESCALATED"
   |"TRANSFERRED"
   | "RESOLVED"
@@ -45,7 +47,11 @@ export class TimelineService {
   /**
    * Get the complete timeline history for a specific grievance.
    */
-  static async getTimelineHistory(grievanceId: string | mongoose.Types.ObjectId) {
-    return await Timeline.find({ grievance: grievanceId }).sort({ createdAt: 1 });
+  static async getTimelineHistory(grievanceId: string | mongoose.Types.ObjectId, allowedTypes?: TimelineEventType[]) {
+    const query: any = { grievance: grievanceId };
+    if (allowedTypes && allowedTypes.length > 0) {
+      query.type = { $in: allowedTypes };
+    }
+    return await Timeline.find(query).sort({ createdAt: 1 });
   }
 }

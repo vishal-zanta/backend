@@ -84,19 +84,19 @@ export class ExternalIntegrationService {
   /**
    * Fetch the latest status from the external department API
    */
-  static async fetchExternalStatus(departmentCode: string, externalComplaintId: string): Promise<string | null> {
+  static async fetchExternalStatus(departmentCode: string, externalComplaintId: string): Promise<{ status: string | null; details?: any } | null> {
     if (!externalComplaintId) return null;
 
     try {
       if (departmentCode === "HEALTH") {
         const token = await this.getAuthToken(departmentCode);
-        return await HealthDepartmentService.getStatus(externalComplaintId, token);
+        return { status: await HealthDepartmentService.getStatus(externalComplaintId, token) };
       } 
       else if (departmentCode === "EDUCATION") {
-        return await EducationDepartmentService.getStatus(externalComplaintId);
+        return { status: await EducationDepartmentService.getStatus(externalComplaintId) };
       }
       else if (departmentCode === "FOOD") {
-        return await FoodDepartmentService.getStatus(externalComplaintId);
+        return await FoodDepartmentService.getStatusAndDetails(externalComplaintId);
       }
       return null;
     } catch (error: any) {
@@ -148,5 +148,15 @@ export class ExternalIntegrationService {
       return await FoodDepartmentService.getDistricts('10'); // Default to Bihar state
     }
     throw new Error(`District data not configured for department: ${departmentCode}`);
+  }
+
+  /**
+   * Upload files to an external department API
+   */
+  static async uploadExternalFiles(departmentCode: string, externalComplaintId: string, files: Express.Multer.File[]): Promise<any> {
+    if (departmentCode === "FOOD") {
+      return await FoodDepartmentService.uploadFiles(externalComplaintId, files);
+    }
+    throw new Error(`File upload not configured for department: ${departmentCode}`);
   }
 }

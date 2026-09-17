@@ -428,7 +428,16 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 403, message: "Access denied. You do not own this grievance." });
     }
 
-    const timeline = await TimelineService.getTimelineHistory(id);
+    const publicTimelineTypes: any[] = [
+      "COMPLAINT_REGISTERED",
+      "STATUS_CHANGE",
+      "RESOLVED",
+      "COMPLAINT_CLOSED",
+      "CITIZEN_FEEDBACK",
+     
+      
+    ];
+    const timeline = await TimelineService.getTimelineHistory(id, publicTimelineTypes);
     const responseData = {
       ...grievance.toJSON(),
       timeline,
@@ -1083,7 +1092,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         role: "CITIZEN"
       },
       metadata: {
-        description: timelineTemplates.STATUS_CHANGE(oldStatus, "REOPENED") + ` Reason: ${reOpenReason}`
+        description: timelineTemplates.STATUS_CHANGE(oldStatus, "REOPENED", reOpenReason)
       }
     });
 
@@ -1317,14 +1326,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           grievanceId: grievance._id as any,
           type: "COMPLAINT_CLOSED",
           actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
+          metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours, remarks) }
         });
       } else if (oldGrievance.status !== status) {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "STATUS_CHANGE" as any,
           actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: { description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status) }
+          metadata: { description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status, remarks) }
         });
       }
     }
@@ -1599,7 +1608,15 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 404, message: "Grievance not found." });
     }
 
-    const timeline = await TimelineService.getTimelineHistory(grievance._id.toString());
+    const publicTimelineTypes: any[] = [
+      "COMPLAINT_REGISTERED",
+      "STATUS_CHANGE",
+      "RESOLVED",
+      "COMPLAINT_CLOSED",
+      "CITIZEN_FEEDBACK",
+     
+    ];
+    const timeline = await TimelineService.getTimelineHistory(grievance._id.toString(), publicTimelineTypes);
 
     
     

@@ -9,6 +9,7 @@ import { validateRequestFields } from '../../utils/helpers.js';
 import { EmailService } from '../../libs/emailService.lib.js';
 import { resetPasswordEmailTemplate } from '../../templates/resetPassword.template.js';
 import { CaptchaService } from '../captcha/captcha.service.js';
+import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
 
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
@@ -79,11 +80,17 @@ export class AuthController {
     if (!user) {
       throw new ApiError({ status: 404, message: 'User not found' });
     }
-
+    const officerTagging = await OfficerTagging.findOne({ officer: id }).populate({
+      path: "services",
+      populate: {
+        path: "department"
+      }
+    });
+    
     return new ApiResponse({
       res,
       status: 200,
-      data: user,
+      data: { ...user.toObject(), officerTagging },
       message: 'Profile fetched successfully'
     });
   });

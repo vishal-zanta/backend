@@ -74,7 +74,7 @@ export interface IGrievance extends Document {
   createdBy?: mongoose.Types.ObjectId;
   sourceApiKey?: mongoose.Types.ObjectId;
   channel?: mongoose.Types.ObjectId;
-  assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL" | "PENDING";
+  assignedPriority?: "NORMAL" | "URGENT" | "CRITICAL" ;
   assignedOfficer?: mongoose.Types.ObjectId;
   assignedAt?: Date;
   resolvedAt?: Date;
@@ -208,11 +208,7 @@ const GrievanceSchema = new Schema<IGrievance>(
       attachments: [AttachmentSchema],
     },
     impact: {
-      // urgency: {
-      //   type: String,
-      //   enum: ["NORMAL", "URGENT", "CRITICAL"],
-      //   default: "NORMAL",
-      // },
+  
       affectedBeneficiary: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Option",
@@ -256,8 +252,8 @@ const GrievanceSchema = new Schema<IGrievance>(
     },
     assignedPriority: {
       type: String,
-      enum: ["NORMAL", "URGENT", "CRITICAL", "PENDING"],
-      default: "PENDING",
+      enum: ["NORMAL", "URGENT", "CRITICAL"],
+      default: "NORMAL",
     },
     assignedOfficer: {
       type: mongoose.Schema.Types.ObjectId,

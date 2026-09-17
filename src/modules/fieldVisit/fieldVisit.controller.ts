@@ -259,7 +259,7 @@ export class FieldVisitController {
       throw new ApiError({ status: 404, message: 'Field visit not found' });
     }
 
-    const eventsToLog: string[] = [];
+    const eventsToLog: { type: string; desc: string }[] = [];
 
     if (status && visit.status !== status) {
       visit.logs.push({
@@ -269,7 +269,10 @@ export class FieldVisitController {
         newValue: status,
         changedAt: new Date()
       });
-      eventsToLog.push(`Field visit status changed to ${status}`);
+      eventsToLog.push({
+        type: "FIELD_VISIT_STATUS",
+        desc: timelineTemplates.FIELD_VISIT_STATUS(status)
+      });
       visit.status = status;
     }
 
@@ -283,30 +286,36 @@ export class FieldVisitController {
           newValue: newSchedule,
           changedAt: new Date()
         });
-        eventsToLog.push(`Field visit scheduled for ${newSchedule.toLocaleDateString()}`);
+        eventsToLog.push({
+          type: "FIELD_VISIT_SCHEDULE",
+          desc: timelineTemplates.FIELD_VISIT_SCHEDULE(newSchedule.toLocaleDateString())
+        });
         visit.schedule = newSchedule;
       }
     }
 
     if (remark && visit.remark !== remark) {
-      eventsToLog.push(`Field visit remarks updated: ${remark}`);
+      eventsToLog.push({
+        type: "FIELD_VISIT_REMARK",
+        desc: timelineTemplates.FIELD_VISIT_REMARK(remark)
+      });
       visit.remark = remark;
     }
 
     if (eventsToLog.length > 0 && officerId) {
       const officer = await User.findById(officerId).populate('roles');
       if (officer) {
-        for (const desc of eventsToLog) {
+        for (const event of eventsToLog) {
           await TimelineService.logEvent({
             grievanceId: visit.grievance as any,
-            type: "FIELD_VISIT",
+            type: event.type as any,
             actor: {
               id: officer._id ,
               name: officer.name || 'Officer',
               role: (officer.roles as any)?.[0]?.level || 'OFFICER'
             },
             metadata: {
-              description: timelineTemplates.FIELD_VISIT(desc)
+              description: event.desc
             }
           });
         }

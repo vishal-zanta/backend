@@ -121,31 +121,49 @@ export class ExternalGrievanceController {
     // Attempt live sync if it has an external ID and isn't totally closed
     if (grievance.externalComplaintId && grievance.status !== "CLOSED") {
       try {
-        const latestStatus = await ExternalIntegrationService.fetchExternalStatus(
+        const result = await ExternalIntegrationService.fetchExternalStatus(
           grievance.departmentCode,
           grievance.externalComplaintId
         );
 
-        if (latestStatus && latestStatus !== "UNKNOWN" && latestStatus !== grievance.status) {
-          const oldStatus = grievance.status;
-          grievance.status = latestStatus;
-          await grievance.save();
+        if (result && result.status && result.status !== "UNKNOWN") {
+          const latestStatus = result.status;
+          let changed = false;
 
-          // Log the status change in the timeline
-          await TimelineService.logEvent({
-            grievanceId: grievance._id as any,
-            type: "STATUS_CHANGE" as any, // TimelineEventType may be an enum or specific string union
-            actor: {
-              id: (req as any).user?._id || null,
-              name: "System Sync",
-              role: "System"
-            },
-            metadata: { 
-              description: `External department updated status from ${oldStatus} to ${latestStatus}`,
-              oldStatus, 
-              newStatus: latestStatus 
-            }
-          });
+          if (latestStatus !== grievance.status) {
+            const oldStatus = grievance.status;
+            grievance.status = latestStatus;
+            changed = true;
+
+            // Log the status change in the timeline
+            await TimelineService.logEvent({
+              grievanceId: grievance._id as any,
+              type: "STATUS_CHANGE" as any, 
+              actor: {
+                id: (req as any).user?._id || null,
+                name: "System Sync",
+                role: "System"
+              },
+              metadata: { 
+                description: `External department updated status from ${oldStatus} to ${latestStatus}`,
+                oldStatus, 
+                newStatus: latestStatus 
+              }
+            });
+          }
+
+          if (result.details) {
+            grievance.departmentPayload = {
+              ...grievance.departmentPayload,
+              ...result.details
+            };
+            grievance.markModified('departmentPayload');
+            changed = true;
+          }
+
+          if (changed) {
+            await grievance.save();
+          }
         }
       } catch (error) {
         console.warn(`[ExternalGrievanceController] Live sync failed for ${grievance.externalComplaintId}`, error);
@@ -153,10 +171,15 @@ export class ExternalGrievanceController {
       }
     }
 
+    const timeline = await TimelineService.getTimelineHistory(grievance._id as any);
+
     return new ApiResponse({
       res,
       status: 200,
-      data: grievance,
+      data: {
+        ...grievance.toJSON(),
+        timeline
+      },
       message: "External grievance details fetched successfully."
     });
   });
@@ -205,6 +228,47 @@ export class ExternalGrievanceController {
       status: 200,
       data,
       message: `District data for ${departmentCode} fetched successfully.`
+    });
+  });
+
+  /**
+   * Upload files to an external grievance
+   */
+  static uploadFiles = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    // Find the grievance by MongoDB _id or externalComplaintId
+    const grievance = await ExternalGrievance.findOne({
+      $or: [
+        { _id: id.length === 24 ? id : null },
+        { externalComplaintId: id }
+      ]
+    });
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "External grievance not found." });
+    }
+
+    if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
+      throw new ApiError({ status: 400, message: "No files uploaded." });
+    }
+
+    if (grievance.departmentCode !== "FOOD") {
+      throw new ApiError({ status: 400, message: "File upload is only supported for FOOD department currently." });
+    }
+
+    if (!grievance.externalComplaintId) {
+      throw new ApiError({ status: 400, message: "External grievance ID is missing. Wait for sync." });
+    }
+
+    const files = req.files as Express.Multer.File[];
+    const result = await ExternalIntegrationService.uploadExternalFiles(grievance.departmentCode, grievance.externalComplaintId, files);
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: result,
+      message: "Files uploaded successfully."
     });
   });
 }
