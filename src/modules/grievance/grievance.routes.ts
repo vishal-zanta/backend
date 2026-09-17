@@ -36,6 +36,9 @@ router.get("/all/:id", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceCo
 // Get general analytics summary (Total, Resolved, Pending, Escalated)
 router.get("/analytics-summary", authProtect, GrievanceController.getGrievanceAnalyticsSummary);
 
+// Get CCE dashboard analytics
+router.get("/cce/dashboard-analytics", authProtect, checkPermission("CCE_DASHBOARD"), GrievanceController.getCCEDashboardAnalytics);
+
 // Get admin dashboard analytics
 router.get("/admin/dashboard-analytics", authProtect,checkPermission("ADMIN_DASHBOARD"), GrievanceController.getAdminDashboardAnalytics);
 

@@ -490,6 +490,53 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
   });
 
   /**
+   * Get dashboard analytics for CCE
+   */
+  static getCCEDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$channel",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: "complaintsources", // Check Mongoose collection name (usually lowercase plural)
+          localField: "_id",
+          foreignField: "_id",
+          as: "sourceData"
+        }
+      },
+      {
+        $unwind: {
+          path: "$sourceData",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          sourceId: "$_id",
+          sourceName: { $ifNull: ["$sourceData.title", "Unknown"] },
+          count: 1,
+          _id: 0
+        }
+      }
+    ];
+
+    const sourceWiseComplaints = await Grievance.aggregate(pipeline);
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        sourceWiseComplaints
+      },
+      message: "CCE dashboard analytics fetched successfully"
+    });
+  });
+
+  /**
    * Get dashboard analytics for admin
    */
   static getAdminDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
