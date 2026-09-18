@@ -58,6 +58,9 @@ router.get(
 // Create a grievance by an officer on behalf of a citizen
 router.post("/officer/create",  authProtect,checkPermission("CREATE_GRIEVANCE"), upload.any('grievance'),  GrievanceController.createGrievanceByAgent);
 
+// Submit feedback by an officer on behalf of a citizen
+router.post("/officer/:id/feedback", authProtect, checkPermission("UPDATE_GRIEVANCE"), GrievanceController.submitFeedbackByAgent);
+
 // Update entire grievance details by an officer
 router.put("/officer/:id", authProtect,checkPermission("UPDATE_GRIEVANCE"), GrievanceController.updateGrievanceByOfficer);
 

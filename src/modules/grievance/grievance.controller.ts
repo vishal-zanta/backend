@@ -25,6 +25,7 @@ import { Option } from "../options/option.model.js";
 import { DistrictModel, BlockModel, PanchayatModel, ThanaModel } from '../address/address.model.js';
 import { AuditService } from "../audit/audit.service.js";
 import { SlaConfig } from "../slaConfig/slaConfig.model.js";
+import { ExternalGrievance } from "../externalGrievance/externalGrievance.model.js";
 export class GrievanceController {
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
@@ -314,13 +315,13 @@ export class GrievanceController {
 const citizenMobile = citizen.mobile.slice(-10);
 const alternateMobile = citizen?.alternateMobile?.slice(-10);
     // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
-    const baseConditions = [
+    const baseConditions: any[] = [
       { citizen: citizen._id },
-      { "citizenInfo.mobile": citizenMobile },
+      { "citizenInfo.mobile": new RegExp(`${citizenMobile}$`) },
     ];
     // If the citizen has an alternate mobile on their profile, we can match that too
     if (alternateMobile) {
-      baseConditions.push({ "citizenInfo.mobile": alternateMobile });
+      baseConditions.push({ "citizenInfo.mobile": new RegExp(`${alternateMobile}$`) });
     }
 
     const query: any = {
@@ -356,11 +357,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       };
     }
 
-    const totalCount = await Grievance.countDocuments(query);
-    const pagination = buildPagination({ page, limit, totalCount });
-
-    // Populate only the explicitly requested fields to reduce payload size
-    const grievances = await Grievance.find(query)
+    const internalGrievances = await Grievance.find(query)
       .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt feedbackText rating assignedOfficer")
       .populate("classification.department")
       .populate("classification.service")
@@ -375,15 +372,46 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         }
       })
       .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en type")
-      .sort({ createdAt: -1 })
-      .skip(pagination.offset)
-      .limit(pagination.limit);
+      .lean();
+
+    // Fetch External Grievances
+    const externalMobiles = [citizenMobile];
+    if (alternateMobile) externalMobiles.push(alternateMobile);
+    const extMobileRegex = new RegExp(`(${externalMobiles.join('|')})$`);
+    
+    const extQuery: any = { mobile: extMobileRegex };
+    if (status) {
+      extQuery.status = { $in: status.split(",") };
+    }
+    if (search) {
+      extQuery.$or = [
+        { externalComplaintId: new RegExp(search, "i") },
+        { mobile: new RegExp(search, "i") }
+      ];
+    }
+    
+    const externalGrievances = await ExternalGrievance.find(extQuery).lean();
+
+    // Combine and mark type explicitly
+    const formattedInternal = internalGrievances.map(g => Object.assign({}, g, { grievanceType: 'INTERNAL' }));
+    const formattedExternal = externalGrievances.map(g => Object.assign({}, g, { grievanceType: 'EXTERNAL' }));
+
+    const allGrievances = [...formattedInternal, ...formattedExternal].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA;
+    });
+
+    const totalCount = allGrievances.length;
+    const pagination = buildPagination({ page, limit, totalCount });
+
+    const paginatedDocs = allGrievances.slice(pagination.offset, pagination.offset + pagination.limit);
 
     return new ApiResponse({
       res,
       status: 200,
       data: {
-        docs: grievances,
+        docs: paginatedDocs,
         pagination,
       },
       message: "Grievances retrieved successfully",
@@ -1011,6 +1039,62 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         pagination,
       },
       message: "Assigned Grievances retrieved successfully",
+    });
+  });
+
+  /**
+   * Submit feedback and star rating on behalf of a citizen by an Agent/CCE
+   */
+  static submitFeedbackByAgent = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const validation = submitFeedbackSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`).join(", ") });
+    }
+    const { rating, feedbackText } = validation.data;
+    const user = req.user;
+
+    if (!user) {
+      throw new ApiError({ status: 401, message: "Unauthorized. Agent not found." });
+    }
+
+    const grievance = await Grievance.findById(id);
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
+      throw new ApiError({ status: 400, message: "Feedback can only be submitted for RESOLVED or CLOSED grievances." });
+    }
+
+    if (grievance.rating) {
+      throw new ApiError({ status: 400, message: "Feedback has already been submitted for this grievance and cannot be changed." });
+    }
+
+    grievance.rating = rating;
+    grievance.feedbackText = feedbackText;
+
+    await grievance.save();
+
+    await TimelineService.logEvent({
+      grievanceId: grievance._id as any,
+      type: "CITIZEN_FEEDBACK",
+      actor: {
+        id: user.id as any,
+        name: user.name || "System",
+        role: user.roles?.[0]?.level || "AGENT"
+      },
+      metadata: {
+        description: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
+      }
+    });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Feedback submitted successfully on behalf of citizen.",
     });
   });
 
