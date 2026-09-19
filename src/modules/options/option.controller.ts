@@ -12,10 +12,10 @@ export class OptionController {
    * Create a new Option. Automatically derives snake_case value from the title.
    */
   static createOption = asyncHandler(async (req: Request, res: Response) => {
-    const { title, type } = req.body;
+    const { title, titleHindi, type } = req.body;
 
-    if (!title || !type) {
-      throw new ApiError({ status: 400, message: "title and type are required" });
+    if (!title || !titleHindi || !type) {
+      throw new ApiError({ status: 400, message: "title, titleHindi and type are required" });
     }
 
     const value = toSnakeCase(title);
@@ -30,6 +30,7 @@ export class OptionController {
 
     const option = await Option.create({
       title: title.trim(),
+      titleHindi: titleHindi.trim(),
       type: type.trim(),
       value,
     });
@@ -82,6 +83,7 @@ export class OptionController {
       const searchRegex = new RegExp(req.query.search as string, "i");
       query.$or = [
         { title: searchRegex },
+        { titleHindi: searchRegex },
         { value: searchRegex },
       ];
     }
@@ -110,7 +112,7 @@ export class OptionController {
    */
   static updateOption = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { title, type, active } = req.body;
+    const { title, titleHindi, type, active } = req.body;
 
     const option = await Option.findById(id);
     if (!option) {
@@ -120,6 +122,10 @@ export class OptionController {
     if (title) {
       option.title = title.trim();
       option.value = toSnakeCase(title);
+    }
+
+    if (titleHindi) {
+      option.titleHindi = titleHindi.trim();
     }
     
     if (type) {

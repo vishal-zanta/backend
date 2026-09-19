@@ -1715,8 +1715,7 @@ export class GrievanceController {
     if (new Date(grievance.updatedAt) < sevenDaysAgo) {
       throw new ApiError({
         status: 400,
-        message:
-          `Grievance can only be reopened within 7 days of being closed. Reopen window is closed.`,
+        message: `Grievance can only be reopened within 7 days of being closed. Reopen window is closed.`,
       });
     }
 
@@ -1917,18 +1916,7 @@ export class GrievanceController {
         throw new ApiError({ status: 404, message: "Grievance not found." });
       }
 
-      if (updateData.status === "RESOLVED") {
-        if (oldGrievance.status !== "RESOLVED") {
-          updateData.resolvedAt = new Date();
-          if (updateData.remarks) {
-            updateData.resolvedReason = updateData.remarks;
-          }
-          // Notify CCE for feedback reminder
-          NotificationService.notifyFeedbackReminder(
-            id,
-            oldGrievance.grievanceId || "N/A",
-          ).catch((e) => console.error(e));
-        }
+      if (updateData.status === "CLOSED" && oldGrievance.status !== "CLOSED") {
         const hasPhotos =
           (oldGrievance.geotaggedImages &&
             oldGrievance.geotaggedImages.length > 0) ||
@@ -1943,7 +1931,7 @@ export class GrievanceController {
 
         const completedVisit = await FieldVisit.findOne({
           grievance: id,
-          status: "COMPLETED",
+          status: { $in: ["COMPLETED", "NOT_APPLICABLE"] },
         });
         if (!completedVisit) {
           throw new ApiError({
@@ -1951,6 +1939,21 @@ export class GrievanceController {
             message:
               "Cannot resolve grievance: A completed field visit is required before resolution.",
           });
+        }
+
+        // Notify CCE for feedback reminder
+        NotificationService.notifyFeedbackReminder(
+          id,
+          oldGrievance.grievanceId || "N/A",
+        ).catch((e) => console.error(e));
+      }
+
+      if (updateData.status === "RESOLVED") {
+        if (oldGrievance.status !== "RESOLVED") {
+          updateData.resolvedAt = new Date();
+          if (updateData.remarks) {
+            updateData.resolvedReason = updateData.remarks;
+          }
         }
       }
 
@@ -2112,7 +2115,6 @@ export class GrievanceController {
           oldGrievance.status !== "CLOSED" &&
           oldGrievance.status !== "RESOLVED"
         ) {
-          // reopen only allowed on closed complaints
           throw new ApiError({
             status: 400,
             message:
@@ -2145,7 +2147,7 @@ export class GrievanceController {
 
         const completedVisit = await FieldVisit.findOne({
           grievance: id,
-          status: "COMPLETED",
+          status: { $in: ["COMPLETED", "NOT_APPLICABLE"] },
         });
         if (!completedVisit) {
           throw new ApiError({
@@ -2154,6 +2156,11 @@ export class GrievanceController {
               "Cannot close grievance: A completed field visit is required before resolution.",
           });
         }
+        // Notify CCE for feedback reminder
+        NotificationService.notifyFeedbackReminder(
+          id,
+          oldGrievance.grievanceId || "N/A",
+        ).catch((e) => console.error(e));
         updatePayload.feedbackText = "";
         updatePayload.rating = null;
       }
@@ -2163,11 +2170,6 @@ export class GrievanceController {
         if (remarks) {
           updatePayload.resolvedReason = remarks;
         }
-        // Notify CCE for feedback reminder
-        NotificationService.notifyFeedbackReminder(
-          id,
-          oldGrievance.grievanceId || "N/A",
-        ).catch((e) => console.error(e));
       }
 
       const grievance = await Grievance.findByIdAndUpdate(id, updatePayload, {

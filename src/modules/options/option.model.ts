@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IOption extends Document {
   title: string;
+  titleHindi: string;
   type: string;
   value: string; // The snake_case version of the title
   active: boolean;
@@ -12,6 +13,7 @@ export interface IOption extends Document {
 const optionSchema = new Schema<IOption>(
   {
     title: { type: String, required: true, trim: true },
+    titleHindi: { type: String, required: true, trim: true },
     type: { type: String, required: true, trim: true },
     value: { type: String, required: true, trim: true },
     active: { type: Boolean, default: true },

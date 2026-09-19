@@ -11,7 +11,7 @@ export interface IFieldVisitLog {
 export interface IFieldVisit extends Document {
   visitId: string;
   grievance: mongoose.Types.ObjectId;
-  status: 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'IN_PROGRESS';
+  status: 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'IN_PROGRESS' | 'NOT_APPLICABLE';
   schedule?: Date;
   remark?: string;
   logs: IFieldVisitLog[];
@@ -33,7 +33,7 @@ const fieldVisitSchema = new Schema<IFieldVisit>({
   },
   status: {
     type: String,
-    enum: ['PENDING', 'SCHEDULED', 'COMPLETED', 'CANCELLED', 'IN_PROGRESS'],
+    enum: ['PENDING', 'SCHEDULED', 'COMPLETED', 'CANCELLED', 'IN_PROGRESS', 'NOT_APPLICABLE'],
     default: 'PENDING'
   },
   schedule: {
