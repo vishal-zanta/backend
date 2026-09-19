@@ -1162,6 +1162,61 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
   });
 
   /**
+   * Resolve a grievance (Citizen)
+   */
+  static resolveGrievanceByCitizen = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { remarks } = req.body;
+    const citizen = req.citizen;
+
+    if (!citizen) {
+      throw new ApiError({ status: 401, message: "Unauthorized." });
+    }
+
+    const grievance = await Grievance.findById(id);
+
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found." });
+    }
+
+    // Verify ownership
+    const isOwner = grievance.citizen?.toString() === citizen._id.toString();
+    const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
+
+    if (!isOwner && !isMobileMatch) {
+      throw new ApiError({ status: 403, message: "Forbidden. You are not authorized to modify this grievance." });
+    }
+
+    if (grievance.status === "RESOLVED" || grievance.status === "CLOSED") {
+      throw new ApiError({ status: 400, message: "Grievance is already resolved or closed." });
+    }
+
+    grievance.status = "RESOLVED";
+    grievance.resolvedAt = new Date() as any;
+    grievance.resolvedReason = remarks || "Resolved by citizen";
+
+    await grievance.save();
+
+    await TimelineService.logEvent({
+      grievanceId: grievance._id as any,
+      type: "RESOLVED",
+      actor: {
+        id: citizen._id as any,
+        name: "CITIZEN",
+        role: "CITIZEN"
+      },
+      metadata: timelineTemplates.RESOLVED(remarks || "Resolved by citizen")
+    });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: grievance,
+      message: "Grievance marked as resolved successfully.",
+    });
+  });
+
+  /**
    * Reopen a grievance (Citizen)
    */
   static reopenGrievance = asyncHandler(async (req: Request, res: Response) => {
@@ -1719,11 +1774,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
     const timeline = await TimelineService.getTimelineHistory(id);
     const slaHours = await GrievanceController.attachSlaToGrievance(grievance);
+        const fieldVisits = await FieldVisit.find({ grievance: id }).sort({ createdAt: -1 });
+
 
     const responseData = {
       ...grievance.toJSON(),
       timeline,
-      slaHours
+      slaHours,
+      fieldVisits
     };
 
     return new ApiResponse({

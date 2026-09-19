@@ -69,7 +69,7 @@ export class ThirdPartyGrievanceController {
   });
 
   static trackGrievances = asyncHandler(async (req: Request, res: Response) => {
-    const { grievanceId, department, service, service, startDate, endDate } = req.query;
+    const { grievanceId, department, service, startDate, endDate } = req.query;
     const apiKeyDoc = (req as any).apiKey;
     
     const query: any = { sourceApiKey: apiKeyDoc._id };

@@ -27,6 +27,9 @@ router.post("/citizen/:id/feedback", citizenAuthProtect, GrievanceController.sub
 // Reopen a resolved/closed grievance
 router.post("/citizen/:id/reopen", citizenAuthProtect, GrievanceController.reopenGrievance);
 
+// Resolve a grievance (by citizen)
+router.post("/citizen/:id/resolve", citizenAuthProtect, GrievanceController.resolveGrievanceByCitizen);
+
 // Get all grievances (for agents/admins)
 router.get("/all", authProtect,checkPermission("ALL_GRIEVANCE"), GrievanceController.getAllGrievances);
 
