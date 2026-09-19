@@ -18,11 +18,21 @@ import { TimelineService } from "../timeline/timeline.service.js";
 import { timelineTemplates } from "../timeline/timeline.template.js";
 import { GrievanceAnalyticLog } from "./grievanceAnalyticLog.model.js";
 import { ComplaintSource } from "../complaintSource/complaintSource.model.js";
-import { createGrievanceSchema, createGrievanceByAgentSchema, submitFeedbackSchema, reopenGrievanceSchema } from "./grievance.validation.js";
+import {
+  createGrievanceSchema,
+  createGrievanceByAgentSchema,
+  submitFeedbackSchema,
+  reopenGrievanceSchema,
+} from "./grievance.validation.js";
 import { User } from "../users/user.model.js";
-import { FieldVisit } from '../fieldVisit/fieldVisit.model.js';
+import { FieldVisit } from "../fieldVisit/fieldVisit.model.js";
 import { Option } from "../options/option.model.js";
-import { DistrictModel, BlockModel, PanchayatModel, ThanaModel } from '../address/address.model.js';
+import {
+  DistrictModel,
+  BlockModel,
+  PanchayatModel,
+  ThanaModel,
+} from "../address/address.model.js";
 import { AuditService } from "../audit/audit.service.js";
 import { SlaConfig } from "../slaConfig/slaConfig.model.js";
 import { ExternalGrievance } from "../externalGrievance/externalGrievance.model.js";
@@ -30,91 +40,194 @@ import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
 export class GrievanceController {
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
-    
+
     if (data.classification?.department) {
-      checks.push(Department.exists({ _id: data.classification.department }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.department: Reference does not exist" });
-      }));
+      checks.push(
+        Department.exists({ _id: data.classification.department }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid classification.department: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
     if (data.classification?.service) {
-      checks.push(Service.exists({ _id: data.classification.service }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.service: Reference does not exist" });
-      }));
+      checks.push(
+        Service.exists({ _id: data.classification.service }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message:
+                "Invalid classification.service: Reference does not exist",
+            });
+        }),
+      );
     }
     if (data.classification?.service) {
-      
     }
     if (data.classification?.nature) {
-      checks.push(Option.exists({ _id: data.classification.nature }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid classification.nature: Reference does not exist" });
-      }));
+      checks.push(
+        Option.exists({ _id: data.classification.nature }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message:
+                "Invalid classification.nature: Reference does not exist",
+            });
+        }),
+      );
     }
 
     if (data.location?.district) {
-      checks.push(DistrictModel.exists({ _id: data.location.district }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.district: Reference does not exist" });
-      }));
+      checks.push(
+        DistrictModel.exists({ _id: data.location.district }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid location.district: Reference does not exist",
+            });
+        }),
+      );
     }
 
     if (data.location?.block) {
-      checks.push(BlockModel.exists({ _id: data.location.block }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.block: Reference does not exist" });
-      }));
+      checks.push(
+        BlockModel.exists({ _id: data.location.block }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid location.block: Reference does not exist",
+            });
+        }),
+      );
     }
     if (data.location?.panchayat) {
-      checks.push(PanchayatModel.exists({ _id: data.location.panchayat }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.panchayat: Reference does not exist" });
-      }));
+      checks.push(
+        PanchayatModel.exists({ _id: data.location.panchayat }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message: "Invalid location.panchayat: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
     if (data.location?.thana) {
-      checks.push(ThanaModel.exists({ _id: data.location.thana }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid location.thana: Reference does not exist" });
-      }));
+      checks.push(
+        ThanaModel.exists({ _id: data.location.thana }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid location.thana: Reference does not exist",
+            });
+        }),
+      );
     }
-   
-
-
 
     // Citizen Info Address Validation
 
     if (data.citizenInfo?.address?.district) {
-      checks.push(DistrictModel.exists({ _id: data.citizenInfo.address.district }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.district: Reference does not exist" });
-      }));
+      checks.push(
+        DistrictModel.exists({ _id: data.citizenInfo.address.district }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid citizenInfo.address.district: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
 
     if (data.citizenInfo?.address?.block) {
-      checks.push(BlockModel.exists({ _id: data.citizenInfo.address.block }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.block: Reference does not exist" });
-      }));
+      checks.push(
+        BlockModel.exists({ _id: data.citizenInfo.address.block }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid citizenInfo.address.block: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
     if (data.citizenInfo?.address?.panchayat) {
-      checks.push(PanchayatModel.exists({ _id: data.citizenInfo.address.panchayat }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.panchayat: Reference does not exist" });
-      }));
+      checks.push(
+        PanchayatModel.exists({ _id: data.citizenInfo.address.panchayat }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid citizenInfo.address.panchayat: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
     if (data.citizenInfo?.address?.thana) {
-      checks.push(ThanaModel.exists({ _id: data.citizenInfo.address.thana }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid citizenInfo.address.thana: Reference does not exist" });
-      }));
+      checks.push(
+        ThanaModel.exists({ _id: data.citizenInfo.address.thana }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid citizenInfo.address.thana: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
-   
-    
-    if (data.impact?.affectedBeneficiary) {
 
-      checks.push(Option.exists({ _id: data.impact.affectedBeneficiary }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid impact.affectedBeneficiary: Reference does not exist" });
-      }));
+    if (data.impact?.affectedBeneficiary) {
+      checks.push(
+        Option.exists({ _id: data.impact.affectedBeneficiary }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid impact.affectedBeneficiary: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
     if (data.impact?.publicImpact) {
-      checks.push(Option.exists({ _id: data.impact.publicImpact }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid impact.publicImpact: Reference does not exist" });
-      }));
+      checks.push(
+        Option.exists({ _id: data.impact.publicImpact }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid impact.publicImpact: Reference does not exist",
+            });
+        }),
+      );
     }
     if (data.communication?.preferredMode) {
-      checks.push(ComplaintSource.exists({ _id: data.communication.preferredMode }).then(exists => {
-        if (!exists) throw new ApiError({ status: 400, message: "Invalid communication.preferredMode: Reference does not exist" });
-      }));
+      checks.push(
+        ComplaintSource.exists({ _id: data.communication.preferredMode }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid communication.preferredMode: Reference does not exist",
+              });
+          },
+        ),
+      );
     }
 
     await Promise.all(checks);
@@ -123,46 +236,70 @@ export class GrievanceController {
   /**
    * Helper to attach SLA hours to a single grievance
    */
-    static attachSlaToGrievance = async (grievance: any) => {
+  static attachSlaToGrievance = async (grievance: any) => {
     let slaHours;
-    const serviceId = grievance.classification?.service?._id || grievance.classification?.service;
-    const officerRoleId = grievance.assignedOfficer?.roles?.[0]?._id || grievance.assignedOfficer?.roles?.[0];
+    const serviceId =
+      grievance.classification?.service?._id ||
+      grievance.classification?.service;
+    const officerRoleId =
+      grievance.assignedOfficer?.roles?.[0]?._id ||
+      grievance.assignedOfficer?.roles?.[0];
 
     if (serviceId && officerRoleId) {
-      const slaConfig = await SlaConfig.findOne({ service: serviceId, active: true });
+      const slaConfig = await SlaConfig.findOne({
+        service: serviceId,
+        active: true,
+      });
       if (slaConfig && slaConfig.escalations) {
-        const roleSla = slaConfig.escalations.find((e: any) => e.role.toString() === officerRoleId.toString());
+        const roleSla = slaConfig.escalations.find(
+          (e: any) => e.role.toString() === officerRoleId.toString(),
+        );
         if (roleSla) {
           slaHours = roleSla.slaHours;
         }
       }
     }
     return slaHours;
-  }
+  };
 
   /**
    * Helper to attach SLA hours to an array of grievances
    */
-    private static async attachSlaToGrievancesList(grievances: any[], defaultOfficerRoleId?: string) {
-    const serviceIds = grievances.map((g: any) => g.classification?.service?._id || g.classification?.service);
-    const slaConfigs = await SlaConfig.find({ service: { $in: serviceIds }, active: true });
-    
+  private static async attachSlaToGrievancesList(
+    grievances: any[],
+    defaultOfficerRoleId?: string,
+  ) {
+    const serviceIds = grievances.map(
+      (g: any) => g.classification?.service?._id || g.classification?.service,
+    );
+    const slaConfigs = await SlaConfig.find({
+      service: { $in: serviceIds },
+      active: true,
+    });
+
     const slaConfigMap = new Map();
     for (const config of slaConfigs) {
       slaConfigMap.set(config.service.toString(), config);
     }
 
     return grievances.map((g: any) => {
-      const serviceId = g.classification?.service?._id?.toString() || g.classification?.service?.toString();
+      const serviceId =
+        g.classification?.service?._id?.toString() ||
+        g.classification?.service?.toString();
       const assignedRoles = g.assignedOfficer?.roles || [];
-      const roleIds = assignedRoles.map((r: any) => r._id?.toString() || r.toString());
-      if (defaultOfficerRoleId && !roleIds.includes(defaultOfficerRoleId)) roleIds.push(defaultOfficerRoleId);
-      
+      const roleIds = assignedRoles.map(
+        (r: any) => r._id?.toString() || r.toString(),
+      );
+      if (defaultOfficerRoleId && !roleIds.includes(defaultOfficerRoleId))
+        roleIds.push(defaultOfficerRoleId);
+
       if (serviceId && roleIds.length > 0) {
         const config = slaConfigMap.get(serviceId);
         if (config && config.escalations) {
           // Find the SLA for any of the officer's roles (pick the first matching one)
-          const roleSla = config.escalations.find((e: any) => roleIds.includes(e.role.toString()));
+          const roleSla = config.escalations.find((e: any) =>
+            roleIds.includes(e.role.toString()),
+          );
           if (roleSla) {
             g.slaHours = roleSla.slaHours;
           }
@@ -172,47 +309,99 @@ export class GrievanceController {
     });
   }
 
-  
   static createGrievance = asyncHandler(async (req: Request, res: Response) => {
     const citizen = req.citizen;
 
     if (!citizen) {
-      throw new ApiError({ status: 401, message: "Unauthorized. Citizen not found." });
+      throw new ApiError({
+        status: 401,
+        message: "Unauthorized. Citizen not found.",
+      });
     }
 
     // Parse nested objects from form-data.
     // In form-data, objects like 'classification' are often sent as JSON strings.
-    let classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd;
-    const dbWebsiteSourceId=await ComplaintSource.findOne({title:RegExp("^website$", "i")})
+    let classification,
+      evidence,
+      impact,
+      communication,
+      location,
+      citizenInfo,
+      address,
+      isCrpEqualPerAdd;
+    const dbWebsiteSourceId = await ComplaintSource.findOne({
+      title: RegExp("^website$", "i"),
+    });
     const channel = dbWebsiteSourceId;
     console.log("Received form-data:", req.body);
     try {
-      classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
-      evidence = typeof req.body.evidence === "string" ? JSON.parse(req.body.evidence) : req.body.evidence;
-      impact = typeof req.body.impact === "string" ? JSON.parse(req.body.impact) : req.body.impact;
-      communication = typeof req.body.communication === "string" ? JSON.parse(req.body.communication) : req.body.communication;
-      location = typeof req.body.location === "string" ? JSON.parse(req.body.location) : req.body.location;
-      citizenInfo = typeof req.body.citizenInfo === "string" ? JSON.parse(req.body.citizenInfo) : req.body.citizenInfo;
+      classification =
+        typeof req.body.classification === "string"
+          ? JSON.parse(req.body.classification)
+          : req.body.classification;
+      evidence =
+        typeof req.body.evidence === "string"
+          ? JSON.parse(req.body.evidence)
+          : req.body.evidence;
+      impact =
+        typeof req.body.impact === "string"
+          ? JSON.parse(req.body.impact)
+          : req.body.impact;
+      communication =
+        typeof req.body.communication === "string"
+          ? JSON.parse(req.body.communication)
+          : req.body.communication;
+      location =
+        typeof req.body.location === "string"
+          ? JSON.parse(req.body.location)
+          : req.body.location;
+      citizenInfo =
+        typeof req.body.citizenInfo === "string"
+          ? JSON.parse(req.body.citizenInfo)
+          : req.body.citizenInfo;
       if (req.body.address) {
-        address = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
+        address =
+          typeof req.body.address === "string"
+            ? JSON.parse(req.body.address)
+            : req.body.address;
       }
       if (req.body.isCrpEqualPerAdd !== undefined) {
-        isCrpEqualPerAdd = typeof req.body.isCrpEqualPerAdd === "string" ? JSON.parse(req.body.isCrpEqualPerAdd) : req.body.isCrpEqualPerAdd;
+        isCrpEqualPerAdd =
+          typeof req.body.isCrpEqualPerAdd === "string"
+            ? JSON.parse(req.body.isCrpEqualPerAdd)
+            : req.body.isCrpEqualPerAdd;
       }
     } catch (e) {
-      throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
+      throw new ApiError({
+        status: 400,
+        message: "Invalid JSON format in form-data fields.",
+      });
     }
 
     // Force the mobile number to be the logged-in citizen's real mobile
     if (!citizenInfo) citizenInfo = {};
     citizenInfo.mobile = citizen.mobile;
 
-    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd };
+    const parsedBody = {
+      classification,
+      evidence,
+      impact,
+      communication,
+      location,
+      citizenInfo,
+      address,
+      isCrpEqualPerAdd,
+    };
     console.log(impact);
     const validation = createGrievanceSchema.safeParse(parsedBody);
     if (!validation.success) {
-      const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
-      throw new ApiError({ status: 400, message: `Validation failed: ${detailedErrors}` });
+      const detailedErrors = validation.error.issues
+        .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+        .join(", ");
+      throw new ApiError({
+        status: 400,
+        message: `Validation failed: ${detailedErrors}`,
+      });
     }
 
     await GrievanceController.validateReferences(parsedBody);
@@ -223,9 +412,9 @@ export class GrievanceController {
       channel,
       files: req.files as Express.Multer.File[] | undefined,
       emailId: req.body.emailId,
-      ...validation.data
-    }); 
- 
+      ...validation.data,
+    });
+
     // Log the grievance creation audit
     AuditService.logGrievanceCreation(req, newGrievance._id as any);
 
@@ -240,862 +429,1094 @@ export class GrievanceController {
   /**
    * Create grievance by Agent/Officer on behalf of a citizen
    */
-  static createGrievanceByAgent = asyncHandler(async (req: Request, res: Response) => {
-    // req.user contains the authenticated officer info
-    
-    // Parse nested objects from form-data.
-    let classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd;
-    const channel = req.body.channel;
-    try {
-      classification = typeof req.body.classification === "string" ? JSON.parse(req.body.classification) : req.body.classification;
-      evidence = typeof req.body.evidence === "string" ? JSON.parse(req.body.evidence) : req.body.evidence;
-      impact = typeof req.body.impact === "string" ? JSON.parse(req.body.impact) : req.body.impact;
-      communication = typeof req.body.communication === "string" ? JSON.parse(req.body.communication) : req.body.communication;
-      location = typeof req.body.location === "string" ? JSON.parse(req.body.location) : req.body.location;
-      citizenInfo = typeof req.body.citizenInfo === "string" ? JSON.parse(req.body.citizenInfo) : req.body.citizenInfo;
-      if (req.body.address) {
-        address = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
+  static createGrievanceByAgent = asyncHandler(
+    async (req: Request, res: Response) => {
+      // req.user contains the authenticated officer info
+
+      // Parse nested objects from form-data.
+      let classification,
+        evidence,
+        impact,
+        communication,
+        location,
+        citizenInfo,
+        address,
+        isCrpEqualPerAdd;
+      const channel = req.body.channel;
+      try {
+        classification =
+          typeof req.body.classification === "string"
+            ? JSON.parse(req.body.classification)
+            : req.body.classification;
+        evidence =
+          typeof req.body.evidence === "string"
+            ? JSON.parse(req.body.evidence)
+            : req.body.evidence;
+        impact =
+          typeof req.body.impact === "string"
+            ? JSON.parse(req.body.impact)
+            : req.body.impact;
+        communication =
+          typeof req.body.communication === "string"
+            ? JSON.parse(req.body.communication)
+            : req.body.communication;
+        location =
+          typeof req.body.location === "string"
+            ? JSON.parse(req.body.location)
+            : req.body.location;
+        citizenInfo =
+          typeof req.body.citizenInfo === "string"
+            ? JSON.parse(req.body.citizenInfo)
+            : req.body.citizenInfo;
+        if (req.body.address) {
+          address =
+            typeof req.body.address === "string"
+              ? JSON.parse(req.body.address)
+              : req.body.address;
+        }
+        if (req.body.isCrpEqualPerAdd !== undefined) {
+          isCrpEqualPerAdd =
+            typeof req.body.isCrpEqualPerAdd === "string"
+              ? JSON.parse(req.body.isCrpEqualPerAdd)
+              : req.body.isCrpEqualPerAdd;
+        }
+      } catch (e) {
+        throw new ApiError({
+          status: 400,
+          message: "Invalid JSON format in form-data fields.",
+        });
       }
-      if (req.body.isCrpEqualPerAdd !== undefined) {
-        isCrpEqualPerAdd = typeof req.body.isCrpEqualPerAdd === "string" ? JSON.parse(req.body.isCrpEqualPerAdd) : req.body.isCrpEqualPerAdd;
+
+      const parsedBody = {
+        classification,
+        evidence,
+        impact,
+        communication,
+        location,
+        citizenInfo,
+        address,
+        isCrpEqualPerAdd,
+      };
+      console.log(parsedBody, "parseBody", req.body.impact);
+      const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
+      if (!validation.success) {
+        const detailedErrors = validation.error.issues
+          .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+          .join(", ");
+        throw new ApiError({
+          status: 400,
+          message: `Validation failed: ${detailedErrors}`,
+        });
       }
-    } catch (e) {
-      throw new ApiError({ status: 400, message: "Invalid JSON format in form-data fields." });
-    }
 
-    const parsedBody = { classification, evidence, impact, communication, location, citizenInfo, address, isCrpEqualPerAdd };
-    console.log(parsedBody,"parseBody",req.body.impact);
-    const validation = createGrievanceByAgentSchema.safeParse(parsedBody);
-    if (!validation.success) {
-      const detailedErrors = validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
-      throw new ApiError({ status: 400, message: `Validation failed: ${detailedErrors}` });
-    }
+      await GrievanceController.validateReferences(parsedBody);
 
-    await GrievanceController.validateReferences(parsedBody);
+      // Attempt to link to an existing Citizen profile if one exists for this mobile number
+      let citizen;
+      try {
+        const { Citizen } = await import("../citizen/citizen.model.js");
+        citizen = await Citizen.findOne({ mobile: citizenInfo.mobile });
+      } catch (e) {
+        console.warn("Could not find Citizen model to link grievance");
+      }
 
-    // Attempt to link to an existing Citizen profile if one exists for this mobile number
-    let citizen;
-    try {
-      const { Citizen } = await import("../citizen/citizen.model.js");
-      citizen = await Citizen.findOne({ mobile: citizenInfo.mobile });
-    } catch (e) {
-      console.warn("Could not find Citizen model to link grievance");
-    }
+      const newGrievance = await GrievanceService.createGrievance({
+        citizen,
+        channel,
+        files: req.files as Express.Multer.File[] | undefined,
+        emailId: req.body.emailId,
+        createdBy: (req as any).user.id,
+        ...validation.data,
+      });
 
-    const newGrievance = await GrievanceService.createGrievance({
-      citizen,
-      channel,
-      files: req.files as Express.Multer.File[] | undefined,
-      emailId: req.body.emailId,
-      createdBy: (req as any).user.id,
-      ...validation.data
-    });
-
-    return new ApiResponse({
-      res,
-      status: 201,
-      data: newGrievance,
-      message: "Grievance created successfully on behalf of citizen",
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 201,
+        data: newGrievance,
+        message: "Grievance created successfully on behalf of citizen",
+      });
+    },
+  );
 
   /**
    * Get all grievances for the logged-in citizen
    */
-  static getCitizenGrievances = asyncHandler(async (req: Request, res: Response) => {
-    const citizen = req.citizen;
-    if (!citizen) {
-      throw new ApiError({ status: 401, message: "Unauthorized. Citizen not found." });
-    }
+  static getCitizenGrievances = asyncHandler(
+    async (req: Request, res: Response) => {
+      const citizen = req.citizen;
+      if (!citizen) {
+        throw new ApiError({
+          status: 401,
+          message: "Unauthorized. Citizen not found.",
+        });
+      }
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string;
-    const status=(req.query.status as string) ||null
-    const priority = req.query.priority as string;
-const citizenMobile = citizen.mobile.slice(-10);
-const alternateMobile = citizen?.alternateMobile?.slice(-10);
-    // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
-    const baseConditions: any[] = [
-      { citizen: citizen._id },
-      { "citizenInfo.mobile": new RegExp(`${citizenMobile}$`) },
-    ];
-    // If the citizen has an alternate mobile on their profile, we can match that too
-    if (alternateMobile) {
-      baseConditions.push({ "citizenInfo.mobile": new RegExp(`${alternateMobile}$`) });
-    }
-
-    const query: any = {
-      $or: baseConditions
-    };
-
-    if (search) {
-      const searchRegex = new RegExp(search, "i");
-      const searchQuery = {
-        $or: [
-          { grievanceId: searchRegex },
-          { "citizenInfo.mobile": searchRegex },
-          { "citizenInfo.alternateMobile": searchRegex },
-        ]
-      };
-      
-      // Combine the base authorization query with the search query using $and
-      query.$and = [
-        { $or: baseConditions },
-        searchQuery
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string;
+      const status = (req.query.status as string) || null;
+      const priority = req.query.priority as string;
+      const citizenMobile = citizen.mobile.slice(-10);
+      const alternateMobile = citizen?.alternateMobile?.slice(-10);
+      // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
+      const baseConditions: any[] = [
+        { citizen: citizen._id },
+        { "citizenInfo.mobile": new RegExp(`${citizenMobile}$`) },
       ];
-      delete query.$or; // Remove the top-level $or since it's now inside $and
-    }
-    if (status) {
-  query.status = {
-    $in: status.split(",")
-  };
-}
+      // If the citizen has an alternate mobile on their profile, we can match that too
+      if (alternateMobile) {
+        baseConditions.push({
+          "citizenInfo.mobile": new RegExp(`${alternateMobile}$`),
+        });
+      }
 
-    if (priority) {
-      query.assignedPriority = {
-        $in: priority.split(",")
+      const query: any = {
+        $or: baseConditions,
       };
-    }
 
-    const internalGrievances = await Grievance.find(query)
-      .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt feedbackText rating assignedOfficer")
-      .populate("classification.department")
-      .populate("classification.service")
-      .populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
-      .populate({
-        path: "assignedOfficer",
-        select: "name roles",
-        populate: {
-          path: "roles",
-          select: "_id level designationEnglish designationHindi"
-        }
-      })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en type")
-      .lean();
+      if (search) {
+        const searchRegex = new RegExp(search, "i");
+        const searchQuery = {
+          $or: [
+            { grievanceId: searchRegex },
+            { "citizenInfo.mobile": searchRegex },
+            { "citizenInfo.alternateMobile": searchRegex },
+          ],
+        };
 
-    // Fetch External Grievances
-    const externalMobiles = [citizenMobile];
-    if (alternateMobile) externalMobiles.push(alternateMobile);
-    const extMobileRegex = new RegExp(`(${externalMobiles.join('|')})$`);
-    
-    const extQuery: any = { mobile: extMobileRegex };
-    if (status) {
-      extQuery.status = { $in: status.split(",") };
-    }
-    if (search) {
-      extQuery.$or = [
-        { externalComplaintId: new RegExp(search, "i") },
-        { mobile: new RegExp(search, "i") }
-      ];
-    }
-    
-    const externalGrievances = await ExternalGrievance.find(extQuery).lean();
+        // Combine the base authorization query with the search query using $and
+        query.$and = [{ $or: baseConditions }, searchQuery];
+        delete query.$or; // Remove the top-level $or since it's now inside $and
+      }
+      if (status) {
+        query.status = {
+          $in: status.split(","),
+        };
+      }
 
-    // Combine and mark type explicitly
-    const formattedInternal = internalGrievances.map(g => Object.assign({}, g, { grievanceType: 'INTERNAL' }));
-    const formattedExternal = externalGrievances.map(g => Object.assign({}, g, { grievanceType: 'EXTERNAL' }));
+      if (priority) {
+        query.assignedPriority = {
+          $in: priority.split(","),
+        };
+      }
 
-    const allGrievances = [...formattedInternal, ...formattedExternal].sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      return dateB - dateA;
-    });
+      const internalGrievances = await Grievance.find(query)
+        .select(
+          "grievanceId classification location citizenInfo impact status assignedPriority createdAt feedbackText rating assignedOfficer",
+        )
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "classification.service",
+          select: "title titleHindi sla department",
+          populate: { path: "department" },
+        })
+        .populate({
+          path: "assignedOfficer",
+          select: "name roles",
+          populate: {
+            path: "roles",
+            select: "_id level designationEnglish designationHindi",
+          },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.thana", "name_en type")
+        .lean();
 
-    const totalCount = allGrievances.length;
-    const pagination = buildPagination({ page, limit, totalCount });
+      // Fetch External Grievances
+      const externalMobiles = [citizenMobile];
+      if (alternateMobile) externalMobiles.push(alternateMobile);
+      const extMobileRegex = new RegExp(`(${externalMobiles.join("|")})$`);
 
-    const paginatedDocs = allGrievances.slice(pagination.offset, pagination.offset + pagination.limit);
+      const extQuery: any = { mobile: extMobileRegex };
+      if (status) {
+        extQuery.status = { $in: status.split(",") };
+      }
+      if (search) {
+        extQuery.$or = [
+          { externalComplaintId: new RegExp(search, "i") },
+          { mobile: new RegExp(search, "i") },
+        ];
+      }
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        docs: paginatedDocs,
-        pagination,
-      },
-      message: "Grievances retrieved successfully",
-    });
-  });
+      const externalGrievances = await ExternalGrievance.find(extQuery).lean();
+
+      // Combine and mark type explicitly
+      const formattedInternal = internalGrievances.map((g) =>
+        Object.assign({}, g, { grievanceType: "INTERNAL" }),
+      );
+      const formattedExternal = externalGrievances.map((g) =>
+        Object.assign({}, g, { grievanceType: "EXTERNAL" }),
+      );
+
+      const allGrievances = [...formattedInternal, ...formattedExternal].sort(
+        (a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        },
+      );
+
+      const totalCount = allGrievances.length;
+      const pagination = buildPagination({ page, limit, totalCount });
+
+      const paginatedDocs = allGrievances.slice(
+        pagination.offset,
+        pagination.offset + pagination.limit,
+      );
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          docs: paginatedDocs,
+          pagination,
+        },
+        message: "Grievances retrieved successfully",
+      });
+    },
+  );
 
   /**
    * Get single grievance details for the logged-in citizen
    */
-  static getCitizenGrievanceById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params as { id: string };
-    const citizen = req.citizen;
+  static getCitizenGrievanceById = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params as { id: string };
+      const citizen = req.citizen;
 
-    if (!citizen) {
-      throw new ApiError({ status: 401, message: "Unauthorized. Citizen not found." });
-    }
-
-    const grievance = await Grievance.findById(id).populate({ path: "classification.service", populate: { path: "department" } })
-    .populate("classification.department")
-    .populate("classification.service")
-    .populate("classification.nature").populate("impact.affectedBeneficiary")
-    .populate({
-      path: "assignedOfficer",
-      select: "name roles",
-      populate: {
-        path: "roles"
+      if (!citizen) {
+        throw new ApiError({
+          status: 401,
+          message: "Unauthorized. Citizen not found.",
+        });
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("location.thana", "name_en type").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("citizenInfo.address.thana", "name_en type").populate("channel","title");
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-const citizenMobile = citizen.mobile.slice(-10);
-const alternateMobile = citizen?.alternateMobile?.slice(-10);
-    // Verify ownership
-    const isOwner = 
-      (grievance.citizen && grievance.citizen.toString() === citizen._id.toString()) ||
-      (grievance.citizenInfo?.mobile === citizenMobile) ||
-      (citizen.alternateMobile && grievance.citizenInfo?.mobile === alternateMobile);
+      const grievance = await Grievance.findById(id)
+        .populate({
+          path: "classification.service",
+          populate: { path: "department" },
+        })
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "assignedOfficer",
+          select: "name roles",
+          populate: {
+            path: "roles",
+          },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.urbanPanchayat", "name_en name_local")
+        .populate("location.ward", "name_en name_local ward_number")
+        .populate("location.village", "name_en name_local")
+        .populate("location.thana", "name_en type")
+        .populate("citizenInfo.address.district", "name_en name_local")
+        .populate("citizenInfo.address.block", "name_en name_local")
+        .populate("citizenInfo.address.panchayat", "name_en name_local")
+        .populate("citizenInfo.address.urbanPanchayat", "name_en name_local")
+        .populate("citizenInfo.address.ward", "name_en name_local ward_number")
+        .populate("citizenInfo.address.village", "name_en name_local")
+        .populate("citizenInfo.address.thana", "name_en type")
+        .populate("channel", "title");
 
-    if (!isOwner) {
-      throw new ApiError({ status: 403, message: "Access denied. You do not own this grievance." });
-    }
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+      const citizenMobile = citizen.mobile.slice(-10);
+      const alternateMobile = citizen?.alternateMobile?.slice(-10);
+      // Verify ownership
+      const isOwner =
+        (grievance.citizen &&
+          grievance.citizen.toString() === citizen._id.toString()) ||
+        grievance.citizenInfo?.mobile === citizenMobile ||
+        (citizen.alternateMobile &&
+          grievance.citizenInfo?.mobile === alternateMobile);
 
-    const publicTimelineTypes: any[] = [
-      "COMPLAINT_REGISTERED",
-      "STATUS_CHANGE",
-      "RESOLVED",
-      "COMPLAINT_CLOSED",
-      "CITIZEN_FEEDBACK",
-     
-      
-    ];
-    const timeline = await TimelineService.getTimelineHistory(id, publicTimelineTypes);
-    const responseData = {
-      ...grievance.toJSON(),
-      timeline,
-    };
+      if (!isOwner) {
+        throw new ApiError({
+          status: 403,
+          message: "Access denied. You do not own this grievance.",
+        });
+      }
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: responseData,
-      message: "Grievance details retrieved successfully",
-    });
-  });
+      const publicTimelineTypes: any[] = [
+        "COMPLAINT_REGISTERED",
+        "STATUS_CHANGE",
+        "RESOLVED",
+        "COMPLAINT_CLOSED",
+        "CITIZEN_FEEDBACK",
+      ];
+      const timeline = await TimelineService.getTimelineHistory(
+        id,
+        publicTimelineTypes,
+      );
+      const responseData = {
+        ...grievance.toJSON(),
+        timeline,
+      };
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: responseData,
+        message: "Grievance details retrieved successfully",
+      });
+    },
+  );
 
   /**
    * Get grievance analytics summary (Total Assigned, Resolved, Pending, Escalated)
    */
-  static getGrievanceAnalyticsSummary = asyncHandler(async (req: Request, res: Response) => {
-    const officerId = req.query.officerId as string;
-    
-    const query: any = {};
-    if (officerId) {
-      query.assignedOfficer = officerId;
-    }
+  static getGrievanceAnalyticsSummary = asyncHandler(
+    async (req: Request, res: Response) => {
+      const officerId = req.query.officerId as string;
 
-    const totalAssigned = await Grievance.countDocuments({ ...query, assignedOfficer: { $ne: null } });
-    const resolvedCount = await Grievance.countDocuments({ ...query, status: { $in: ["RESOLVED", "CLOSED"] } });
-    const pendingCount = await Grievance.countDocuments({ ...query, status: { $nin: ["RESOLVED", "CLOSED"] } });
+      const query: any = {};
+      if (officerId) {
+        query.assignedOfficer = officerId;
+      }
 
-    // For escalated, group by grievance so one grievance doesn't count multiple times
-    const escalatedQuery: any = { action: "ESCALATED" };
-    if (officerId) {
-      // If filtering by officer, only count escalations related to this officer
-      escalatedQuery["metadata.breachedOfficer"] = officerId;
-    }
-    
-    const escalatedGrievances = await GrievanceAnalyticLog.distinct("grievance", escalatedQuery);
-    const escalatedCount = escalatedGrievances.length;
+      const totalAssigned = await Grievance.countDocuments({
+        ...query,
+        assignedOfficer: { $ne: null },
+      });
+      const resolvedCount = await Grievance.countDocuments({
+        ...query,
+        status: { $in: ["RESOLVED", "CLOSED"] },
+      });
+      const pendingCount = await Grievance.countDocuments({
+        ...query,
+        status: { $nin: ["RESOLVED", "CLOSED"] },
+      });
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        totalAssigned,
-        resolvedCount,
-        pendingCount,
-        escalatedCount
-      },
-      message: "Grievance analytics summary fetched successfully"
-    });
-  });
+      // For escalated, group by grievance so one grievance doesn't count multiple times
+      const escalatedQuery: any = { action: "ESCALATED" };
+      if (officerId) {
+        // If filtering by officer, only count escalations related to this officer
+        escalatedQuery["metadata.breachedOfficer"] = officerId;
+      }
+
+      const escalatedGrievances = await GrievanceAnalyticLog.distinct(
+        "grievance",
+        escalatedQuery,
+      );
+      const escalatedCount = escalatedGrievances.length;
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          totalAssigned,
+          resolvedCount,
+          pendingCount,
+          escalatedCount,
+        },
+        message: "Grievance analytics summary fetched successfully",
+      });
+    },
+  );
 
   /**
    * Get dashboard analytics for CCE
    */
-  static getCCEDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
-    const pipeline = [
-      {
-        $group: {
-          _id: "$channel",
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $lookup: {
-          from: "complaintsources", // Check Mongoose collection name (usually lowercase plural)
-          localField: "_id",
-          foreignField: "_id",
-          as: "sourceData"
-        }
-      },
-      {
-        $unwind: {
-          path: "$sourceData",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $project: {
-          sourceId: "$_id",
-          sourceName: { $ifNull: ["$sourceData.title", "Unknown"] },
-          count: 1,
-          _id: 0
-        }
-      }
-    ];
+  static getCCEDashboardAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+      const pipeline = [
+        {
+          $group: {
+            _id: "$channel",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "complaintsources", // Check Mongoose collection name (usually lowercase plural)
+            localField: "_id",
+            foreignField: "_id",
+            as: "sourceData",
+          },
+        },
+        {
+          $unwind: {
+            path: "$sourceData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            sourceId: "$_id",
+            sourceName: { $ifNull: ["$sourceData.title", "Unknown"] },
+            count: 1,
+            _id: 0,
+          },
+        },
+      ];
 
-    const sourceWiseComplaints = await Grievance.aggregate(pipeline);
+      const sourceWiseComplaints = await Grievance.aggregate(pipeline);
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        sourceWiseComplaints
-      },
-      message: "CCE dashboard analytics fetched successfully"
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          sourceWiseComplaints,
+        },
+        message: "CCE dashboard analytics fetched successfully",
+      });
+    },
+  );
 
   /**
    * Get dashboard analytics for admin
    */
-  static getAdminDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
-    const { filter = "week" } = req.query;
+  static getAdminDashboardAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { filter = "week" } = req.query;
 
-    let currentStart = new Date();
-    let lastStart = new Date();
-    const now = new Date();
+      let currentStart = new Date();
+      let lastStart = new Date();
+      const now = new Date();
 
-    if (filter === "week") {
-      currentStart.setDate(now.getDate() - 7);
-      lastStart.setDate(now.getDate() - 14);
-    } else if (filter === "month") {
-      currentStart.setMonth(now.getMonth() - 1);
-      lastStart.setMonth(now.getMonth() - 2);
-    } else if (filter === "year") {
-      currentStart.setFullYear(now.getFullYear() - 1);
-      lastStart.setFullYear(now.getFullYear() - 2);
-    } else if (filter === "lifetime") {
-      currentStart = new Date(0);
-      lastStart = new Date(0);
-    } else {
-      currentStart.setDate(now.getDate() - 7);
-      lastStart.setDate(now.getDate() - 14);
-    }
+      if (filter === "week") {
+        currentStart.setDate(now.getDate() - 7);
+        lastStart.setDate(now.getDate() - 14);
+      } else if (filter === "month") {
+        currentStart.setMonth(now.getMonth() - 1);
+        lastStart.setMonth(now.getMonth() - 2);
+      } else if (filter === "year") {
+        currentStart.setFullYear(now.getFullYear() - 1);
+        lastStart.setFullYear(now.getFullYear() - 2);
+      } else if (filter === "lifetime") {
+        currentStart = new Date(0);
+        lastStart = new Date(0);
+      } else {
+        currentStart.setDate(now.getDate() - 7);
+        lastStart.setDate(now.getDate() - 14);
+      }
 
-    const getMetrics = async (startDate: Date, endDate: Date) => {
-      const matchCondition = { createdAt: { $gte: startDate, $lt: endDate } };
-      const stats = await Grievance.aggregate([
-        { $match: matchCondition },
+      const getMetrics = async (startDate: Date, endDate: Date) => {
+        const matchCondition = { createdAt: { $gte: startDate, $lt: endDate } };
+        const stats = await Grievance.aggregate([
+          { $match: matchCondition },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: 1 },
+              active: {
+                $sum: {
+                  $cond: [
+                    { $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]] },
+                    1,
+                    0,
+                  ],
+                },
+              },
+              resolved: {
+                $sum: {
+                  $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0],
+                },
+              },
+              escalated: {
+                $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] },
+              },
+              slaCompliant: {
+                $sum: {
+                  $cond: [{ $in: ["$escalationLevel", [0, null]] }, 1, 0],
+                },
+              },
+              ratingSum: {
+                $sum: {
+                  $cond: [{ $ifNull: ["$rating", false] }, "$rating", 0],
+                },
+              },
+              ratingCount: {
+                $sum: { $cond: [{ $ifNull: ["$rating", false] }, 1, 0] },
+              },
+            },
+          },
+        ]);
+
+        const result = stats[0] || {
+          total: 0,
+          active: 0,
+          resolved: 0,
+          escalated: 0,
+          slaCompliant: 0,
+          ratingSum: 0,
+          ratingCount: 0,
+        };
+
+        return {
+          totalComplaints: result.total,
+          active: result.active,
+          resolved: result.resolved,
+          escalated: result.escalated,
+          slaCompliance:
+            result.total > 0
+              ? Number(((result.slaCompliant / result.total) * 100).toFixed(1))
+              : 0,
+          satisfaction:
+            result.ratingCount > 0
+              ? Number((result.ratingSum / result.ratingCount).toFixed(1))
+              : 0,
+        };
+      };
+
+      const currentPeriod = await getMetrics(currentStart, now);
+      let previousPeriod = null;
+      if (filter !== "lifetime") {
+        previousPeriod = await getMetrics(lastStart, currentStart);
+      }
+
+      // Charts data only for current period
+      const formatStr =
+        filter === "year" || filter === "lifetime" ? "%Y-%m" : "%Y-%m-%d";
+
+      const trendRaised = await Grievance.aggregate([
+        { $match: { createdAt: { $gte: currentStart, $lt: now } } },
         {
           $group: {
-            _id: null,
-            total: { $sum: 1 },
-            active: {
-              $sum: { $cond: [{ $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]] }, 1, 0] }
-            },
-            resolved: {
-              $sum: { $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0] }
-            },
-            escalated: {
-              $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] }
-            },
-            slaCompliant: {
-              $sum: { $cond: [{ $in: ["$escalationLevel", [0, null]] }, 1, 0] }
-            },
-            ratingSum: {
-              $sum: { $cond: [{ $ifNull: ["$rating", false] }, "$rating", 0] }
-            },
-            ratingCount: {
-              $sum: { $cond: [{ $ifNull: ["$rating", false] }, 1, 0] }
-            }
-          }
-        }
+            _id: { $dateToString: { format: formatStr, date: "$createdAt" } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
       ]);
 
-      const result = stats[0] || {
-        total: 0, active: 0, resolved: 0, escalated: 0,
-        slaCompliant: 0, ratingSum: 0, ratingCount: 0
-      };
-
-      return {
-        totalComplaints: result.total,
-        active: result.active,
-        resolved: result.resolved,
-        escalated: result.escalated,
-        slaCompliance: result.total > 0 ? Number(((result.slaCompliant / result.total) * 100).toFixed(1)) : 0,
-        satisfaction: result.ratingCount > 0 ? Number((result.ratingSum / result.ratingCount).toFixed(1)) : 0
-      };
-    };
-
-    const currentPeriod = await getMetrics(currentStart, now);
-    let previousPeriod = null;
-    if (filter !== "lifetime") {
-      previousPeriod = await getMetrics(lastStart, currentStart);
-    }
-
-    // Charts data only for current period
-    const formatStr = filter === "year" || filter === "lifetime" ? "%Y-%m" : "%Y-%m-%d";
-
-    const trendRaised = await Grievance.aggregate([
-      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
-      {
-        $group: {
-          _id: { $dateToString: { format: formatStr, date: "$createdAt" } },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { "_id": 1 } }
-    ]);
-
-    const trendResolved = await Grievance.aggregate([
-      { $match: { updatedAt: { $gte: currentStart, $lt: now }, status: { $in: ["RESOLVED", "CLOSED"] } } },
-      {
-        $group: {
-          _id: { $dateToString: { format: formatStr, date: "$updatedAt" } },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { "_id": 1 } }
-    ]);
-
-    const bySubservice = await Grievance.aggregate([
-      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
-      {
-        $group: {
-          _id: "$classification.service",
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $lookup: {
-          from: "services",
-          localField: "_id",
-          foreignField: "_id",
-          as: "serviceDetails"
-        }
-      },
-      { $unwind: { path: "$serviceDetails", preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          name: "$serviceDetails.title",
-          titleHindi: "$serviceDetails.titleHindi",
-          count: 1
-        }
-      }
-    ]);
-
-    const byDistrict = await Grievance.aggregate([
-      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
-      {
-        $group: {
-          _id: { $ifNull: ["$location.district", "Unknown"] },
-          total: { $sum: 1 },
-          resolved: { $sum: { $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0] } },
-          pending: { $sum: { $cond: [{ $eq: ["$status", "OPEN"] }, 1, 0] } },
-          inProgress: { $sum: { $cond: [{ $eq: ["$status", "IN_PROGRESS"] }, 1, 0] } },
-          escalated: { $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] } }
-        }
-      },
-      {
-        $lookup: {
-          from: "districts",
-          localField: "_id",
-          foreignField: "_id",
-          as: "districtDetails"
-        }
-      },
-      { $unwind: { path: "$districtDetails", preserveNullAndEmptyArrays: false } },
-      {
-        $project: {
-          _id: 1,
-          name: { $ifNull: ["$districtDetails.name_en", "$_id"] },
-          total: 1,
-          resolved: 1,
-          pending: 1,
-          inProgress: 1,
-          escalated: 1
-        }
-      }
-    ]);
-
-    const bySource = await Grievance.aggregate([
-      { $match: { createdAt: { $gte: currentStart, $lt: now } } },
-      {
-        $group: {
-          _id: { $ifNull: ["$channel", "Unknown"] },
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $lookup: {
-          from: "complaintsources",
-          localField: "_id",
-          foreignField: "_id",
-          as: "channelDetails"
-        }
-      },
-      { $unwind: { path: "$channelDetails", preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          name: { $ifNull: ["$channelDetails.title", "$_id"] },
-          count: 1
-        }
-      }
-    ]);
-
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        metrics: {
-          currentPeriod,
-          previousPeriod
-        },
-        charts: {
-          trend: {
-            raised: trendRaised,
-            resolved: trendResolved
+      const trendResolved = await Grievance.aggregate([
+        {
+          $match: {
+            updatedAt: { $gte: currentStart, $lt: now },
+            status: { $in: ["RESOLVED", "CLOSED"] },
           },
-          bySubservice,
-          byDistrict,
-          bySource
-        }
-      },
-      message: "Admin dashboard analytics fetched successfully"
-    });
-  });
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: formatStr, date: "$updatedAt" } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+
+      const bySubservice = await Grievance.aggregate([
+        { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+        {
+          $group: {
+            _id: "$classification.service",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "services",
+            localField: "_id",
+            foreignField: "_id",
+            as: "serviceDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$serviceDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            name: "$serviceDetails.title",
+            titleHindi: "$serviceDetails.titleHindi",
+            count: 1,
+          },
+        },
+      ]);
+
+      const byDistrict = await Grievance.aggregate([
+        { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+        {
+          $group: {
+            _id: { $ifNull: ["$location.district", "Unknown"] },
+            total: { $sum: 1 },
+            resolved: {
+              $sum: {
+                $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0],
+              },
+            },
+            pending: { $sum: { $cond: [{ $eq: ["$status", "OPEN"] }, 1, 0] } },
+            inProgress: {
+              $sum: { $cond: [{ $eq: ["$status", "IN_PROGRESS"] }, 1, 0] },
+            },
+            escalated: {
+              $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "districts",
+            localField: "_id",
+            foreignField: "_id",
+            as: "districtDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$districtDetails",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: { $ifNull: ["$districtDetails.name_en", "$_id"] },
+            total: 1,
+            resolved: 1,
+            pending: 1,
+            inProgress: 1,
+            escalated: 1,
+          },
+        },
+      ]);
+
+      const bySource = await Grievance.aggregate([
+        { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+        {
+          $group: {
+            _id: { $ifNull: ["$channel", "Unknown"] },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "complaintsources",
+            localField: "_id",
+            foreignField: "_id",
+            as: "channelDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$channelDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            name: { $ifNull: ["$channelDetails.title", "$_id"] },
+            count: 1,
+          },
+        },
+      ]);
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          metrics: {
+            currentPeriod,
+            previousPeriod,
+          },
+          charts: {
+            trend: {
+              raised: trendRaised,
+              resolved: trendResolved,
+            },
+            bySubservice,
+            byDistrict,
+            bySource,
+          },
+        },
+        message: "Admin dashboard analytics fetched successfully",
+      });
+    },
+  );
 
   /**
    * Get all grievances (for agents/admins) with search across ID, mobile, and service name
    */
-  static getAllGrievances = asyncHandler(async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string;
-    const status = (req.query.status as string) || null;
-    const feedback = req.query.feedback as string;
-    const priority = req.query.priority as string;
+  static getAllGrievances = asyncHandler(
+    async (req: Request, res: Response) => {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string;
+      const status = (req.query.status as string) || null;
+      const feedback = req.query.feedback as string;
+      const priority = req.query.priority as string;
 
-    const query: any = {};
-    if (status) {
-      query.status = {
-        $in: status.split(",")
-      };
-    }
-
-    if (priority) {
-      query.assignedPriority = {
-        $in: priority.split(",")
-      };
-    }
-
-    if (feedback === 'true') {
-      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
-      query.rating = { $ne: null };
-    } else if (feedback === 'false') {
-      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
-      query.rating = null;
-    }
-
-    if (search) {
-      const searchRegex = new RegExp(search, "i");
-      let serviceIds: any[] = [];
-      
-      // Look up matching services by name
-      try {
-        
-        const matchingServices = await Service.find({ title: searchRegex }).select("_id");
-        serviceIds = matchingServices.map(s => s._id);
-      } catch (e) {
-        console.error("Failed to lookup Service for search", e);
+      const query: any = {};
+      if (status) {
+        query.status = {
+          $in: status.split(","),
+        };
       }
 
-      query.$or = [
-        { grievanceId: searchRegex },
-        { "citizenInfo.mobile": searchRegex },
-        
-      ];
-
-      // If any services matched the search string by name, include them in the OR clause
-      if (serviceIds.length > 0) {
-        query.$or.push({ "classification.service": { $in: serviceIds } });
+      if (priority) {
+        query.assignedPriority = {
+          $in: priority.split(","),
+        };
       }
-    }
 
-    const totalCount = await Grievance.countDocuments(query);
-    const pagination = buildPagination({ page, limit, totalCount });
+      if (feedback === "true") {
+        if (!query.status) query.status = { $in: ["RESOLVED", "CLOSED"] };
+        query.rating = { $ne: null };
+      } else if (feedback === "false") {
+        if (!query.status) query.status = { $in: ["RESOLVED", "CLOSED"] };
+        query.rating = null;
+      }
 
-    const grievances = await Grievance.find(query)
-      .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt")
-      .populate("classification.department")
-      .populate("classification.service")
-      .populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local")
-      .populate("location.village", "name_en name_local")
-      .populate("location.thana", "name_en type")
-      .populate("location.urbanPanchayat", "name_en name_local")
-      .populate("location.ward", "name_en name_local")
-      .populate({
-        path: "assignedOfficer",
-        select: "name roles",
-        populate: {
-          path: "roles",
-          select: "_id level designationEnglish"
+      if (search) {
+        const searchRegex = new RegExp(search, "i");
+        let serviceIds: any[] = [];
+
+        // Look up matching services by name
+        try {
+          const matchingServices = await Service.find({
+            title: searchRegex,
+          }).select("_id");
+          serviceIds = matchingServices.map((s) => s._id);
+        } catch (e) {
+          console.error("Failed to lookup Service for search", e);
         }
-      })
-      .sort({ createdAt: -1 })
-      .skip(pagination.offset)
-      .limit(pagination.limit)
-      .lean();
 
-    const modifiedGrievances = await GrievanceController.attachSlaToGrievancesList(grievances);
+        query.$or = [
+          { grievanceId: searchRegex },
+          { "citizenInfo.mobile": searchRegex },
+        ];
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        docs: modifiedGrievances,
-        pagination,
-      },
-      message: "All Grievances retrieved successfully",
-    });
-  });
+        // If any services matched the search string by name, include them in the OR clause
+        if (serviceIds.length > 0) {
+          query.$or.push({ "classification.service": { $in: serviceIds } });
+        }
+      }
+
+      const totalCount = await Grievance.countDocuments(query);
+      const pagination = buildPagination({ page, limit, totalCount });
+
+      const grievances = await Grievance.find(query)
+        .select(
+          "grievanceId classification location citizenInfo impact status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt",
+        )
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "classification.service",
+          select: "title titleHindi sla department",
+          populate: { path: "department" },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.village", "name_en name_local")
+        .populate("location.thana", "name_en type")
+        .populate("location.urbanPanchayat", "name_en name_local")
+        .populate("location.ward", "name_en name_local")
+        .populate({
+          path: "assignedOfficer",
+          select: "name roles",
+          populate: {
+            path: "roles",
+            select: "_id level designationEnglish",
+          },
+        })
+        .sort({ createdAt: -1 })
+        .skip(pagination.offset)
+        .limit(pagination.limit)
+        .lean();
+
+      const modifiedGrievances =
+        await GrievanceController.attachSlaToGrievancesList(grievances);
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          docs: modifiedGrievances,
+          pagination,
+        },
+        message: "All Grievances retrieved successfully",
+      });
+    },
+  );
 
   /**
    * Get dashboard analytics for an officer
    */
-  static getOfficerDashboardAnalytics = asyncHandler(async (req: Request, res: Response) => {
-    const officerId = (req as any).user.id || (req as any).user._id;
-    const { filter = "week" } = req.query;
+  static getOfficerDashboardAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+      const officerId = (req as any).user.id || (req as any).user._id;
+      const { filter = "week" } = req.query;
 
-    let currentStart = new Date();
-    let lastStart = new Date();
-    const now = new Date();
+      let currentStart = new Date();
+      let lastStart = new Date();
+      const now = new Date();
 
-    if (filter === "week") {
-      currentStart.setDate(now.getDate() - 7);
-      lastStart.setDate(now.getDate() - 14);
-    } else if (filter === "month") {
-      currentStart.setMonth(now.getMonth() - 1);
-      lastStart.setMonth(now.getMonth() - 2);
-    } else if (filter === "year") {
-      currentStart.setFullYear(now.getFullYear() - 1);
-      lastStart.setFullYear(now.getFullYear() - 2);
-    } else {
-      currentStart.setDate(now.getDate() - 7);
-      lastStart.setDate(now.getDate() - 14);
-    }
+      if (filter === "week") {
+        currentStart.setDate(now.getDate() - 7);
+        lastStart.setDate(now.getDate() - 14);
+      } else if (filter === "month") {
+        currentStart.setMonth(now.getMonth() - 1);
+        lastStart.setMonth(now.getMonth() - 2);
+      } else if (filter === "year") {
+        currentStart.setFullYear(now.getFullYear() - 1);
+        lastStart.setFullYear(now.getFullYear() - 2);
+      } else {
+        currentStart.setDate(now.getDate() - 7);
+        lastStart.setDate(now.getDate() - 14);
+      }
 
-    const getMetrics = async (startDate: Date, endDate: Date) => {
-      const assignedCount = await Grievance.countDocuments({
-        assignedOfficer: officerId,
-        createdAt: { $gte: startDate, $lt: endDate }
-      });
+      const getMetrics = async (startDate: Date, endDate: Date) => {
+        const assignedCount = await Grievance.countDocuments({
+          assignedOfficer: officerId,
+          createdAt: { $gte: startDate, $lt: endDate },
+        });
 
-      const pendingCount = await Grievance.countDocuments({
-        assignedOfficer: officerId,
-        status: { $nin: ["RESOLVED", "CLOSED"] },
-        createdAt: { $gte: startDate, $lt: endDate }
-      });
+        const pendingCount = await Grievance.countDocuments({
+          assignedOfficer: officerId,
+          status: { $nin: ["RESOLVED", "CLOSED"] },
+          createdAt: { $gte: startDate, $lt: endDate },
+        });
 
-      const resolvedCount = await Grievance.countDocuments({
-        assignedOfficer: officerId,
-        status: { $in: ["RESOLVED"] },
-        updatedAt: { $gte: startDate, $lt: endDate }
-      });
+        const resolvedCount = await Grievance.countDocuments({
+          assignedOfficer: officerId,
+          status: { $in: ["RESOLVED"] },
+          updatedAt: { $gte: startDate, $lt: endDate },
+        });
 
-      const breachedCount = await GrievanceAnalyticLog.countDocuments({
-        action: "ESCALATED",
-        "metadata.breachedOfficer": officerId,
-        createdAt: { $gte: startDate, $lt: endDate }
-      });
+        const breachedCount = await GrievanceAnalyticLog.countDocuments({
+          action: "ESCALATED",
+          "metadata.breachedOfficer": officerId,
+          createdAt: { $gte: startDate, $lt: endDate },
+        });
 
-      return { assignedCount, pendingCount, resolvedCount, breachedCount };
-    };
+        return { assignedCount, pendingCount, resolvedCount, breachedCount };
+      };
 
-    const currentMetrics = await getMetrics(currentStart, now);
-    const lastMetrics = await getMetrics(lastStart, currentStart);
+      const currentMetrics = await getMetrics(currentStart, now);
+      const lastMetrics = await getMetrics(lastStart, currentStart);
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        currentPeriod: {
-          totalAssigned: currentMetrics.assignedCount,
-          pending: currentMetrics.pendingCount,
-          resolved: currentMetrics.resolvedCount,
-          slaBreached: currentMetrics.breachedCount
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          currentPeriod: {
+            totalAssigned: currentMetrics.assignedCount,
+            pending: currentMetrics.pendingCount,
+            resolved: currentMetrics.resolvedCount,
+            slaBreached: currentMetrics.breachedCount,
+          },
+          previousPeriod: {
+            totalAssigned: lastMetrics.assignedCount,
+            pending: lastMetrics.pendingCount,
+            resolved: lastMetrics.resolvedCount,
+            slaBreached: lastMetrics.breachedCount,
+          },
         },
-        previousPeriod: {
-          totalAssigned: lastMetrics.assignedCount,
-          pending: lastMetrics.pendingCount,
-          resolved: lastMetrics.resolvedCount,
-          slaBreached: lastMetrics.breachedCount
-        }
-      },
-      message: "Officer dashboard analytics fetched successfully"
-    });
-  });
+        message: "Officer dashboard analytics fetched successfully",
+      });
+    },
+  );
 
   /**
    * Get all grievances assigned to the logged-in officer
    */
-  static getOfficerGrievances = asyncHandler(async (req: Request, res: Response) => {
-    // req.user contains the authenticated officer info
-    const officerId = (req as any).user?.id;
-    // console.log(req.user)
-    if (!officerId) {
-      throw new ApiError({ status: 401, message: "Unauthorized. Officer not found." });
-    }
-
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string;
-    const status = (req.query.status as string) || null;
-    const feedback = req.query.feedback as string;
-    const priority = req.query.priority as string;
-
-    const query: any = {
-      assignedOfficer: officerId 
-    };
-
-    if (status) {
-      query.status = {
-        $in: status.split(",")
-      };
-    }
-
-    if (priority) {
-      query.assignedPriority = {
-        $in: priority.split(",")
-      };
-    }
-
-    if (feedback === 'true') {
-      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
-      query.rating = { $ne: null };
-    } else if (feedback === 'false') {
-      if (!query.status) query.status = { $in: ['RESOLVED', 'CLOSED'] };
-      query.rating = null;
-    }
-
-    if (search) {
-      const searchRegex = new RegExp(search, "i");
-      let searchSubServiceIds: any[] = [];
-      
-      try {
-        const matchingServices = await Service.find({ title: searchRegex }).select("_id");
-        searchSubServiceIds = matchingServices.map(s => s._id);
-      } catch (e) {}
-
-      query.$or = [
-        { grievanceId: searchRegex },
-        { "citizenInfo.mobile": searchRegex },
-      ];
-
-      if (searchSubServiceIds.length > 0) {
-        query.$or.push({ "classification.service": { $in: searchSubServiceIds } });
+  static getOfficerGrievances = asyncHandler(
+    async (req: Request, res: Response) => {
+      // req.user contains the authenticated officer info
+      const officerId = (req as any).user?.id;
+      // console.log(req.user)
+      if (!officerId) {
+        throw new ApiError({
+          status: 401,
+          message: "Unauthorized. Officer not found.",
+        });
       }
-    }
 
-    const totalCount = await Grievance.countDocuments(query);
-    const pagination = buildPagination({ page, limit, totalCount });
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string;
+      const status = (req.query.status as string) || null;
+      const feedback = req.query.feedback as string;
+      const priority = req.query.priority as string;
 
-    const grievances = await Grievance.find(query)
-      .select("grievanceId classification location citizenInfo impact status assignedPriority createdAt assignedAt")
-      .populate("classification.department")
-      .populate("classification.service")
-      .populate("classification.nature").populate("impact.affectedBeneficiary")
-      .populate({ path: "classification.service", select: "title titleHindi sla department", populate: { path: "department" } })
-      .populate("location.district", "name_en name_local").populate("location.block", "name_en name_local")
-      .populate("location.panchayat", "name_en name_local")
-      .populate("location.village", "name_en name_local")
-      .populate("location.thana", "name_en type")
-      .populate("location.urbanPanchayat", "name_en name_local")
-      .populate("location.ward", "name_en name_local")
-      .sort({ createdAt: -1 })
-      .skip(pagination.offset)
-      .limit(pagination.limit)
-      .lean();
+      const query: any = {
+        assignedOfficer: officerId,
+      };
 
-    const officerRoleId = (req as any).user?.roles?.[0]?._id?.toString() || (req as any).user?.roles?.[0]?.toString();
-    const modifiedGrievances = await GrievanceController.attachSlaToGrievancesList(grievances, officerRoleId);
+      if (status) {
+        query.status = {
+          $in: status.split(","),
+        };
+      }
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: {
-        docs: modifiedGrievances,
-        pagination,
-      },
-      message: "Assigned Grievances retrieved successfully",
-    });
-  });
+      if (priority) {
+        query.assignedPriority = {
+          $in: priority.split(","),
+        };
+      }
+
+      if (feedback === "true") {
+        if (!query.status) query.status = { $in: ["RESOLVED", "CLOSED"] };
+        query.rating = { $ne: null };
+      } else if (feedback === "false") {
+        if (!query.status) query.status = { $in: ["RESOLVED", "CLOSED"] };
+        query.rating = null;
+      }
+
+      if (search) {
+        const searchRegex = new RegExp(search, "i");
+        let searchSubServiceIds: any[] = [];
+
+        try {
+          const matchingServices = await Service.find({
+            title: searchRegex,
+          }).select("_id");
+          searchSubServiceIds = matchingServices.map((s) => s._id);
+        } catch (e) {}
+
+        query.$or = [
+          { grievanceId: searchRegex },
+          { "citizenInfo.mobile": searchRegex },
+        ];
+
+        if (searchSubServiceIds.length > 0) {
+          query.$or.push({
+            "classification.service": { $in: searchSubServiceIds },
+          });
+        }
+      }
+
+      const totalCount = await Grievance.countDocuments(query);
+      const pagination = buildPagination({ page, limit, totalCount });
+
+      const grievances = await Grievance.find(query)
+        .select(
+          "grievanceId classification location citizenInfo impact status assignedPriority createdAt assignedAt",
+        )
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "classification.service",
+          select: "title titleHindi sla department",
+          populate: { path: "department" },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.village", "name_en name_local")
+        .populate("location.thana", "name_en type")
+        .populate("location.urbanPanchayat", "name_en name_local")
+        .populate("location.ward", "name_en name_local")
+        .sort({ createdAt: -1 })
+        .skip(pagination.offset)
+        .limit(pagination.limit)
+        .lean();
+
+      const officerRoleId =
+        (req as any).user?.roles?.[0]?._id?.toString() ||
+        (req as any).user?.roles?.[0]?.toString();
+      const modifiedGrievances =
+        await GrievanceController.attachSlaToGrievancesList(
+          grievances,
+          officerRoleId,
+        );
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: {
+          docs: modifiedGrievances,
+          pagination,
+        },
+        message: "Assigned Grievances retrieved successfully",
+      });
+    },
+  );
 
   /**
    * Submit feedback and star rating on behalf of a citizen by an Agent/CCE
    */
-  static submitFeedbackByAgent = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const validation = submitFeedbackSchema.safeParse(req.body);
-    if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`).join(", ") });
-    }
-    const { rating, feedbackText } = validation.data;
-    const user = req.user;
+  static submitFeedbackByAgent = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const validation = submitFeedbackSchema.safeParse(req.body);
+      if (!validation.success) {
+        throw new ApiError({
+          status: 400,
+          message: validation.error.issues
+            .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+            .join(", "),
+        });
+      }
+      const { rating, feedbackText } = validation.data;
+      const user = req.user;
 
-    if (!user) {
-      throw new ApiError({ status: 401, message: "Unauthorized. Agent not found." });
-    }
+      if (!user) {
+        throw new ApiError({
+          status: 401,
+          message: "Unauthorized. Agent not found.",
+        });
+      }
 
-    const grievance = await Grievance.findById(id);
+      const grievance = await Grievance.findById(id);
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
 
-    if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
-      throw new ApiError({ status: 400, message: "Feedback can only be submitted for RESOLVED or CLOSED grievances." });
-    }
+      if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
+        throw new ApiError({
+          status: 400,
+          message:
+            "Feedback can only be submitted for RESOLVED or CLOSED grievances.",
+        });
+      }
 
-    if (grievance.rating) {
-      throw new ApiError({ status: 400, message: "Feedback has already been submitted for this grievance and cannot be changed." });
-    }
+      if (grievance.rating) {
+        throw new ApiError({
+          status: 400,
+          message:
+            "Feedback has already been submitted for this grievance and cannot be changed.",
+        });
+      }
 
-    grievance.rating = rating;
-    grievance.feedbackText = feedbackText;
+      grievance.rating = rating;
+      grievance.feedbackText = feedbackText;
 
-    await grievance.save();
+      await grievance.save();
 
-    await TimelineService.logEvent({
-      grievanceId: grievance._id as any,
-      type: "CITIZEN_FEEDBACK",
-      actor: {
-        id: user.id as any,
-        name: user.name || "System",
-        role: user.roles?.[0]?.level || "AGENT"
-      },
-      metadata: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
-    });
+      await TimelineService.logEvent({
+        grievanceId: grievance._id as any,
+        type: "CITIZEN_FEEDBACK",
+        actor: {
+          id: user.id as any,
+          name: user.name || "System",
+          role: user.roles?.[0]?.level || "AGENT",
+        },
+        metadata: timelineTemplates.CITIZEN_FEEDBACK(
+          rating,
+          feedbackText || "",
+        ),
+      });
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: "Feedback submitted successfully on behalf of citizen.",
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: "Feedback submitted successfully on behalf of citizen.",
+      });
+    },
+  );
 
   /**
    * Submit citizen feedback and star rating for a resolved grievance
@@ -1104,7 +1525,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const { id } = req.params;
     const validation = submitFeedbackSchema.safeParse(req.body);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`).join(", ") });
+      throw new ApiError({
+        status: 400,
+        message: validation.error.issues
+          .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+          .join(", "),
+      });
     }
     const { rating, feedbackText } = validation.data;
     const citizen = req.citizen;
@@ -1124,17 +1550,28 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
 
     if (!isOwner && !isMobileMatch) {
-      throw new ApiError({ status: 403, message: "You are not authorized to review this grievance." });
+      throw new ApiError({
+        status: 403,
+        message: "You are not authorized to review this grievance.",
+      });
     }
 
     // Validate Status (Feedback is only for resolved/closed tickets)
     if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
-      throw new ApiError({ status: 400, message: "Feedback can only be submitted for RESOLVED or CLOSED grievances." });
+      throw new ApiError({
+        status: 400,
+        message:
+          "Feedback can only be submitted for RESOLVED or CLOSED grievances.",
+      });
     }
 
     // Prevent overriding existing feedback (immutable)
     if (grievance.rating) {
-      throw new ApiError({ status: 400, message: "Feedback has already been submitted for this grievance and cannot be changed." });
+      throw new ApiError({
+        status: 400,
+        message:
+          "Feedback has already been submitted for this grievance and cannot be changed.",
+      });
     }
 
     grievance.rating = rating;
@@ -1148,9 +1585,9 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       actor: {
         id: citizen._id as any,
         name: "CITIZEN",
-        role: "CITIZEN"
+        role: "CITIZEN",
       },
-      metadata: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
+      metadata: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || ""),
     });
 
     return new ApiResponse({
@@ -1164,57 +1601,66 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
   /**
    * Resolve a grievance (Citizen)
    */
-  static resolveGrievanceByCitizen = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { remarks } = req.body;
-    const citizen = req.citizen;
+  static resolveGrievanceByCitizen = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const { remarks } = req.body;
+      const citizen = req.citizen;
 
-    if (!citizen) {
-      throw new ApiError({ status: 401, message: "Unauthorized." });
-    }
+      if (!citizen) {
+        throw new ApiError({ status: 401, message: "Unauthorized." });
+      }
 
-    const grievance = await Grievance.findById(id);
+      const grievance = await Grievance.findById(id);
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
 
-    // Verify ownership
-    const isOwner = grievance.citizen?.toString() === citizen._id.toString();
-    const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
+      // Verify ownership
+      const isOwner = grievance.citizen?.toString() === citizen._id.toString();
+      const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
 
-    if (!isOwner && !isMobileMatch) {
-      throw new ApiError({ status: 403, message: "Forbidden. You are not authorized to modify this grievance." });
-    }
+      if (!isOwner && !isMobileMatch) {
+        throw new ApiError({
+          status: 403,
+          message:
+            "Forbidden. You are not authorized to modify this grievance.",
+        });
+      }
 
-    if (grievance.status === "RESOLVED" ) {
-      throw new ApiError({ status: 400, message: "Grievance is already resolved." });
-    }
+      if (grievance.status === "RESOLVED") {
+        throw new ApiError({
+          status: 400,
+          message: "Grievance is already resolved.",
+        });
+      }
 
-    grievance.status = "RESOLVED";
-    grievance.resolvedAt = new Date() as any;
-    grievance.resolvedReason = remarks || "Resolved by citizen";
+      grievance.status = "RESOLVED";
+      grievance.resolvedAt = new Date() as any;
+      grievance.resolvedReason = remarks || "Resolved by citizen";
 
-    await grievance.save();
+      await grievance.save();
 
-    await TimelineService.logEvent({
-      grievanceId: grievance._id as any,
-      type: "RESOLVED",
-      actor: {
-        id: citizen._id as any,
-        name: "CITIZEN",
-        role: "CITIZEN"
-      },
-      metadata: timelineTemplates.RESOLVED(remarks || "Resolved by citizen")
-    });
+      await TimelineService.logEvent({
+        grievanceId: grievance._id as any,
+        type: "RESOLVED",
+        actor: {
+          id: citizen._id as any,
+          name: "CITIZEN",
+          role: "CITIZEN",
+        },
+        metadata: timelineTemplates.RESOLVED(remarks || "Resolved by citizen"),
+      });
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: "Grievance marked as resolved successfully.",
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: "Grievance marked as resolved successfully.",
+      });
+    },
+  );
 
   /**
    * Reopen a grievance (Citizen)
@@ -1223,7 +1669,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const { id } = req.params;
     const validation = reopenGrievanceSchema.safeParse(req.body);
     if (!validation.success) {
-      throw new ApiError({ status: 400, message: validation.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`).join(", ") });
+      throw new ApiError({
+        status: 400,
+        message: validation.error.issues
+          .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+          .join(", "),
+      });
     }
     const { reOpenReason } = validation.data;
     const citizen = req.citizen;
@@ -1243,12 +1694,18 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     const isMobileMatch = grievance.citizenInfo?.mobile === citizen.mobile;
 
     if (!isOwner && !isMobileMatch) {
-      throw new ApiError({ status: 403, message: "Forbidden. You are not authorized to reopen this grievance." });
+      throw new ApiError({
+        status: 403,
+        message: "Forbidden. You are not authorized to reopen this grievance.",
+      });
     }
 
     // Enforce status constraint
-    if (grievance.status !== "RESOLVED" && grievance.status !== "CLOSED") {
-      throw new ApiError({ status: 400, message: "Only RESOLVED or CLOSED grievances can be reopened." });
+    if (grievance.status !== "CLOSED" && grievance.status !== "RESOLVED") {
+      throw new ApiError({
+        status: 400,
+        message: "Only CLOSED and RESOLVED grievances can be reopened.",
+      });
     }
 
     // Enforce 7-day constraint based on updatedAt (when status was likely resolved/closed)
@@ -1256,7 +1713,11 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     if (new Date(grievance.updatedAt) < sevenDaysAgo) {
-      throw new ApiError({ status: 400, message: "Grievance can only be reopened within 7 days of being resolved or closed." });
+      throw new ApiError({
+        status: 400,
+        message:
+          `Grievance can only be reopened within 7 days of being closed. Reopen window is closed.`,
+      });
     }
 
     const oldStatus = grievance.status;
@@ -1269,25 +1730,39 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     let escalated = false;
     let nextLevelRoleName = "Officer";
     const serviceId = grievance.classification?.service;
-    
+
     if (serviceId) {
       const serviceDoc = await Service.findById(serviceId);
       const departmentId = serviceDoc?.department;
-      
-      if (departmentId) {
-        const slaConfig = await SlaConfig.findOne({ service: serviceId, active: true });
-        const workflowLevels = await WorkflowLevel.findOne({ department: departmentId, active: true });
 
-        if (slaConfig && slaConfig.escalations?.length && workflowLevels?.levels?.length) {
-          const sortedLevels = workflowLevels.levels.sort((a: any, b: any) => a.order - b.order);
+      if (departmentId) {
+        const slaConfig = await SlaConfig.findOne({
+          service: serviceId,
+          active: true,
+        });
+        const workflowLevels = await WorkflowLevel.findOne({
+          department: departmentId,
+          active: true,
+        });
+
+        if (
+          slaConfig &&
+          slaConfig.escalations?.length &&
+          workflowLevels?.levels?.length
+        ) {
+          const sortedLevels = workflowLevels.levels.sort(
+            (a: any, b: any) => a.order - b.order,
+          );
           let currentLevelIndex = grievance.escalationLevel || 0;
-          
+
           let nextValidLevelIndex = -1;
           let nextWorkflowLevel = null;
-          
+
           for (let i = currentLevelIndex + 1; i < sortedLevels.length; i++) {
             const checkRole = sortedLevels[i].role.toString();
-            const roleInSla = slaConfig.escalations.some((esc: any) => esc.role.toString() === checkRole);
+            const roleInSla = slaConfig.escalations.some(
+              (esc: any) => esc.role.toString() === checkRole,
+            );
             if (roleInSla) {
               nextValidLevelIndex = i;
               nextWorkflowLevel = sortedLevels[i];
@@ -1297,21 +1772,42 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
 
           if (nextValidLevelIndex !== -1 && nextWorkflowLevel) {
             const nextRoleId = nextWorkflowLevel.role;
-            const eligibleUsers = await User.find({ roles: nextRoleId, status: 'ACTIVE' }).select('_id');
-            const userIds = eligibleUsers.map(u => u._id);
-            
+            const eligibleUsers = await User.find({
+              roles: nextRoleId,
+              status: "ACTIVE",
+            }).select("_id");
+            const userIds = eligibleUsers.map((u) => u._id);
+
             if (userIds.length > 0) {
-              const tagQuery: any = { officer: { $in: userIds }, services: serviceId, active: true };
-              const ward = grievance.location?.panchayat || grievance.location?.block;
+              const tagQuery: any = {
+                officer: { $in: userIds },
+                services: serviceId,
+                active: true,
+              };
+              const ward =
+                grievance.location?.panchayat || grievance.location?.block;
               if (ward) tagQuery.wards = ward;
-              
-              const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
+
+              const eligibleTags =
+                await OfficerTagging.find(tagQuery).select("officer");
               let availableOfficers = [];
               if (eligibleTags.length > 0) {
                 const taggedUserIds = eligibleTags.map((t: any) => t.officer);
-                availableOfficers = await User.find({ _id: { $in: taggedUserIds }, status: 'ACTIVE' }).sort({ escalatedCount: 1 }).limit(1).populate("roles");
+                availableOfficers = await User.find({
+                  _id: { $in: taggedUserIds },
+                  status: "ACTIVE",
+                })
+                  .sort({ escalatedCount: 1 })
+                  .limit(1)
+                  .populate("roles");
               } else {
-                availableOfficers = await User.find({ _id: { $in: userIds }, status: 'ACTIVE' }).sort({ escalatedCount: 1 }).limit(1).populate("roles");
+                availableOfficers = await User.find({
+                  _id: { $in: userIds },
+                  status: "ACTIVE",
+                })
+                  .sort({ escalatedCount: 1 })
+                  .limit(1)
+                  .populate("roles");
               }
 
               if (availableOfficers.length > 0) {
@@ -1320,11 +1816,12 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
                 grievance.assignedAt = new Date() as any;
                 grievance.escalationLevel = nextValidLevelIndex;
                 grievance.slaWarningSent = false;
-                
-                nextOfficer.escalatedCount = (nextOfficer.escalatedCount || 0) + 1;
+
+                nextOfficer.escalatedCount =
+                  (nextOfficer.escalatedCount || 0) + 1;
                 await nextOfficer.save();
                 escalated = true;
-                
+
                 nextLevelRoleName = nextOfficer.roles?.[0]?.level || "Officer";
 
                 await GrievanceAnalyticLog.insertMany([
@@ -1333,8 +1830,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
                     action: "ESCALATED",
                     metadata: {
                       breachedOfficer: oldOfficer,
-                      reason: "CITIZEN_REOPEN"
-                    }
+                      reason: "CITIZEN_REOPEN",
+                    },
                   },
                   {
                     grievance: grievance._id,
@@ -1342,13 +1839,18 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
                     assignedTo: nextOfficer._id,
                     metadata: {
                       previousOfficer: oldOfficer,
-                      assignedBy: "CITIZEN_REOPEN"
-                    }
-                  }
+                      assignedBy: "CITIZEN_REOPEN",
+                    },
+                  },
                 ]);
 
                 // Notify next officer
-                NotificationService.notifyEscalation(nextOfficer._id, oldOfficer, grievance._id, grievance.grievanceId || "").catch(e => console.error(e));
+                NotificationService.notifyEscalation(
+                  nextOfficer._id,
+                  oldOfficer,
+                  grievance._id,
+                  grievance.grievanceId || "",
+                ).catch((e) => console.error(e));
               }
             }
           }
@@ -1365,9 +1867,13 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       actor: {
         id: citizen._id as any,
         name: "CITIZEN",
-        role: "CITIZEN"
+        role: "CITIZEN",
       },
-      metadata: timelineTemplates.STATUS_CHANGE(oldStatus, "REOPENED", reOpenReason)
+      metadata: timelineTemplates.STATUS_CHANGE(
+        oldStatus,
+        "REOPENED",
+        reOpenReason,
+      ),
     });
 
     if (escalated) {
@@ -1378,9 +1884,13 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         actor: {
           id: citizen._id as any,
           name: "System Auto-Escalation",
-          role: "System"
+          role: "System",
         },
-        metadata: timelineTemplates.ESCALATED("N/A", nextLevelRoleName, "SYSTEM")
+        metadata: timelineTemplates.ESCALATED(
+          "N/A",
+          nextLevelRoleName,
+          "SYSTEM",
+        ),
       });
     }
 
@@ -1388,549 +1898,740 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       res,
       status: 200,
       data: grievance,
-      message: escalated ? "Grievance reopened and escalated to the next level." : "Grievance reopened successfully.",
+      message: escalated
+        ? "Grievance reopened and escalated to the next level."
+        : "Grievance reopened successfully.",
     });
   });
 
   /**
    * Update grievance details (by Officer)
    */
-  static updateGrievanceByOfficer = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const updateData = req.body;
+  static updateGrievanceByOfficer = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const updateData = req.body;
 
-    const oldGrievance = await Grievance.findById(id);
-    if (!oldGrievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
+      const oldGrievance = await Grievance.findById(id);
+      if (!oldGrievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
 
-    if (updateData.status === 'RESOLVED') {
-      if (oldGrievance.status !== 'RESOLVED') {
-        updateData.resolvedAt = new Date();
-        if (updateData.remarks) {
-          updateData.resolvedReason = updateData.remarks;
+      if (updateData.status === "RESOLVED") {
+        if (oldGrievance.status !== "RESOLVED") {
+          updateData.resolvedAt = new Date();
+          if (updateData.remarks) {
+            updateData.resolvedReason = updateData.remarks;
+          }
+          // Notify CCE for feedback reminder
+          NotificationService.notifyFeedbackReminder(
+            id,
+            oldGrievance.grievanceId || "N/A",
+          ).catch((e) => console.error(e));
         }
-        // Notify CCE for feedback reminder
-        NotificationService.notifyFeedbackReminder(id, oldGrievance.grievanceId || "N/A").catch(e => console.error(e));
+        const hasPhotos =
+          (oldGrievance.geotaggedImages &&
+            oldGrievance.geotaggedImages.length > 0) ||
+          (updateData.geotaggedImages && updateData.geotaggedImages.length > 0);
+        if (!hasPhotos) {
+          throw new ApiError({
+            status: 400,
+            message:
+              "Cannot resolve grievance: At least one photo of the resolution is required.",
+          });
+        }
+
+        const completedVisit = await FieldVisit.findOne({
+          grievance: id,
+          status: "COMPLETED",
+        });
+        if (!completedVisit) {
+          throw new ApiError({
+            status: 400,
+            message:
+              "Cannot resolve grievance: A completed field visit is required before resolution.",
+          });
+        }
       }
-      const hasPhotos = (oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0) || (updateData.geotaggedImages && updateData.geotaggedImages.length > 0);
-      if (!hasPhotos) {
-        throw new ApiError({ status: 400, message: "Cannot resolve grievance: At least one photo of the resolution is required." });
-      }
 
-      const completedVisit = await FieldVisit.findOne({ grievance: id, status: 'COMPLETED' });
-      if (!completedVisit) {
-        throw new ApiError({ status: 400, message: "Cannot resolve grievance: A completed field visit is required before resolution." });
-      }
-    }
+      const oldPhotosCount = oldGrievance.geotaggedImages?.length || 0;
 
-    const oldPhotosCount = oldGrievance.geotaggedImages?.length || 0;
-    
-    const grievance = await Grievance.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-
-    const newPhotosCount = grievance.geotaggedImages?.length || 0;
-    if (newPhotosCount > oldPhotosCount && req.user) {
-      const addedPhotos = newPhotosCount - oldPhotosCount;
-      const lastPhoto = grievance.geotaggedImages?.[grievance.geotaggedImages.length - 1];
-      const lat = lastPhoto?.coordinates?.latitude || "N/A";
-      const lng = lastPhoto?.coordinates?.longitude || "N/A";
-      
-      await TimelineService.logEvent({
-        grievanceId: grievance._id as any,
-        type: "RESOLUTION_PHOTO",
-        actor: {
-          id: req.user.id as any,
-          name: "OFFICER", // Would normally lookup user
-          role: "OFFICER"
-        },
-        metadata: timelineTemplates.RESOLUTION_PHOTO(addedPhotos, lat, lng)
+      const grievance = await Grievance.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
       });
-    }
 
-    if (oldGrievance.status !== grievance.status && req.user) {
-      await TimelineService.logEvent({
-        grievanceId: grievance._id as any,
-        type: "STATUS_CHANGE" as any, // assuming type might need adding or it accepts string
-        actor: {
-          id: req.user.id as any,
-          name: "OFFICER",
-          role: "OFFICER"
-        },
-        metadata: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", grievance.status || "UNKNOWN")
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+
+      const newPhotosCount = grievance.geotaggedImages?.length || 0;
+      if (newPhotosCount > oldPhotosCount && req.user) {
+        const addedPhotos = newPhotosCount - oldPhotosCount;
+        const lastPhoto =
+          grievance.geotaggedImages?.[grievance.geotaggedImages.length - 1];
+        const lat = lastPhoto?.coordinates?.latitude || "N/A";
+        const lng = lastPhoto?.coordinates?.longitude || "N/A";
+
+        await TimelineService.logEvent({
+          grievanceId: grievance._id as any,
+          type: "RESOLUTION_PHOTO",
+          actor: {
+            id: req.user.id as any,
+            name: "OFFICER", // Would normally lookup user
+            role: "OFFICER",
+          },
+          metadata: timelineTemplates.RESOLUTION_PHOTO(addedPhotos, lat, lng),
+        });
+      }
+
+      if (oldGrievance.status !== grievance.status && req.user) {
+        await TimelineService.logEvent({
+          grievanceId: grievance._id as any,
+          type: "STATUS_CHANGE" as any, // assuming type might need adding or it accepts string
+          actor: {
+            id: req.user.id as any,
+            name: "OFFICER",
+            role: "OFFICER",
+          },
+          metadata: timelineTemplates.STATUS_CHANGE(
+            oldGrievance.status || "UNKNOWN",
+            grievance.status || "UNKNOWN",
+          ),
+        });
+      }
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: "Grievance updated successfully.",
       });
-    }
-
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: "Grievance updated successfully.",
-    });
-  });
+    },
+  );
 
   /**
    * Transfer grievance to another officer
    */
-  static transferGrievance = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { assignedOfficer } = req.body;
+  static transferGrievance = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const { assignedOfficer } = req.body;
 
-    if (!assignedOfficer) {
-      throw new ApiError({ status: 400, message: "New assignedOfficer ID is required." });
-    }
+      if (!assignedOfficer) {
+        throw new ApiError({
+          status: 400,
+          message: "New assignedOfficer ID is required.",
+        });
+      }
 
-    const oldGrievance = await Grievance.findById(id);
-    if (!oldGrievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-    const previousOfficer = oldGrievance.assignedOfficer;
+      const oldGrievance = await Grievance.findById(id);
+      if (!oldGrievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+      const previousOfficer = oldGrievance.assignedOfficer;
 
-    const grievance = await Grievance.findByIdAndUpdate(
-      id,
-      { assignedOfficer, assignedAt: new Date() },
-      { new: true, runValidators: true }
-    );
+      const grievance = await Grievance.findByIdAndUpdate(
+        id,
+        { assignedOfficer, assignedAt: new Date() },
+        { new: true, runValidators: true },
+      );
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
 
-    if (req.user) {
-      await GrievanceAnalyticLog.create({
-        grievance: grievance._id,
-        action: "ASSIGNED",
-        actionBy: (req as any).user.id || (req as any).user._id,
-        assignedTo: assignedOfficer,
-        metadata: {
-          previousOfficer
-        }
+      if (req.user) {
+        await GrievanceAnalyticLog.create({
+          grievance: grievance._id,
+          action: "ASSIGNED",
+          actionBy: (req as any).user.id || (req as any).user._id,
+          assignedTo: assignedOfficer,
+          metadata: {
+            previousOfficer,
+          },
+        });
+      }
+
+      const newOfficer = await User.findById(assignedOfficer).populate("roles");
+      let metadataObj: any = {
+        description: "Grievance transferred.",
+        description_local: "शिकायत स्थानांतरित की गई।",
+      };
+      if (newOfficer) {
+        const roleName =
+          (newOfficer.roles as any)?.[0]?.designationEnglish || "Officer";
+        metadataObj = timelineTemplates.ASSIGNED(roleName, newOfficer.name);
+      }
+
+      await TimelineService.logEvent({
+        grievanceId: grievance._id as any,
+        type: "TRANSFERRED",
+        actor: {
+          name: (req as any).user?.name || "System",
+          role: (req as any).user?.roles[0]?.designationEnglish || "System",
+        },
+        metadata: metadataObj,
       });
-    }
 
-    const newOfficer = await User.findById(assignedOfficer).populate("roles");
-    let metadataObj: any = { description: "Grievance transferred.", description_local: "शिकायत स्थानांतरित की गई।" };
-    if (newOfficer) {
-      const roleName = (newOfficer.roles as any)?.[0]?.designationEnglish || "Officer";
-      metadataObj = timelineTemplates.ASSIGNED(roleName, newOfficer.name);
-    }
+      // Notify the new officer about the transfer
+      NotificationService.notifyTransfer(
+        assignedOfficer,
+        grievance._id,
+        grievance.grievanceId,
+      ).catch((e) => console.error(e));
 
-    await TimelineService.logEvent({
-      grievanceId: grievance._id as any,
-      type: "TRANSFERRED",
-      actor: {
-        name: (req as any).user?.name || "System",
-        role: (req as any).user?.roles[0]?.designationEnglish || "System",
-      },
-      metadata: metadataObj
-    });
-
-    // Notify the new officer about the transfer
-    NotificationService.notifyTransfer(assignedOfficer, grievance._id, grievance.grievanceId).catch(e => console.error(e));
-
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: "Grievance transferred successfully.",
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: "Grievance transferred successfully.",
+      });
+    },
+  );
 
   /**
    * Change status of a grievance
    */
-  static updateGrievanceStatus = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { status, remarks } = req.body;
+  static updateGrievanceStatus = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const { status, remarks } = req.body;
 
-    if (!status) {
-      throw new ApiError({ status: 400, message: "Status is required." });
-    }
-
-    const oldGrievance = await Grievance.findById(id);
-    if (!oldGrievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-
-    if (status === "REOPENED") {
-      if (oldGrievance.status !== "RESOLVED" && oldGrievance.status !== "CLOSED") {
-        throw new ApiError({ status: 400, message: "A grievance can only be reopened if it is currently RESOLVED or CLOSED." });
-      }
-    }
-
-    if (status === "RESOLVED") {
-      const hasPhotos = oldGrievance.geotaggedImages && oldGrievance.geotaggedImages.length > 0;
-      if (!hasPhotos) {
-        throw new ApiError({ status: 400, message: "Cannot resolve grievance: At least one photo of the resolution is required." });
+      if (!status) {
+        throw new ApiError({ status: 400, message: "Status is required." });
       }
 
-      const completedVisit = await FieldVisit.findOne({ grievance: id, status: 'COMPLETED' });
-      if (!completedVisit) {
-        throw new ApiError({ status: 400, message: "Cannot resolve grievance: A completed field visit is required before resolution." });
+      const oldGrievance = await Grievance.findById(id);
+      if (!oldGrievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
       }
-    }
+      const updatePayload: any = { status };
+      if (status === "REOPENED") {
+        if (
+          oldGrievance.status !== "CLOSED" &&
+          oldGrievance.status !== "RESOLVED"
+        ) {
+          // reopen only allowed on closed complaints
+          throw new ApiError({
+            status: 400,
+            message:
+              "A grievance can only be reopened if it is currently CLOSED or RESOLVED.",
+          });
+        }
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const updatePayload: any = { status };
-    if (status === "RESOLVED" && oldGrievance.status !== "RESOLVED") {
-      updatePayload.resolvedAt = new Date();
-      if (remarks) {
-        updatePayload.resolvedReason = remarks;
+        if (new Date(oldGrievance.updatedAt) < sevenDaysAgo) {
+          throw new ApiError({
+            status: 400,
+            message:
+              "Grievance can only be reopened within 7 days of being closed. Reopen window is closed.",
+          });
+        }
       }
-      // Notify CCE for feedback reminder
-      NotificationService.notifyFeedbackReminder(id, oldGrievance.grievanceId || "N/A").catch(e => console.error(e));
-    }
 
-    const grievance = await Grievance.findByIdAndUpdate(
-      id,
-      updatePayload,
-      { new: true, runValidators: true }
-    );
+      if (status === "CLOSED") {
+        const hasPhotos =
+          oldGrievance.geotaggedImages &&
+          oldGrievance.geotaggedImages.length > 0;
+        if (!hasPhotos) {
+          throw new ApiError({
+            status: 400,
+            message:
+              "Cannot close grievance: At least one photo of the resolution is required.",
+          });
+        }
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-
-    if (req.user) {
-      if (status === "RESOLVED") {
-        await TimelineService.logEvent({
-          grievanceId: grievance._id as any,
-          type: "RESOLVED",
-          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: timelineTemplates.RESOLVED(remarks || "Grievance resolved.")
+        const completedVisit = await FieldVisit.findOne({
+          grievance: id,
+          status: "COMPLETED",
         });
-      } else if (status === "CLOSED") {
-        // Find how many hours it took from creation to closed (approx)
-        const hours = Math.round((Date.now() - new Date(grievance.createdAt).getTime()) / (1000 * 60 * 60));
-        await TimelineService.logEvent({
-          grievanceId: grievance._id as any,
-          type: "COMPLAINT_CLOSED",
-          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: timelineTemplates.COMPLAINT_CLOSED(hours, remarks)
-        });
-      } else if (oldGrievance.status !== status) {
-        await TimelineService.logEvent({
-          grievanceId: grievance._id as any,
-          type: "STATUS_CHANGE" as any,
-          actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status, remarks)
-        });
+        if (!completedVisit) {
+          throw new ApiError({
+            status: 400,
+            message:
+              "Cannot close grievance: A completed field visit is required before resolution.",
+          });
+        }
+        updatePayload.feedbackText = "";
+        updatePayload.rating = null;
       }
-    }
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: `Grievance status changed to ${status}.`,
-    });
-  });
+      if (status === "RESOLVED" && oldGrievance.status !== "RESOLVED") {
+        updatePayload.resolvedAt = new Date();
+        if (remarks) {
+          updatePayload.resolvedReason = remarks;
+        }
+        // Notify CCE for feedback reminder
+        NotificationService.notifyFeedbackReminder(
+          id,
+          oldGrievance.grievanceId || "N/A",
+        ).catch((e) => console.error(e));
+      }
+
+      const grievance = await Grievance.findByIdAndUpdate(id, updatePayload, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+
+      if (req.user) {
+        if (status === "RESOLVED") {
+          await TimelineService.logEvent({
+            grievanceId: grievance._id as any,
+            type: "RESOLVED",
+            actor: {
+              id: (req as any).user.id as any,
+              name: req.user.name,
+              role: req.user.roles?.[0]?.level || "OFFICER",
+            },
+            metadata: timelineTemplates.RESOLVED(
+              remarks || "Grievance resolved.",
+            ),
+          });
+        } else if (status === "CLOSED") {
+          // Find how many hours it took from creation to closed (approx)
+          const hours = Math.round(
+            (Date.now() - new Date(grievance.createdAt).getTime()) /
+              (1000 * 60 * 60),
+          );
+          await TimelineService.logEvent({
+            grievanceId: grievance._id as any,
+            type: "COMPLAINT_CLOSED",
+            actor: {
+              id: (req as any).user.id as any,
+              name: req.user.name,
+              role: req.user.roles?.[0]?.level || "OFFICER",
+            },
+            metadata: timelineTemplates.COMPLAINT_CLOSED(hours, remarks),
+          });
+        } else if (oldGrievance.status !== status) {
+          await TimelineService.logEvent({
+            grievanceId: grievance._id as any,
+            type: "STATUS_CHANGE" as any,
+            actor: {
+              id: (req as any).user.id as any,
+              name: req.user.name,
+              role: req.user.roles?.[0]?.level || "OFFICER",
+            },
+            metadata: timelineTemplates.STATUS_CHANGE(
+              oldGrievance.status || "UNKNOWN",
+              status,
+              remarks,
+            ),
+          });
+        }
+      }
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: `Grievance status changed to ${status}.`,
+      });
+    },
+  );
 
   /**
    * Change priority of a grievance
    */
-  static updateGrievancePriority = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { assignedPriority } = req.body;
+  static updateGrievancePriority = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const { assignedPriority } = req.body;
 
-    if (!assignedPriority) {
-      throw new ApiError({ status: 400, message: "assignedPriority is required." });
-    }
-
-    const grievance = await Grievance.findByIdAndUpdate(
-      id,
-      { assignedPriority },
-      { new: true, runValidators: true }
-    );
-
-
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-     await TimelineService.logEvent({
-          grievanceId: grievance._id,
-          type:"PRIORITY_SET",
-          actor:{
-            id: req.user?.id,
-            name: req.user?.name || "System",
-            role: req.user?.roles?.[0]?.level || "System",
-          },
-          metadata: timelineTemplates.PRIORITY_SET(assignedPriority)
+      if (!assignedPriority) {
+        throw new ApiError({
+          status: 400,
+          message: "assignedPriority is required.",
         });
+      }
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: `Grievance priority changed to ${assignedPriority}.`,
-    });
-  });
+      const grievance = await Grievance.findByIdAndUpdate(
+        id,
+        { assignedPriority },
+        { new: true, runValidators: true },
+      );
+
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+      await TimelineService.logEvent({
+        grievanceId: grievance._id,
+        type: "PRIORITY_SET",
+        actor: {
+          id: req.user?.id,
+          name: req.user?.name || "System",
+          role: req.user?.roles?.[0]?.level || "System",
+        },
+        metadata: timelineTemplates.PRIORITY_SET(assignedPriority),
+      });
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: `Grievance priority changed to ${assignedPriority}.`,
+      });
+    },
+  );
 
   /**
    * Upload Geotagged images for a grievance (by Officer)
    */
-  static uploadGeotaggedImages = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+  static uploadGeotaggedImages = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
 
-    if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
-      throw new ApiError({ status: 400, message: "No images provided." });
-    }
-
-    const grievance: any = await Grievance.findById(id).populate("classification.service");
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-
-    const isGeotagMandatory = grievance.classification?.service?.geoTagged === true;
-
-    const newGeotaggedImages = [];
-
-    const files = req.files as Express.Multer.File[];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      // Only process images
-      if (!file.mimetype.startsWith("image/")) {
-        throw new ApiError({ status: 400, message: `File ${file.originalname} is not a valid image.` });
+      if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
+        throw new ApiError({ status: 400, message: "No images provided." });
       }
 
-      // Extract GPS data using exifr
-      let gpsData;
-      try {
-        gpsData = await exifr.gps(file.buffer);
-      } catch (e) {
-        console.error("Error reading geotags from image", e)
-        if (isGeotagMandatory) {
-          throw new ApiError({ status: 400, message: `Geotagging is mandatory for this service failed to read coordinates.` });
+      const grievance: any = await Grievance.findById(id).populate(
+        "classification.service",
+      );
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+
+      const isGeotagMandatory =
+        grievance.classification?.service?.geoTagged === true;
+
+      const newGeotaggedImages = [];
+
+      const files = req.files as Express.Multer.File[];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // Only process images
+        if (!file.mimetype.startsWith("image/")) {
+          throw new ApiError({
+            status: 400,
+            message: `File ${file.originalname} is not a valid image.`,
+          });
         }
-      }
 
-      if ((!gpsData || !gpsData.latitude || !gpsData.longitude) && isGeotagMandatory) {
-        throw new ApiError({ 
-          status: 400, 
-          message: `Image ${file.originalname} is not geotagged. This service strictly requires geotagged images. Please ensure location services are enabled on your camera app.` 
-        });
-      }
+        // Extract GPS data using exifr
+        let gpsData;
+        try {
+          gpsData = await exifr.gps(file.buffer);
+        } catch (e) {
+          console.error("Error reading geotags from image", e);
+          if (isGeotagMandatory) {
+            throw new ApiError({
+              status: 400,
+              message: `Geotagging is mandatory for this service failed to read coordinates.`,
+            });
+          }
+        }
 
-      const ext = file.originalname.split('.').pop() || "jpg";
-      const folderId = grievance.citizen?.toString() || "agent-created";
-      const key = `grievances/${folderId}/geotag-${Date.now()}-${i}-${Math.floor(Math.random() * 10000)}.${ext}`;
-      
-      const url = await StorageService.uploadFile(key, file.buffer, file.mimetype);
+        if (
+          (!gpsData || !gpsData.latitude || !gpsData.longitude) &&
+          isGeotagMandatory
+        ) {
+          throw new ApiError({
+            status: 400,
+            message: `Image ${file.originalname} is not geotagged. This service strictly requires geotagged images. Please ensure location services are enabled on your camera app.`,
+          });
+        }
 
-      const imageRecord: any = {
-        url,
-        fileName: file.originalname,
-        uploadedAt: new Date(),
-      };
+        const ext = file.originalname.split(".").pop() || "jpg";
+        const folderId = grievance.citizen?.toString() || "agent-created";
+        const key = `grievances/${folderId}/geotag-${Date.now()}-${i}-${Math.floor(Math.random() * 10000)}.${ext}`;
 
-      if (gpsData && gpsData.latitude && gpsData.longitude) {
-        imageRecord.coordinates = {
-          latitude: gpsData.latitude,
-          longitude: gpsData.longitude,
+        const url = await StorageService.uploadFile(
+          key,
+          file.buffer,
+          file.mimetype,
+        );
+
+        const imageRecord: any = {
+          url,
+          fileName: file.originalname,
+          uploadedAt: new Date(),
         };
+
+        if (gpsData && gpsData.latitude && gpsData.longitude) {
+          imageRecord.coordinates = {
+            latitude: gpsData.latitude,
+            longitude: gpsData.longitude,
+          };
+        }
+
+        newGeotaggedImages.push(imageRecord);
       }
 
-      newGeotaggedImages.push(imageRecord);
-    }
+      if (!grievance.geotaggedImages) {
+        grievance.geotaggedImages = [];
+      }
 
-    if (!grievance.geotaggedImages) {
-      grievance.geotaggedImages = [];
-    }
+      grievance.geotaggedImages.push(...newGeotaggedImages);
+      await grievance.save();
 
-    grievance.geotaggedImages.push(...newGeotaggedImages);
-    await grievance.save();
-
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: grievance,
-      message: "Geotagged images uploaded and verified successfully.",
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: grievance,
+        message: "Geotagged images uploaded and verified successfully.",
+      });
+    },
+  );
 
   /**
    * Get single grievance details (for Admin/General) without access restrictions
    */
-  static getAdminGrievanceById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params as { id: string };
+  static getAdminGrievanceById = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params as { id: string };
 
-    const grievance = await Grievance.findById(id).populate({ path: "classification.service", populate: { path: "department" } })
-    .populate("classification.department")
-    .populate("classification.service")
-    .populate("classification.nature").populate("impact.affectedBeneficiary")
-    .populate({
-      path: "assignedOfficer",
-      select: "name roles",
-      populate: {
-        path: "roles"
+      const grievance = await Grievance.findById(id)
+        .populate({
+          path: "classification.service",
+          populate: { path: "department" },
+        })
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "assignedOfficer",
+          select: "name roles",
+          populate: {
+            path: "roles",
+          },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.urbanPanchayat", "name_en name_local")
+        .populate("location.ward", "name_en name_local ward_number")
+        .populate("location.village", "name_en name_local")
+        .populate("location.thana", "name_en type")
+        .populate("citizenInfo.address.district", "name_en name_local")
+        .populate("citizenInfo.address.block", "name_en name_local")
+        .populate("citizenInfo.address.panchayat", "name_en name_local")
+        .populate("citizenInfo.address.urbanPanchayat", "name_en name_local")
+        .populate("citizenInfo.address.ward", "name_en name_local ward_number")
+        .populate("citizenInfo.address.village", "name_en name_local")
+        .populate("citizenInfo.address.thana", "name_en type")
+        .populate("channel", "title");
+
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("location.thana", "name_en type").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("citizenInfo.address.thana", "name_en type").populate("channel","title");
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
+      const timeline = await TimelineService.getTimelineHistory(id);
+      const slaHours =
+        await GrievanceController.attachSlaToGrievance(grievance);
+      const fieldVisits = await FieldVisit.find({ grievance: id }).sort({
+        createdAt: -1,
+      });
 
-    const timeline = await TimelineService.getTimelineHistory(id);
-    const slaHours = await GrievanceController.attachSlaToGrievance(grievance);
-        const fieldVisits = await FieldVisit.find({ grievance: id }).sort({ createdAt: -1 });
+      const responseData = {
+        ...grievance.toJSON(),
+        timeline,
+        slaHours,
+        fieldVisits,
+      };
 
-
-    const responseData = {
-      ...grievance.toJSON(),
-      timeline,
-      slaHours,
-      fieldVisits
-    };
-
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: responseData,
-      message: "Grievance details retrieved successfully",
-    });
-  });
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: responseData,
+        message: "Grievance details retrieved successfully",
+      });
+    },
+  );
 
   /**
    * Get single grievance details for the logged-in officer
    */
-  static getOfficerGrievanceById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params as { id: string };
-    const officerId = (req as any).user?.id || (req as any).user?._id;
+  static getOfficerGrievanceById = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params as { id: string };
+      const officerId = (req as any).user?.id || (req as any).user?._id;
 
-    if (!officerId) {
-      throw new ApiError({ status: 401, message: "Unauthorized. Officer not found." });
-    }
-
-    const grievance = await Grievance.findById(id).populate({ path: "classification.service", populate: { path: "department" } })
-    .populate("classification.department")
-    .populate("classification.service")
-    .populate("classification.nature").populate("impact.affectedBeneficiary")
-    .populate({
-      path: "assignedOfficer",
-      select: "name roles",
-      populate: {
-        path: "roles"
+      if (!officerId) {
+        throw new ApiError({
+          status: 401,
+          message: "Unauthorized. Officer not found.",
+        });
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.urbanPanchayat", "name_en name_local").populate("location.ward", "name_en name_local ward_number").populate("location.village", "name_en name_local").populate("location.thana", "name_en type").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.urbanPanchayat", "name_en name_local").populate("citizenInfo.address.ward", "name_en name_local ward_number").populate("citizenInfo.address.village", "name_en name_local").populate("citizenInfo.address.thana", "name_en type").populate("channel","title");
 
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
+      const grievance = await Grievance.findById(id)
+        .populate({
+          path: "classification.service",
+          populate: { path: "department" },
+        })
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "assignedOfficer",
+          select: "name roles",
+          populate: {
+            path: "roles",
+          },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.urbanPanchayat", "name_en name_local")
+        .populate("location.ward", "name_en name_local ward_number")
+        .populate("location.village", "name_en name_local")
+        .populate("location.thana", "name_en type")
+        .populate("citizenInfo.address.district", "name_en name_local")
+        .populate("citizenInfo.address.block", "name_en name_local")
+        .populate("citizenInfo.address.panchayat", "name_en name_local")
+        .populate("citizenInfo.address.urbanPanchayat", "name_en name_local")
+        .populate("citizenInfo.address.ward", "name_en name_local ward_number")
+        .populate("citizenInfo.address.village", "name_en name_local")
+        .populate("citizenInfo.address.thana", "name_en type")
+        .populate("channel", "title");
 
-    
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
 
-    const assignedOfficerId = grievance.assignedOfficer?._id.toString();
+      const assignedOfficerId = grievance.assignedOfficer?._id.toString();
 
-    // Verify ownership: either explicitly assigned OR service falls under their tags
-    const isOwner = 
-      (assignedOfficerId === officerId.toString())
-// console.log(assignedOfficerId,officerId)
-    if (!isOwner) {
-      throw new ApiError({ status: 403, message: "Access denied. This grievance is not assigned to you." });
-    }
+      // Verify ownership: either explicitly assigned OR service falls under their tags
+      const isOwner = assignedOfficerId === officerId.toString();
+      // console.log(assignedOfficerId,officerId)
+      if (!isOwner) {
+        throw new ApiError({
+          status: 403,
+          message: "Access denied. This grievance is not assigned to you.",
+        });
+      }
 
-    const timeline = await TimelineService.getTimelineHistory(id);
-    const fieldVisits = await FieldVisit.find({ grievance: id }).sort({ createdAt: -1 });
-    
-    const slaHours = await GrievanceController.attachSlaToGrievance(grievance);
+      const timeline = await TimelineService.getTimelineHistory(id);
+      const fieldVisits = await FieldVisit.find({ grievance: id }).sort({
+        createdAt: -1,
+      });
 
-    const responseData = {
-      ...grievance.toJSON(),
-      timeline,
-      fieldVisits,
-      slaHours
-    };
+      const slaHours =
+        await GrievanceController.attachSlaToGrievance(grievance);
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: responseData,
-      message: "Grievance details retrieved successfully",
-    });
-  });
+      const responseData = {
+        ...grievance.toJSON(),
+        timeline,
+        fieldVisits,
+        slaHours,
+      };
 
-
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: responseData,
+        message: "Grievance details retrieved successfully",
+      });
+    },
+  );
 
   /**
    * Public API to get grievance status with captcha
    */
-  static getPublicGrievanceStatus = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    
-    const { captchaId, captchaValue } = req.query as { captchaId?: string; captchaValue?: string };
+  static getPublicGrievanceStatus = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
 
-    if (!captchaId || !captchaValue) {
-      throw new ApiError({ status: 400, message: "Both captchaId and captchaValue are required." });
-    }
+      const { captchaId, captchaValue } = req.query as {
+        captchaId?: string;
+        captchaValue?: string;
+      };
 
-    // Verify Captcha
-    try {
-      const isValid = await CaptchaService.verifyCaptcha(captchaId, captchaValue);
-      if (!isValid) {
-        throw new Error("Invalid Captcha");
+      if (!captchaId || !captchaValue) {
+        throw new ApiError({
+          status: 400,
+          message: "Both captchaId and captchaValue are required.",
+        });
       }
-    } catch (error: any) {
-      throw new ApiError({ status: 400, message: error.message || "Invalid Captcha" });
-    }
 
+      // Verify Captcha
+      try {
+        const isValid = await CaptchaService.verifyCaptcha(
+          captchaId,
+          captchaValue,
+        );
+        if (!isValid) {
+          throw new Error("Invalid Captcha");
+        }
+      } catch (error: any) {
+        throw new ApiError({
+          status: 400,
+          message: error.message || "Invalid Captcha",
+        });
+      }
 
-    const grievance = await Grievance.findOne({ grievanceId: id })
-      .select("grievanceId status classification citizenInfo assignedOfficer createdAt")
-      .populate({
-        path: "classification.service",
-        select: "title titleHindi"
-      })
-      .populate({
-        path: "assignedOfficer",
-        select: "name"
+      const grievance = await Grievance.findOne({ grievanceId: id })
+        .select(
+          "grievanceId status classification citizenInfo assignedOfficer createdAt",
+        )
+        .populate({
+          path: "classification.service",
+          select: "title titleHindi",
+        })
+        .populate({
+          path: "assignedOfficer",
+          select: "name",
+        });
+
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found." });
+      }
+
+      const publicTimelineTypes: any[] = [
+        "COMPLAINT_REGISTERED",
+        "STATUS_CHANGE",
+        "RESOLVED",
+        "COMPLAINT_CLOSED",
+        "CITIZEN_FEEDBACK",
+      ];
+      const timeline = await TimelineService.getTimelineHistory(
+        grievance._id.toString(),
+        publicTimelineTypes,
+      );
+
+      let maskedCitizenInfo = grievance.citizenInfo
+        ? JSON.parse(JSON.stringify(grievance.citizenInfo))
+        : null;
+
+      if (maskedCitizenInfo) {
+        if (maskedCitizenInfo.mobile) {
+          const mob = maskedCitizenInfo.mobile;
+          maskedCitizenInfo.mobile =
+            mob.length > 4 ? "X".repeat(mob.length - 4) + mob.slice(-4) : mob;
+        }
+        if (maskedCitizenInfo.alternateMobile) {
+          const altMob = maskedCitizenInfo.alternateMobile;
+          maskedCitizenInfo.alternateMobile =
+            altMob.length > 4
+              ? "X".repeat(altMob.length - 4) + altMob.slice(-4)
+              : altMob;
+        }
+      }
+
+      // Format response to strictly include required fields only
+      const responseData = {
+        grievanceId: grievance.grievanceId,
+        status: grievance.status,
+        service: grievance.classification?.service,
+        citizenInfo: maskedCitizenInfo,
+        assignedOfficer: grievance.assignedOfficer,
+        timeline,
+      };
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: responseData,
+        message: "Grievance status retrieved successfully",
       });
-
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found." });
-    }
-
-    const publicTimelineTypes: any[] = [
-      "COMPLAINT_REGISTERED",
-      "STATUS_CHANGE",
-      "RESOLVED",
-      "COMPLAINT_CLOSED",
-      "CITIZEN_FEEDBACK",
-     
-    ];
-    const timeline = await TimelineService.getTimelineHistory(grievance._id.toString(), publicTimelineTypes);
-
-    
-    
-    let maskedCitizenInfo = grievance.citizenInfo ? JSON.parse(JSON.stringify(grievance.citizenInfo)) : null;
-    
-    if (maskedCitizenInfo) {
-      if (maskedCitizenInfo.mobile) {
-        const mob = maskedCitizenInfo.mobile;
-        maskedCitizenInfo.mobile = mob.length > 4 ? "X".repeat(mob.length - 4) + mob.slice(-4) : mob;
-      }
-      if (maskedCitizenInfo.alternateMobile) {
-        const altMob = maskedCitizenInfo.alternateMobile;
-        maskedCitizenInfo.alternateMobile = altMob.length > 4 ? "X".repeat(altMob.length - 4) + altMob.slice(-4) : altMob;
-      }
-    }
-
-    // Format response to strictly include required fields only
-    const responseData = {
-      grievanceId: grievance.grievanceId,
-      status: grievance.status,
-      service: grievance.classification?.service,
-      citizenInfo: maskedCitizenInfo,
-      assignedOfficer: grievance.assignedOfficer,
-      timeline
-    };
-
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: responseData,
-      message: "Grievance status retrieved successfully",
-    });
-  });
+    },
+  );
 }
