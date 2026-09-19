@@ -1187,8 +1187,8 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
       throw new ApiError({ status: 403, message: "Forbidden. You are not authorized to modify this grievance." });
     }
 
-    if (grievance.status === "RESOLVED" || grievance.status === "CLOSED") {
-      throw new ApiError({ status: 400, message: "Grievance is already resolved or closed." });
+    if (grievance.status === "RESOLVED" ) {
+      throw new ApiError({ status: 400, message: "Grievance is already resolved." });
     }
 
     grievance.status = "RESOLVED";
