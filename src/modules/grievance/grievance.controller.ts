@@ -602,7 +602,7 @@ export class GrievanceController {
 
       const internalGrievances = await Grievance.find(query)
         .select(
-          "grievanceId classification location citizenInfo impact status assignedPriority createdAt feedbackText rating assignedOfficer",
+          "grievanceId classification location citizenInfo impact status assignedPriority createdAt updatedAt feedbackText rating assignedOfficer",
         )
         .populate("classification.department")
         .populate("classification.service")
