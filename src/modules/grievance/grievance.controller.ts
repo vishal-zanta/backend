@@ -26,6 +26,7 @@ import { DistrictModel, BlockModel, PanchayatModel, ThanaModel } from '../addres
 import { AuditService } from "../audit/audit.service.js";
 import { SlaConfig } from "../slaConfig/slaConfig.model.js";
 import { ExternalGrievance } from "../externalGrievance/externalGrievance.model.js";
+import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
 export class GrievanceController {
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
@@ -1085,9 +1086,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         name: user.name || "System",
         role: user.roles?.[0]?.level || "AGENT"
       },
-      metadata: {
-        description: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
-      }
+      metadata: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
     });
 
     return new ApiResponse({
@@ -1151,9 +1150,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         name: "CITIZEN",
         role: "CITIZEN"
       },
-      metadata: {
-        description: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
-      }
+      metadata: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || "")
     });
 
     return new ApiResponse({
@@ -1208,12 +1205,105 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     }
 
     const oldStatus = grievance.status;
+    const oldOfficer = grievance.assignedOfficer;
 
     grievance.status = "REOPENED";
     grievance.reOpenReason = reOpenReason;
+
+    // Escalate to next level if available
+    let escalated = false;
+    let nextLevelRoleName = "Officer";
+    const serviceId = grievance.classification?.service;
+    
+    if (serviceId) {
+      const serviceDoc = await Service.findById(serviceId);
+      const departmentId = serviceDoc?.department;
+      
+      if (departmentId) {
+        const slaConfig = await SlaConfig.findOne({ service: serviceId, active: true });
+        const workflowLevels = await WorkflowLevel.findOne({ department: departmentId, active: true });
+
+        if (slaConfig && slaConfig.escalations?.length && workflowLevels?.levels?.length) {
+          const sortedLevels = workflowLevels.levels.sort((a: any, b: any) => a.order - b.order);
+          let currentLevelIndex = grievance.escalationLevel || 0;
+          
+          let nextValidLevelIndex = -1;
+          let nextWorkflowLevel = null;
+          
+          for (let i = currentLevelIndex + 1; i < sortedLevels.length; i++) {
+            const checkRole = sortedLevels[i].role.toString();
+            const roleInSla = slaConfig.escalations.some((esc: any) => esc.role.toString() === checkRole);
+            if (roleInSla) {
+              nextValidLevelIndex = i;
+              nextWorkflowLevel = sortedLevels[i];
+              break;
+            }
+          }
+
+          if (nextValidLevelIndex !== -1 && nextWorkflowLevel) {
+            const nextRoleId = nextWorkflowLevel.role;
+            const eligibleUsers = await User.find({ roles: nextRoleId, status: 'ACTIVE' }).select('_id');
+            const userIds = eligibleUsers.map(u => u._id);
+            
+            if (userIds.length > 0) {
+              const tagQuery: any = { officer: { $in: userIds }, services: serviceId, active: true };
+              const ward = grievance.location?.panchayat || grievance.location?.block;
+              if (ward) tagQuery.wards = ward;
+              
+              const eligibleTags = await OfficerTagging.find(tagQuery).select('officer');
+              let availableOfficers = [];
+              if (eligibleTags.length > 0) {
+                const taggedUserIds = eligibleTags.map((t: any) => t.officer);
+                availableOfficers = await User.find({ _id: { $in: taggedUserIds }, status: 'ACTIVE' }).sort({ escalatedCount: 1 }).limit(1).populate("roles");
+              } else {
+                availableOfficers = await User.find({ _id: { $in: userIds }, status: 'ACTIVE' }).sort({ escalatedCount: 1 }).limit(1).populate("roles");
+              }
+
+              if (availableOfficers.length > 0) {
+                const nextOfficer: any = availableOfficers[0];
+                grievance.assignedOfficer = nextOfficer._id as any;
+                grievance.assignedAt = new Date() as any;
+                grievance.escalationLevel = nextValidLevelIndex;
+                grievance.slaWarningSent = false;
+                
+                nextOfficer.escalatedCount = (nextOfficer.escalatedCount || 0) + 1;
+                await nextOfficer.save();
+                escalated = true;
+                
+                nextLevelRoleName = nextOfficer.roles?.[0]?.level || "Officer";
+
+                await GrievanceAnalyticLog.insertMany([
+                  {
+                    grievance: grievance._id,
+                    action: "ESCALATED",
+                    metadata: {
+                      breachedOfficer: oldOfficer,
+                      reason: "CITIZEN_REOPEN"
+                    }
+                  },
+                  {
+                    grievance: grievance._id,
+                    action: "ASSIGNED",
+                    assignedTo: nextOfficer._id,
+                    metadata: {
+                      previousOfficer: oldOfficer,
+                      assignedBy: "CITIZEN_REOPEN"
+                    }
+                  }
+                ]);
+
+                // Notify next officer
+                NotificationService.notifyEscalation(nextOfficer._id, oldOfficer, grievance._id, grievance.grievanceId || "").catch(e => console.error(e));
+              }
+            }
+          }
+        }
+      }
+    }
+
     await grievance.save();
 
-    // Log to timeline
+    // Log to timeline (Status change)
     await TimelineService.logEvent({
       grievanceId: grievance._id as any,
       type: "STATUS_CHANGE" as any,
@@ -1222,16 +1312,28 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         name: "CITIZEN",
         role: "CITIZEN"
       },
-      metadata: {
-        description: timelineTemplates.STATUS_CHANGE(oldStatus, "REOPENED", reOpenReason)
-      }
+      metadata: timelineTemplates.STATUS_CHANGE(oldStatus, "REOPENED", reOpenReason)
     });
+
+    if (escalated) {
+      // Log escalation to timeline
+      await TimelineService.logEvent({
+        grievanceId: grievance._id as any,
+        type: "ESCALATED" as any,
+        actor: {
+          id: citizen._id as any,
+          name: "System Auto-Escalation",
+          role: "System"
+        },
+        metadata: timelineTemplates.ESCALATED("N/A", nextLevelRoleName, "SYSTEM")
+      });
+    }
 
     return new ApiResponse({
       res,
       status: 200,
       data: grievance,
-      message: "Grievance reopened successfully.",
+      message: escalated ? "Grievance reopened and escalated to the next level." : "Grievance reopened successfully.",
     });
   });
 
@@ -1290,9 +1392,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           name: "OFFICER", // Would normally lookup user
           role: "OFFICER"
         },
-        metadata: {
-          description: timelineTemplates.RESOLUTION_PHOTO(addedPhotos, lat, lng)
-        }
+        metadata: timelineTemplates.RESOLUTION_PHOTO(addedPhotos, lat, lng)
       });
     }
 
@@ -1305,9 +1405,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           name: "OFFICER",
           role: "OFFICER"
         },
-        metadata: {
-          description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", grievance.status || "UNKNOWN")
-        }
+        metadata: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", grievance.status || "UNKNOWN")
       });
     }
 
@@ -1359,10 +1457,10 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
     }
 
     const newOfficer = await User.findById(assignedOfficer).populate("roles");
-    let description = "Grievance transferred.";
+    let metadataObj: any = { description: "Grievance transferred.", description_local: "शिकायत स्थानांतरित की गई।" };
     if (newOfficer) {
       const roleName = (newOfficer.roles as any)?.[0]?.designationEnglish || "Officer";
-      description = timelineTemplates.ASSIGNED(roleName, newOfficer.name);
+      metadataObj = timelineTemplates.ASSIGNED(roleName, newOfficer.name);
     }
 
     await TimelineService.logEvent({
@@ -1372,9 +1470,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
         name: (req as any).user?.name || "System",
         role: (req as any).user?.roles[0]?.designationEnglish || "System",
       },
-      metadata: {
-        description
-      }
+      metadata: metadataObj
     });
 
     // Notify the new officer about the transfer
@@ -1448,7 +1544,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           grievanceId: grievance._id as any,
           type: "RESOLVED",
           actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: { description: timelineTemplates.RESOLVED(remarks || "Grievance resolved.") }
+          metadata: timelineTemplates.RESOLVED(remarks || "Grievance resolved.")
         });
       } else if (status === "CLOSED") {
         // Find how many hours it took from creation to closed (approx)
@@ -1457,14 +1553,14 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
           grievanceId: grievance._id as any,
           type: "COMPLAINT_CLOSED",
           actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours, remarks) }
+          metadata: timelineTemplates.COMPLAINT_CLOSED(hours, remarks)
         });
       } else if (oldGrievance.status !== status) {
         await TimelineService.logEvent({
           grievanceId: grievance._id as any,
           type: "STATUS_CHANGE" as any,
           actor: { id: (req as any).user.id as any, name: req.user.name, role: req.user.roles?.[0]?.level || "OFFICER" },
-          metadata: { description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status, remarks) }
+          metadata: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status, remarks)
         });
       }
     }
@@ -1506,9 +1602,7 @@ const alternateMobile = citizen?.alternateMobile?.slice(-10);
             name: req.user?.name || "System",
             role: req.user?.roles?.[0]?.level || "System",
           },
-          metadata:{
-            description:timelineTemplates.PRIORITY_SET(assignedPriority)
-          }
+          metadata: timelineTemplates.PRIORITY_SET(assignedPriority)
         });
 
     return new ApiResponse({

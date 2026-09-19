@@ -19,6 +19,24 @@ export class ShiftController {
 
 
     const query: any = { roles: { $in: roleIds }, status: 'ACTIVE' };
+
+    const currentUserId = (req as any).user?._id || (req as any).user?.id;
+    if (currentUserId) {
+      const currentUser = await User.findById(currentUserId).populate('roles');
+      if (currentUser) {
+        const level = (currentUser.roles as any)?.[0]?.level;
+        if (level === 'Supervisor') {
+          query.supervisor = currentUserId;
+        } else if (level === 'CCE' ) {
+          if (currentUser.supervisor) {
+            query.supervisor = currentUser.supervisor;
+          } else {
+            query._id = currentUserId;
+          }
+        }
+      }
+    }
+
     const totalCount = await User.countDocuments(query);
     const pagination = buildPagination({ page, limit, totalCount });
 
@@ -44,7 +62,7 @@ export class ShiftController {
     });
 
     // Find the currently logged-in user's shift for this date
-    const currentUserId = (req as any).user?._id || (req as any).user?.id;
+    // currentUserId is already defined above
     let myShift = null;
     if (currentUserId) {
       myShift = await Shift.findOne({

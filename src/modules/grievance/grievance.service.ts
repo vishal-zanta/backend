@@ -265,9 +265,7 @@ export class GrievanceService {
         name: actorName,
         role: actorRole,
       },
-      metadata:{
-        description:timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, descriptionRole)
-      }
+      metadata: timelineTemplates.COMPLAINT_REGISTERED(newGrievance.grievanceId, descriptionRole)
     });
 
     // Notify CCE of new complaint creation
@@ -284,9 +282,7 @@ export class GrievanceService {
             name: actorRole === "API_KEY" ? actorName : (officer?.name || "SYSTEM"),
             role: actorRole === "API_KEY" ? actorRole : (officer?.roles?.[0]?.level || "SYSTEM"),
           },
-          metadata: {
-            description: timelineTemplates.ASSIGNED(assignedUser?.roles?.[0]?.level || "Officer", assignedUser.name)
-          }
+          metadata: timelineTemplates.ASSIGNED(assignedUser?.roles?.[0]?.level || "Officer", assignedUser.name)
         });
         
         // Notify officer of assignment

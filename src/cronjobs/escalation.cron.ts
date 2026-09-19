@@ -44,13 +44,13 @@ export const checkAndEscalateGrievances = async () => {
 
     for (const grievance of activeGrievances) {
       console.log("complain",grievance.grievanceId)
-      const subServiceId = grievance.classification?.service?._id?.toString();
+      const serviceId = grievance.classification?.service?._id?.toString();
       const departmentId = (grievance.classification?.service as any)?.department?.toString();
       
-      console.log(subServiceId,"subServiceId")
-      if (!subServiceId || !departmentId) continue;
+      console.log(serviceId,"serviceId")
+      if (!serviceId || !departmentId) continue;
 
-      const slaConfig = slaConfigMap.get(subServiceId);
+      const slaConfig = slaConfigMap.get(serviceId);
       console.log(slaConfig,"slaConfig")
 
       if (!slaConfig || !slaConfig.escalations || slaConfig.escalations.length === 0) continue;
@@ -127,7 +127,7 @@ console.log(currentRoleSla,"currentRoleSla")
 
         const tagQuery: any = {
           officer: { $in: userIds },
-          services: subServiceId,
+          services: serviceId,
           active: true
         };
         

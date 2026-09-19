@@ -259,7 +259,7 @@ export class FieldVisitController {
       throw new ApiError({ status: 404, message: 'Field visit not found' });
     }
 
-    const eventsToLog: { type: string; desc: string }[] = [];
+    const eventsToLog: { type: string; metadata: any }[] = [];
 
     if (status && visit.status !== status) {
       visit.logs.push({
@@ -271,7 +271,7 @@ export class FieldVisitController {
       });
       eventsToLog.push({
         type: "FIELD_VISIT_STATUS",
-        desc: timelineTemplates.FIELD_VISIT_STATUS(status)
+        metadata: timelineTemplates.FIELD_VISIT_STATUS(status)
       });
       visit.status = status;
     }
@@ -288,7 +288,7 @@ export class FieldVisitController {
         });
         eventsToLog.push({
           type: "FIELD_VISIT_SCHEDULE",
-          desc: timelineTemplates.FIELD_VISIT_SCHEDULE(newSchedule.toLocaleDateString())
+          metadata: timelineTemplates.FIELD_VISIT_SCHEDULE(newSchedule.toLocaleDateString())
         });
         visit.schedule = newSchedule;
       }
@@ -297,7 +297,7 @@ export class FieldVisitController {
     if (remark && visit.remark !== remark) {
       eventsToLog.push({
         type: "FIELD_VISIT_REMARK",
-        desc: timelineTemplates.FIELD_VISIT_REMARK(remark)
+        metadata: timelineTemplates.FIELD_VISIT_REMARK(remark)
       });
       visit.remark = remark;
     }
@@ -314,9 +314,7 @@ export class FieldVisitController {
               name: officer.name || 'Officer',
               role: (officer.roles as any)?.[0]?.level || 'OFFICER'
             },
-            metadata: {
-              description: event.desc
-            }
+            metadata: event.metadata
           });
         }
       }

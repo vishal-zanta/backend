@@ -69,7 +69,7 @@ export class ThirdPartyGrievanceController {
   });
 
   static trackGrievances = asyncHandler(async (req: Request, res: Response) => {
-    const { grievanceId, department, service, subService, startDate, endDate } = req.query;
+    const { grievanceId, department, service, service, startDate, endDate } = req.query;
     const apiKeyDoc = (req as any).apiKey;
     
     const query: any = { sourceApiKey: apiKeyDoc._id };
@@ -217,7 +217,7 @@ export class ThirdPartyGrievanceController {
         grievanceId: oldGrievance._id as any,
         type: "RESOLVED",
         actor: { id: apiKeyDoc.createdBy, name: apiKeyDoc.name, role: "API_KEY" },
-        metadata: { description: timelineTemplates.RESOLVED(remarks || "Grievance resolved via API.") }
+        metadata: timelineTemplates.RESOLVED(remarks || "Grievance resolved via API.")
       });
     } else if (status === "CLOSED") {
       const hours = Math.round((Date.now() - new Date(oldGrievance.createdAt).getTime()) / (1000 * 60 * 60));
@@ -225,14 +225,14 @@ export class ThirdPartyGrievanceController {
         grievanceId: oldGrievance._id as any,
         type: "COMPLAINT_CLOSED",
         actor: { id: apiKeyDoc.createdBy, name: apiKeyDoc.name, role: "API_KEY" },
-        metadata: { description: timelineTemplates.COMPLAINT_CLOSED(hours) }
+        metadata: timelineTemplates.COMPLAINT_CLOSED(hours)
       });
     } else {
       await TimelineService.logEvent({
         grievanceId: oldGrievance._id as any,
         type: "STATUS_CHANGE" as any,
         actor: { id: apiKeyDoc.createdBy, name: apiKeyDoc.name, role: "API_KEY" },
-        metadata: { description: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status) }
+        metadata: timelineTemplates.STATUS_CHANGE(oldGrievance.status || "UNKNOWN", status)
       });
     }
 
@@ -269,7 +269,7 @@ export class ThirdPartyGrievanceController {
       grievanceId: grievance._id as any,
       type: "PRIORITY_SET",
       actor: { id: apiKeyDoc.createdBy, name: apiKeyDoc.name, role: "API_KEY" },
-      metadata: { description: timelineTemplates.PRIORITY_SET(assignedPriority) }
+      metadata: timelineTemplates.PRIORITY_SET(assignedPriority)
     });
 
     return new ApiResponse({

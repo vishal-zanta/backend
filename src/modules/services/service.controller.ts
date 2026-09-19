@@ -21,10 +21,10 @@ export class ServiceController {
       fieldVisit
     };
 
-    const existingService = await Service.findOne({ title: req.body.title });
+    const existingService = await Service.findOne({ title: req.body.title, department: req.body.department });
     if (existingService) {
       if (existingService.active) {
-        throw new ApiError({ status: 400, message: 'Service with this title already exists' });
+        throw new ApiError({ status: 400, message: 'Service with this title already exists in the selected department' });
       } else {
         Object.assign(existingService, servicePayload, { active: true });
         await existingService.save();

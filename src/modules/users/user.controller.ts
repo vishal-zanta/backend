@@ -28,13 +28,14 @@ export class UserController {
   static createUser = asyncHandler(async (req: Request, res: Response) => {
     validateRequestFields(["name", "roles", "password"], req.body);
 
-    let { name, email, phone, roles, district, password, skills, preferredLanguages, loginId } = req.body;
+    let { name, email, phone, roles, district, password, skills, preferredLanguages, loginId, supervisor } = req.body;
     let userRoles = roles || [];
 
     if (email === "") email = undefined;
     if (phone === "") phone = undefined;
     if (loginId === "") loginId = undefined;
     if (district === "") district = undefined;
+    if (supervisor === "") supervisor = undefined;
 
     let existingUser = null;
     if (email || phone || loginId) {
@@ -78,6 +79,7 @@ export class UserController {
       existingUser.password = password;
       if (userRoles.length) existingUser.roles = userRoles;
       existingUser.district = district;
+      if (supervisor !== undefined) existingUser.supervisor = supervisor;
       if (loginId) existingUser.loginId = loginId;
       if (skills) existingUser.skills = skills;
       if (preferredLanguages) existingUser.preferredLanguages = preferredLanguages;
@@ -92,6 +94,7 @@ export class UserController {
         password,
         roles: userRoles,
         district,
+        supervisor,
         skills,
         preferredLanguages,
         loginId
@@ -282,7 +285,7 @@ export class UserController {
 
   static updateUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    let { name, phone, email, roles, status, district, password, skills, preferredLanguages, loginId } = req.body;
+    let { name, phone, email, roles, status, district, password, skills, preferredLanguages, loginId, supervisor } = req.body;
     let userRoles = roles || [];
 
     const user = await User.findById(id);
@@ -306,6 +309,9 @@ export class UserController {
     
     if (loginId === "") user.loginId = undefined;
     else if (loginId !== undefined) user.loginId = loginId;
+
+    if (supervisor === "") user.supervisor = undefined;
+    else if (supervisor !== undefined) user.supervisor = supervisor;
     if (password) {
       user.password = password;
       user.isPasswordResetMandatory = true;

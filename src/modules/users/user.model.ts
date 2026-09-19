@@ -21,6 +21,7 @@ export interface IUser extends Document {
   isPasswordResetMandatory: boolean;
   skills?: mongoose.Types.ObjectId[];
   preferredLanguages?: string[];
+  supervisor?: mongoose.Types.ObjectId;
 }
 
 const userSchema = new Schema<IUser>({
@@ -58,6 +59,10 @@ const userSchema = new Schema<IUser>({
   district: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'District'
+  },
+  supervisor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
   status: {
     type: String,

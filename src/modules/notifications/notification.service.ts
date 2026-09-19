@@ -116,14 +116,14 @@ export class NotificationService {
     await this.sendToRole('CCE', { title, message, type: 'INFO', referenceId: grievanceId, referenceModel: 'Grievance', metadata: { grievanceRef } });
   }
 
-  static async notifyTaggingGap(subServiceId: string, ward: string = 'N/A', grievanceId?: any, grievanceRef?: string) {
-    let subServiceName = String(subServiceId);
+  static async notifyTaggingGap(serviceId: string, ward: string = 'N/A', grievanceId?: any, grievanceRef?: string) {
+    let serviceName = String(serviceId);
     try {
       // Lazy load to avoid circular dependencies and get the friendly name
       const { Service } = await import('../services/service.model.js');
-      const serviceDoc = await Service.findById(subServiceId).select('title titleHindi');
+      const serviceDoc = await Service.findById(serviceId).select('title titleHindi');
       if (serviceDoc) {
-        subServiceName = serviceDoc.title || serviceDoc.titleHindi || subServiceName;
+        serviceName = serviceDoc.title || serviceDoc.titleHindi || serviceName;
       }
     } catch (e) {
       console.error("Error looking up Service for Tagging Gap notification", e);
@@ -131,7 +131,7 @@ export class NotificationService {
     
     const finalWard = ward ? ward : 'N/A';
     const title = "Officer Tagging Gap Alert";
-    const message = `Auto-assignment failed for Grievance #${grievanceRef || 'Unknown'} - Service (${subServiceName}) and Ward (${finalWard}). No eligible officer tagging found.`;
-    await this.sendToRole('ADMIN', { title, message, type: 'ALERT', referenceId: grievanceId, referenceModel: grievanceId ? 'Grievance' : undefined, metadata: { subServiceId, subServiceName, ward: finalWard, grievanceRef } });
+    const message = `Auto-assignment failed for Grievance #${grievanceRef || 'Unknown'} - Service (${serviceName}) and Ward (${finalWard}). No eligible officer tagging found.`;
+    await this.sendToRole('ADMIN', { title, message, type: 'ALERT', referenceId: grievanceId, referenceModel: grievanceId ? 'Grievance' : undefined, metadata: { serviceId, serviceName, ward: finalWard, grievanceRef } });
   }
 }

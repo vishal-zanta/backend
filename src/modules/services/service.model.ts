@@ -17,8 +17,7 @@ const serviceSchema = new Schema<IService>({
   title: {
     type: String,
     required: true,
-    trim: true,
-    unique: true
+    trim: true
   },
   titleHindi: {
     type: String,
@@ -51,5 +50,7 @@ const serviceSchema = new Schema<IService>({
 }, {
   timestamps: true
 });
+
+serviceSchema.index({ title: 1, department: 1 }, { unique: true });
 
 export const Service = mongoose.model<IService>('Service', serviceSchema);

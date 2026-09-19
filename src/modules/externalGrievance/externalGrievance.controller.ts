@@ -47,9 +47,7 @@ export class ExternalGrievanceController {
         name: actorName,
         role: actorRole
       },
-      metadata: {
-        description: timelineTemplates.COMPLAINT_REGISTERED(complaintId || grievance._id.toString(), (req as any).citizen ? "Citizen" : "System")
-      }
+      metadata: timelineTemplates.COMPLAINT_REGISTERED(complaintId || grievance._id.toString(), (req as any).citizen ? "Citizen" : "System")
     });
 
     return new ApiResponse({
@@ -267,7 +265,7 @@ export class ExternalGrievanceController {
                 role: "System"
               },
               metadata: { 
-                description: `External department updated status from ${oldStatus} to ${latestStatus}`,
+                ...timelineTemplates.STATUS_CHANGE(oldStatus, latestStatus),
                 oldStatus, 
                 newStatus: latestStatus 
               }
