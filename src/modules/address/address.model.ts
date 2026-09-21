@@ -37,7 +37,8 @@ const VillageSchema = new Schema({
   lgd_village_code: { type: Number, required: true, unique: true, index: true },
   panchayat_id: { type: Number, required: true, index: true },
   block_id: { type: Number, required: true, index: true },
-  name_en: { type: String, required: true }
+  name_en: { type: String, required: true },
+  name_local: { type: String }
 }, { timestamps: true });
 
 // ==========================================
@@ -62,7 +63,8 @@ const WardSchema = new Schema({
   lgd_ward_code: { type: Number, required: true, unique: true, index: true },
   ulb_id: { type: Number, required: true, index: true },
   ward_number: { type: Number, required: true },
-  name_en: { type: String, required: true }
+  name_en: { type: String, required: true },
+  name_local: { type: String }
 }, { timestamps: true });
 
 // ==========================================
@@ -73,6 +75,7 @@ const ThanaSchema = new Schema({
   district: { type: String },
   district_id: { type: Number, index: true },
   name_en: { type: String, required: true },
+  name_local: { type: String },
   type: { type: String }
 }, { timestamps: true });
 

@@ -29,6 +29,7 @@ import thirdPartyGrievanceRoutes from "../grievance/thirdPartyGrievance.routes.j
 import externalGrievanceRoutes from "../externalGrievance/externalGrievance.routes.js";
 import { visitorRoutes } from "../visitor/visitor.routes.js";
 import emailRoutes from "../email/email.routes.js";
+import translateRoutes from "../translate/translate.routes.js";
 const router = Router();
 
 router.use("/", healthRoutes);
@@ -61,5 +62,6 @@ router.use("/third-party/grievances", thirdPartyGrievanceRoutes);
 router.use("/external-grievances", externalGrievanceRoutes);
 router.use("/visitors", visitorRoutes);
 router.use("/emails", emailRoutes);
+router.use("/translate", translateRoutes);
 
 export default router;
