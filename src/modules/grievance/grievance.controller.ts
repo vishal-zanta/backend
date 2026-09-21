@@ -1725,6 +1725,11 @@ export class GrievanceController {
     grievance.status = "REOPENED";
     grievance.reOpenReason = reOpenReason;
 
+    await FieldVisit.updateMany(
+      { grievance: grievance._id, status: 'COMPLETED' },
+      { $set: { status: 'PENDING' } }
+    );
+
     // Escalate to next level if available
     let escalated = false;
     let nextLevelRoleName = "Officer";
@@ -2033,10 +2038,15 @@ export class GrievanceController {
         throw new ApiError({ status: 404, message: "Grievance not found." });
       }
       const previousOfficer = oldGrievance.assignedOfficer;
+      
+      const updatePayload: any = { assignedOfficer, assignedAt: new Date() };
+      if (!previousOfficer) {
+        updatePayload.status = "IN_PROGRESS";
+      }
 
       const grievance = await Grievance.findByIdAndUpdate(
         id,
-        { assignedOfficer, assignedAt: new Date() },
+        updatePayload,
         { new: true, runValidators: true },
       );
 
@@ -2131,6 +2141,10 @@ export class GrievanceController {
               "Grievance can only be reopened within 7 days of being closed. Reopen window is closed.",
           });
         }
+        await FieldVisit.updateMany(
+          { grievance: oldGrievance._id, status: 'COMPLETED' },
+          { $set: { status: 'PENDING' } }
+        );
       }
 
       if (status === "CLOSED") {

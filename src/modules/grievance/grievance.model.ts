@@ -79,7 +79,7 @@ export interface IGrievance extends Document {
   assignedAt?: Date;
   resolvedAt?: Date;
   resolvedReason?: string;
-  status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
+  status?: "PENDING" | "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED" | "ESCALATED";
   address?: {
     isUrban?: boolean;
     addressLine?: string;
@@ -271,6 +271,7 @@ const GrievanceSchema = new Schema<IGrievance>(
     status: {
       type: String,
       enum: [
+        "PENDING",
         "OPEN",
         "IN_PROGRESS",
         "RESOLVED",

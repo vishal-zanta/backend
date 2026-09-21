@@ -182,6 +182,8 @@ export class GrievanceService {
     if (citizen?.email && !finalCitizenInfo.email) finalCitizenInfo.email = citizen.email;
     if (citizen?.preferredLanguage && !finalCitizenInfo.preferredLanguage) finalCitizenInfo.preferredLanguage = citizen.preferredLanguage;
 
+    const isCreatedByCitizen = !createdBy && !sourceApiKey;
+
     const payloadToCreate: any = {
       citizenInfo: finalCitizenInfo,
       classification,
@@ -191,7 +193,7 @@ export class GrievanceService {
       grievanceId,
       location,
       address,
-      status: "OPEN",
+      status: isCreatedByCitizen ? "PENDING" : "OPEN",
       createdBy,
       sourceApiKey,
       channel
@@ -218,11 +220,12 @@ export class GrievanceService {
     // Auto Assignment Logic
     const serviceId = classification?.service;
     let autoAssignFailed = false;
-    if (serviceId) {
+    if (serviceId && !isCreatedByCitizen) {
       const assignedOfficerId = await GrievanceService.autoAssignOfficer(serviceId, location);
       if (assignedOfficerId) {
         payloadToCreate.assignedOfficer = assignedOfficerId;
         payloadToCreate.assignedAt = new Date();
+        payloadToCreate.status = "IN_PROGRESS";
       } else {
         autoAssignFailed = true;
       }

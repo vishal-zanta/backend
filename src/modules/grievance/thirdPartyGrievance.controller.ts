@@ -195,6 +195,10 @@ export class ThirdPartyGrievanceController {
       if (oldGrievance.status !== "RESOLVED" && oldGrievance.status !== "CLOSED") {
         throw new ApiError({ status: 400, message: "A grievance can only be reopened if it is currently RESOLVED or CLOSED." });
       }
+      await FieldVisit.updateMany(
+        { grievance: oldGrievance._id, status: 'COMPLETED' },
+        { $set: { status: 'PENDING' } }
+      );
     }
 
     if (status === "RESOLVED") {

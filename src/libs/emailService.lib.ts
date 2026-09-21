@@ -61,7 +61,7 @@ class EmailService {
       return info;
     } catch (error: any) {
       console.error("Error sending email:", error);
-      throw new Error(error.message || "Failed to send email");
+      //TODO:   throw new Error(error.message || "Failed to send email");
     }
   }
 }
