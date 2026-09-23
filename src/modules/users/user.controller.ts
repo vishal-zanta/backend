@@ -236,6 +236,7 @@ export class UserController {
       .populate({ path: 'roles', populate: { path: 'department' } })
       .populate('district')
       .populate('skills')
+      .populate('supervisor')
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
