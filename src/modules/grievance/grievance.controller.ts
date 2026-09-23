@@ -1149,8 +1149,22 @@ export class GrievanceController {
       const status = (req.query.status as string) || null;
       const feedback = req.query.feedback as string;
       const priority = req.query.priority as string;
+      const department = req.query.department as string;
+      
+      let sortObj: any = { createdAt: -1 };
+      const sortBy = req.query.sortBy as string;
+      const sortOrder = req.query.sortOrder as string;
+      if (sortBy === 'raisedOn' || sortBy === 'createdAt') {
+        sortObj = { createdAt: sortOrder === 'asc' ? 1 : -1 };
+      }
 
       const query: any = {};
+      
+      if (department) {
+        query["classification.department"] = {
+          $in: department.split(","),
+        };
+      }
       if (status) {
         query.status = {
           $in: status.split(","),
@@ -1227,7 +1241,7 @@ export class GrievanceController {
             select: "_id level designationEnglish",
           },
         })
-        .sort({ createdAt: -1 })
+        .sort(sortObj)
         .skip(pagination.offset)
         .limit(pagination.limit)
         .lean();
@@ -1346,10 +1360,24 @@ export class GrievanceController {
       const status = (req.query.status as string) || null;
       const feedback = req.query.feedback as string;
       const priority = req.query.priority as string;
+      const department = req.query.department as string;
+      
+      let sortObj: any = { createdAt: -1 };
+      const sortBy = req.query.sortBy as string;
+      const sortOrder = req.query.sortOrder as string;
+      if (sortBy === 'raisedOn' || sortBy === 'createdAt') {
+        sortObj = { createdAt: sortOrder === 'asc' ? 1 : -1 };
+      }
 
       const query: any = {
         assignedOfficer: officerId,
       };
+
+      if (department) {
+        query["classification.department"] = {
+          $in: department.split(","),
+        };
+      }
 
       if (status) {
         query.status = {
@@ -1417,7 +1445,7 @@ export class GrievanceController {
         .populate("location.thana", "name_en type")
         .populate("location.urbanPanchayat", "name_en name_local")
         .populate("location.ward", "name_en name_local")
-        .sort({ createdAt: -1 })
+        .sort(sortObj)
         .skip(pagination.offset)
         .limit(pagination.limit)
         .lean();

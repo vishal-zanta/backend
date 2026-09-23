@@ -10,6 +10,7 @@ import { EmailService } from '../../libs/emailService.lib.js';
 import { resetPasswordEmailTemplate } from '../../templates/resetPassword.template.js';
 import { CaptchaService } from '../captcha/captcha.service.js';
 import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
+import { Shift } from '../shift/shift.model.js';
 
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
@@ -86,11 +87,13 @@ export class AuthController {
         path: "department"
       }
     });
+
+    const shift = await Shift.findOne({ user: id }).sort({ date: -1, createdAt: -1 });
     
     return new ApiResponse({
       res,
       status: 200,
-      data: { ...user.toObject(), officerTagging },
+      data: { ...user.toObject(), officerTagging, shift },
       message: 'Profile fetched successfully'
     });
   });

@@ -70,5 +70,64 @@ export class BreakController {
     });
   });
 
- 
+  // API to get my breaks list with pagination
+  static getMyBreaks = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.user as any;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const breaks = await Break.find({ user: id })
+      .sort({ startTime: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Break.countDocuments({ user: id });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        breaks,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      },
+      message: 'Breaks fetched successfully'
+    });
+  });
+
+  // API for admin to get breaks of any user by ID with pagination
+  static getUserBreaks = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.params.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const breaks = await Break.find({ user: userId })
+      .sort({ startTime: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Break.countDocuments({ user: userId });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        breaks,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      },
+      message: 'User breaks fetched successfully'
+    });
+  });
+
 }
