@@ -25,5 +25,6 @@ ENV NODE_ENV=production
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY hozo-translation-prod-247bbeac1b85.json ./hozo-translation-prod-247bbeac1b85.json
 
 CMD ["node", "dist/app.js"]
