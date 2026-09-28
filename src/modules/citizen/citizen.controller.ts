@@ -8,6 +8,7 @@ import { ApiError } from "../../middlewares/errorHandler.js";
 import ApiResponse from "../../utils/apiResponse.js";
 import { PasswordHelper } from "../../utils/passwordHelper.js";
 import { Grievance } from "../grievance/grievance.model.js";
+import { ExternalGrievance } from "../externalGrievance/externalGrievance.model.js";
 export class CitizenController {
   /**
    * Validates Captcha and sends an OTP to the citizen's mobile number.
@@ -140,7 +141,7 @@ export class CitizenController {
       baseConditions.push({ "citizenInfo.mobile": citizen.alternateMobile });
     }
 
-    const aggregation = await Grievance.aggregate([
+    const internalAgg = await Grievance.aggregate([
       { $match: { $or: baseConditions } },
       {
         $group: {
@@ -150,16 +151,39 @@ export class CitizenController {
       }
     ]);
 
-    let totalComplaints = 0;
-    let inProgress = 0;
-    let resolved = 0;
-    let escalated = 0;
+    // External Grievances matching
+    const externalMobiles = [citizen.mobile.slice(-10)];
+    if (citizen.alternateMobile) {
+      externalMobiles.push(citizen.alternateMobile.slice(-10));
+    }
+    const extMobileRegex = new RegExp(`(${externalMobiles.join("|")})$`);
 
-    aggregation.forEach(item => {
+    const externalAgg = await ExternalGrievance.aggregate([
+      { $match: { mobile: extMobileRegex } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const statusCounts: Record<string, number> = {
+      OPEN: 0,
+      IN_PROGRESS: 0,
+      RESOLVED: 0,
+      CLOSED: 0,
+      ESCALATED: 0,
+      REJECTED: 0,
+      PENDING: 0
+    };
+
+    let totalComplaints = 0;
+
+    [...internalAgg, ...externalAgg].forEach(item => {
       totalComplaints += item.count;
-      if (item._id === "IN_PROGRESS") inProgress = item.count;
-      if (item._id === "RESOLVED") resolved = item.count;
-      if (item._id === "ESCALATED") escalated = item.count;
+      const stat = item._id || "UNKNOWN";
+      statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
     });
 
     return new ApiResponse({
@@ -167,9 +191,7 @@ export class CitizenController {
       status: 200,
       data: {
         totalComplaints,
-        inProgress,
-        resolved,
-        escalated
+        ...statusCounts
       },
       message: "Dashboard analytics retrieved successfully"
     });

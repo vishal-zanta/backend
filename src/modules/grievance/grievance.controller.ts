@@ -556,6 +556,10 @@ export class GrievanceController {
       const search = req.query.search as string;
       const status = (req.query.status as string) || null;
       const priority = req.query.priority as string;
+      const department = req.query.department as string;
+      const departmentCode = req.query.departmentCode as string;
+      const sortBy = (req.query.sortBy as string) || "createdAt";
+      const sortOrder = (req.query.sortOrder as string)?.toLowerCase() === "asc" ? 1 : -1;
       const citizenMobile = citizen.mobile.slice(-10);
       const alternateMobile = citizen?.alternateMobile?.slice(-10);
       // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
@@ -600,10 +604,16 @@ export class GrievanceController {
         };
       }
 
-      const internalGrievances = await Grievance.find(query)
-        .select(
-          "grievanceId classification location citizenInfo impact status assignedPriority createdAt updatedAt feedbackText rating assignedOfficer",
-        )
+      if (department) {
+        query["classification.department"] = department;
+      }
+
+      let internalGrievances: any[] = [];
+      if (!departmentCode || department) {
+        internalGrievances = await Grievance.find(query)
+          .select(
+            "grievanceId classification location citizenInfo impact status assignedPriority createdAt updatedAt feedbackText rating assignedOfficer",
+          )
         .populate("classification.department")
         .populate("classification.service")
         .populate("classification.nature")
@@ -626,6 +636,7 @@ export class GrievanceController {
         .populate("location.panchayat", "name_en name_local")
         .populate("location.thana", "name_en type")
         .lean();
+      }
 
       // Fetch External Grievances
       const externalMobiles = [citizenMobile];
@@ -642,9 +653,15 @@ export class GrievanceController {
           { mobile: new RegExp(search, "i") },
         ];
       }
+      
+      if (departmentCode) {
+        extQuery.departmentCode = departmentCode;
+      }
 
-      const externalGrievances = await ExternalGrievance.find(extQuery).lean();
-
+      let externalGrievances: any[] = [];
+      if (!department || departmentCode) {
+        externalGrievances = await ExternalGrievance.find(extQuery).lean();
+      }
       // Combine and mark type explicitly
       const formattedInternal = internalGrievances.map((g) =>
         Object.assign({}, g, { grievanceType: "INTERNAL" }),
@@ -654,11 +671,22 @@ export class GrievanceController {
       );
 
       const allGrievances = [...formattedInternal, ...formattedExternal].sort(
-        (a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA;
-        },
+        (a: any, b: any) => {
+          let valA = a[sortBy];
+          let valB = b[sortBy];
+          
+          if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
+            valA = new Date(valA || 0).getTime();
+            valB = new Date(valB || 0).getTime();
+          } else if (typeof valA === 'string' && typeof valB === 'string') {
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+          }
+          
+          if (valA < valB) return -1 * sortOrder;
+          if (valA > valB) return 1 * sortOrder;
+          return 0;
+        }
       );
 
       const totalCount = allGrievances.length;
