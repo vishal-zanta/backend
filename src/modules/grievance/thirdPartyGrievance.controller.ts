@@ -195,6 +195,16 @@ export class ThirdPartyGrievanceController {
       if (oldGrievance.status !== "RESOLVED" && oldGrievance.status !== "CLOSED") {
         throw new ApiError({ status: 400, message: "A grievance can only be reopened if it is currently RESOLVED or CLOSED." });
       }
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const referenceDate = oldGrievance.resolvedAt ? new Date(oldGrievance.resolvedAt) : new Date(oldGrievance.updatedAt);
+      if (referenceDate < sevenDaysAgo) {
+        throw new ApiError({
+          status: 400,
+          message: "Grievance can only be reopened within 7 days of being closed or resolved. Reopen window is closed.",
+        });
+      }
       await FieldVisit.updateMany(
         { grievance: oldGrievance._id, status: 'COMPLETED' },
         { $set: { status: 'PENDING' } }

@@ -1612,7 +1612,7 @@ export class GrievanceController {
       type: "CITIZEN_FEEDBACK",
       actor: {
         id: citizen._id as any,
-        name: "CITIZEN",
+        name: citizen.fullName || "Citizen",
         role: "CITIZEN",
       },
       metadata: timelineTemplates.CITIZEN_FEEDBACK(rating, feedbackText || ""),
@@ -1675,7 +1675,7 @@ export class GrievanceController {
         type: "RESOLVED",
         actor: {
           id: citizen._id as any,
-          name: "CITIZEN",
+          name: citizen.fullName || "Citizen",
           role: "CITIZEN",
         },
         metadata: timelineTemplates.RESOLVED(remarks || "Resolved by citizen"),
@@ -1736,14 +1736,16 @@ export class GrievanceController {
       });
     }
 
-    // Enforce 7-day constraint based on updatedAt (when status was likely resolved/closed)
+    // Enforce 7-day constraint based on resolvedAt (when status was likely resolved/closed)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const referenceDate = grievance.resolvedAt ? new Date(grievance.resolvedAt) : new Date(grievance.updatedAt);
 
-    if (new Date(grievance.updatedAt) < sevenDaysAgo) {
+    if (referenceDate < sevenDaysAgo) {
       throw new ApiError({
         status: 400,
-        message: `Grievance can only be reopened within 7 days of being closed. Reopen window is closed.`,
+        message: `Grievance can only be reopened within 7 days of being closed or resolved. Reopen window is closed.`,
       });
     }
 
@@ -1898,7 +1900,7 @@ export class GrievanceController {
       type: "STATUS_CHANGE" as any,
       actor: {
         id: citizen._id as any,
-        name: "CITIZEN",
+        name: citizen.fullName || "Citizen",
         role: "CITIZEN",
       },
       metadata: timelineTemplates.STATUS_CHANGE(
@@ -2161,12 +2163,14 @@ export class GrievanceController {
         }
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const referenceDate = oldGrievance.resolvedAt ? new Date(oldGrievance.resolvedAt) : new Date(oldGrievance.updatedAt);
 
-        if (new Date(oldGrievance.updatedAt) < sevenDaysAgo) {
+        if (referenceDate < sevenDaysAgo) {
           throw new ApiError({
             status: 400,
             message:
-              "Grievance can only be reopened within 7 days of being closed. Reopen window is closed.",
+              "Grievance can only be reopened within 7 days of being closed or resolved. Reopen window is closed.",
           });
         }
         await FieldVisit.updateMany(

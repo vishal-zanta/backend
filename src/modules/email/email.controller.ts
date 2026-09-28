@@ -63,6 +63,16 @@ export class EmailController {
       query.status = req.query.status;
     }
 
+    if (req.query.fromDate || req.query.toDate) {
+      query.receivedAt = {};
+      if (req.query.fromDate) {
+        query.receivedAt.$gte = new Date(req.query.fromDate as string);
+      }
+      if (req.query.toDate) {
+        query.receivedAt.$lte = new Date(req.query.toDate as string);
+      }
+    }
+
     if (req.query.search) {
       const searchRegex = new RegExp(req.query.search as string, 'i');
       query.$or = [

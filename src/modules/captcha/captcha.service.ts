@@ -11,10 +11,15 @@ export class CaptchaService {
     const captcha = svgCaptcha.create({
       size: 6,
       noise: 2,
-      color: true,
+      color: false,
       background: "#f0f0f0",
       charPreset: "abcdefghijklmnopqrstuvwxyz0123456789"
     });
+
+    // Make the captcha text and noise lines black while keeping the background intact
+    captcha.data = captcha.data
+      .replace(/(<path[^>]+fill=")#[0-9a-fA-F]{3,6}(")/g, '$1#000000$2')
+      .replace(/(<path[^>]+stroke=")#[0-9a-fA-F]{3,6}(")/g, '$1#000000$2');
 
     // Generate a small UUID (8 characters hex)
     const captchaId = crypto.randomBytes(4).toString("hex");

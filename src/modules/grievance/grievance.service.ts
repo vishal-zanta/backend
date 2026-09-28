@@ -245,7 +245,7 @@ export class GrievanceService {
     const officer:any = await User.findById(createdBy).populate("roles").lean();
 
     let actorId = createdBy || citizen?._id;
-    let actorName = officer?.name || "CITIZEN";
+    let actorName = officer?.name || citizen?.fullName || citizenInfo?.name || "Citizen";
     let actorRole = officer?.roles?.[0]?.level || "CITIZEN";
     let descriptionRole = officer?.roles?.[0]?.level || "CITIZEN";
 
