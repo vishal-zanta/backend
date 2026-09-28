@@ -7,6 +7,11 @@ const router = Router();
 router.use(authProtect);
 
 import { upload } from '../../middlewares/uploadMiddleware.js';
+import { authorizeRoles } from '../../middlewares/rbacMiddleware.js';
+import { ROLES } from '../../config/roles.config.js';
+
+// Admin Routes
+router.get('/admin/messages', authorizeRoles(ROLES.ADMIN), ChatController.getAllMessagesAdmin);
 
 // Conversations
 router.post('/conversation', ChatController.getOrCreateConversation);

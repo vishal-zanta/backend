@@ -29,7 +29,9 @@ export const checkAndEscalateGrievances = async () => {
     const workflows = await WorkflowLevel.find({ active: true });
     const workflowMap = new Map();
     for (const wf of workflows) {
-      workflowMap.set(wf.department.toString(), wf.levels.sort((a, b) => a.order - b.order));
+      if (wf.department) {
+        workflowMap.set(wf.department.toString(), wf.levels.sort((a, b) => a.order - b.order));
+      }
     }
 
     if (!workflows.length) return;
@@ -39,7 +41,9 @@ export const checkAndEscalateGrievances = async () => {
     // console.log(allSlaConfigs, "allSlaConfigs")
     const slaConfigMap = new Map();
     for (const config of allSlaConfigs) {
-      slaConfigMap.set(config.service.toString(), config);
+      if (config.service) {
+        slaConfigMap.set(config.service.toString(), config);
+      }
     }
 
     for (const grievance of activeGrievances) {
@@ -60,9 +64,9 @@ export const checkAndEscalateGrievances = async () => {
 
       let currentLevelIndex = grievance.escalationLevel || 0;
       const assignedUser = grievance.assignedOfficer as any;
-      if (assignedUser && assignedUser.role) {
-        const roleIdStr = assignedUser.role.toString();
-        const foundIndex = workflowLevels.findIndex((wl: any) => wl.role.toString() === roleIdStr);
+      if (assignedUser && assignedUser.roles && assignedUser.roles.length > 0) {
+        const roleIdsStr = assignedUser.roles.map((r: any) => r._id?.toString() || r.toString());
+        const foundIndex = workflowLevels.findIndex((wl: any) => roleIdsStr.includes(wl.role?.toString()));
         if (foundIndex !== -1) {
           currentLevelIndex = foundIndex;
         }
@@ -75,7 +79,7 @@ export const checkAndEscalateGrievances = async () => {
 console.log(currentWorkflowLevel,"currentWorkflowLevel")
       // Find the SLA hours for the CURRENT role
       const currentRoleSla = slaConfig.escalations.find(
-        (esc: any) => esc.role.toString() === currentWorkflowLevel.role.toString()
+        (esc: any) => esc.role?.toString() === currentWorkflowLevel.role?.toString()
       );
 console.log(currentRoleSla,"currentRoleSla")
       if (!currentRoleSla) continue;
@@ -84,8 +88,8 @@ console.log(currentRoleSla,"currentRoleSla")
       // from the createdAt timestamp.
       let cumulativeSlaHours = 0;
       for (let i = 0; i <= currentLevelIndex; i++) {
-        const stepRole = workflowLevels[i].role.toString();
-        const stepSla = slaConfig.escalations.find((e: any) => e.role.toString() === stepRole);
+        const stepRole = workflowLevels[i].role?.toString();
+        const stepSla = slaConfig.escalations.find((e: any) => e.role?.toString() === stepRole);
         if (stepSla) cumulativeSlaHours += stepSla.slaHours;
       }
       console.log(cumulativeSlaHours, "cumulativeSlaHours")
@@ -102,10 +106,10 @@ console.log(currentRoleSla,"currentRoleSla")
         let nextWorkflowLevel = null;
 
         for (let i = currentLevelIndex + 1; i < workflowLevels.length; i++) {
-          const checkRole = workflowLevels[i].role.toString();
+          const checkRole = workflowLevels[i].role?.toString();
           
           // Check if this workflow role actually exists in the SLA config for this subservice
-          const roleInSla = slaConfig.escalations.some((esc: any) => esc.role.toString() === checkRole);
+          const roleInSla = slaConfig.escalations.some((esc: any) => esc.role?.toString() === checkRole);
           
           if (roleInSla) {
             nextValidLevelIndex = i;
@@ -153,6 +157,7 @@ console.log(currentRoleSla,"currentRoleSla")
 
         if (availableOfficers.length > 0) {
           const nextOfficer = availableOfficers[0];
+          const breachedOfficerId = grievance.assignedOfficer;
 
           // Reassign and jump to the correct next level
           grievance.assignedOfficer = nextOfficer._id as any;
@@ -187,7 +192,7 @@ console.log(currentRoleSla,"currentRoleSla")
               grievance: grievance._id,
               action: "ESCALATED",
               metadata: {
-                breachedOfficer: grievance.assignedOfficer,
+                breachedOfficer: breachedOfficerId,
                 timeTakenBeforeEscalationMs: timePassedMs,
                 timeTakenBeforeEscalationHours: Math.round(timePassedMs / (1000 * 60 * 60)),
                 slaHoursAllowed: cumulativeSlaHours
@@ -198,7 +203,7 @@ console.log(currentRoleSla,"currentRoleSla")
               action: "ASSIGNED",
               assignedTo: nextOfficer._id,
               metadata: {
-                previousOfficer: grievance.assignedOfficer,
+                previousOfficer: breachedOfficerId,
                 assignedBy: "SYSTEM_CRON"
               }
             }

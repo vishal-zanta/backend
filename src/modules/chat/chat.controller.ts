@@ -356,4 +356,88 @@ export class ChatController {
       message: 'User status fetched successfully'
     });
   });
+
+  /**
+   * Admin API to get all chat messages with pagination and filtering
+   */
+  static getAllMessagesAdmin = asyncHandler(async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const fromDate = req.query.fromDate as string;
+    const toDate = req.query.toDate as string;
+    const from = req.query.from as string;
+    const to = req.query.to as string;
+
+    const query: any = {};
+
+    // Date range filter
+    if (fromDate || toDate) {
+      query.createdAt = {};
+      if (fromDate) query.createdAt.$gte = new Date(fromDate);
+      if (toDate) query.createdAt.$lte = new Date(toDate);
+    }
+
+    // Sender filter
+    if (from) {
+      query.sender = from;
+    }
+
+    // Receiver (to) filter
+    if (to) {
+      // Find conversations that include the 'to' user
+      const conversations = await Conversation.find({ participants: to }).select('_id');
+      const conversationIds = conversations.map(c => c._id);
+      
+      query.conversation = { $in: conversationIds };
+      if (!from) {
+          query.sender = { $ne: to }; // If filtering by 'to', we want messages received by 'to'
+      }
+    }
+
+    const totalCount = await Message.countDocuments(query);
+    const pagination = buildPagination({ page, limit, totalCount });
+
+    const messages = await Message.find(query)
+      .populate('sender', 'name email roles isBreak status')
+      .populate({
+        path: 'conversation',
+        populate: {
+          path: 'participants',
+          select: 'name email roles isBreak status'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .skip(pagination.offset)
+      .limit(pagination.limit)
+      .lean();
+
+    // Transform messages to have 'to' field clearly extracted and 'time' alias
+    const formattedMessages = messages.map((msg: any) => {
+      // The 'to' is the participant in the conversation who is not the sender
+      const conv = msg.conversation;
+      const toUsers = conv?.participants?.filter((p: any) => p._id.toString() !== msg.sender?._id?.toString());
+      
+      return {
+        _id: msg._id,
+        from: msg.sender,
+        to: toUsers && toUsers.length === 1 ? toUsers[0] : toUsers,
+        message: msg.type === 'TEXT' ? msg.content : msg.fileUrl || `[${msg.type}]`,
+        type: msg.type,
+        time: msg.createdAt, // alias for requested 'time'
+        readBy: msg.readBy,
+        createdAt: msg.createdAt
+      };
+    });
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        docs: formattedMessages,
+        pagination
+      },
+      message: 'All messages fetched successfully'
+    });
+  });
 }
