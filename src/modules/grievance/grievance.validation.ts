@@ -204,7 +204,7 @@ export const grievanceSchema = z.object({
       .max(50, "Full name cannot exceed 50 characters"),
     mobile: z
       .string()
-      .min(13, "Mobile number must be at least 10 digits")
+      // .min(13, "Mobile number must be at least 10 digits")
       .max(13, "Mobile number cannot exceed 10 digits"),
     alternateMobile: z
       .string()

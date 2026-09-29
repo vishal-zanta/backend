@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const mobileSchema = z.string({ message: "mobile is required" })
-  .min(10, "Mobile number must be at least 10 digits")
+  // .min(10, "Mobile number must be at least 10 digits")
   .max(15, "Mobile number must not exceed 15 digits")
   .regex(/^\+?[0-9]+$/, "Mobile number must contain only digits and optional + prefix for country code");
 
