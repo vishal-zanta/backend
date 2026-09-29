@@ -11,6 +11,7 @@ router.post('/', checkPermission("USER_MANAGEMENT"), UserController.createUser);
 router.get('/',  UserController.getUsers);
 router.patch('/profile', UserController.updateProfile);
 router.put('/:id', checkPermission("USER_MANAGEMENT"), UserController.updateUser);
+router.put('/:id/cce-config', checkPermission("USER_MANAGEMENT"), UserController.updateCceConfig);
 router.delete('/:id', checkPermission("USER_MANAGEMENT"), UserController.deleteUser);
 
 export default router;

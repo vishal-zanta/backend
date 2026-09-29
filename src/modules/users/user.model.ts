@@ -22,6 +22,11 @@ export interface IUser extends Document {
   skills?: mongoose.Types.ObjectId[];
   preferredLanguages?: string[];
   supervisor?: mongoose.Types.ObjectId;
+  cceConfig?: {
+    agentId?: string;
+    extension?: string;
+    password?: string;
+  };
 }
 
 const userSchema = new Schema<IUser>({
@@ -99,7 +104,12 @@ const userSchema = new Schema<IUser>({
   }],
   preferredLanguages: [{
     type: String
-  }]
+  }],
+  cceConfig: {
+    agentId: { type: String, unique: true, sparse: true },
+    extension: { type: String, unique: true, sparse: true },
+    password: { type: String }
+  }
 }, {
   timestamps: true
 });

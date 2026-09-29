@@ -30,6 +30,7 @@ import externalGrievanceRoutes from "../externalGrievance/externalGrievance.rout
 import { visitorRoutes } from "../visitor/visitor.routes.js";
 import emailRoutes from "../email/email.routes.js";
 import translateRoutes from "../translate/translate.routes.js";
+import avayaRoutes from "../avaya/avaya.routes.js";
 const router = Router();
 
 router.use("/", healthRoutes);
@@ -63,5 +64,6 @@ router.use("/external-grievances", externalGrievanceRoutes);
 router.use("/visitors", visitorRoutes);
 router.use("/emails", emailRoutes);
 router.use("/translate", translateRoutes);
+router.use("/telephony", avayaRoutes);
 
 export default router;

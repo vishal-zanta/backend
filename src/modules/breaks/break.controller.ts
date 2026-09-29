@@ -4,6 +4,7 @@ import { Break } from './break.model.js';
 import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import { ApiError } from '../../middlewares/errorHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
+import { AvayaService } from '../avaya/avaya.service.js';
 
 export class BreakController {
   
@@ -26,6 +27,14 @@ export class BreakController {
       user.isBreak = false;
       await user.save();
 
+      if (user.cceConfig && user.cceConfig.agentId) {
+        try {
+          await AvayaService.setAgentState(user.cceConfig.agentId, true);
+        } catch (e) {
+          console.error("Avaya setAgentState (available) failed:", e);
+        }
+      }
+
       return new ApiResponse({
         res,
         status: 200,
@@ -41,6 +50,14 @@ export class BreakController {
      
       user.isBreak = true;
       await user.save();
+
+      if (user.cceConfig && user.cceConfig.agentId) {
+        try {
+          await AvayaService.setAgentState(user.cceConfig.agentId, false);
+        } catch (e) {
+          console.error("Avaya setAgentState (unavailable) failed:", e);
+        }
+      }
 
       return new ApiResponse({
         res,

@@ -11,7 +11,7 @@ import { resetPasswordEmailTemplate } from '../../templates/resetPassword.templa
 import { CaptchaService } from '../captcha/captcha.service.js';
 import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
 import { Shift } from '../shift/shift.model.js';
-
+import { AvayaService } from '../avaya/avaya.service.js';
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
     const { email, loginId, password, token, captchaToken } = req.body;
@@ -36,6 +36,16 @@ export class AuthController {
         user.lastLogin = new Date();
         await user.save();
 
+        if (user.cceConfig && user.cceConfig.agentId && user.cceConfig.extension) {
+          try {
+            await AvayaService.agentLogin(user.cceConfig.agentId, user.cceConfig.extension, user.cceConfig.password || "123456");
+            const webhookUrl = process.env.AVAYA_WEBHOOK_URL || "https://backend.bugslayer.in/api/v1/telephony/webhook";
+            await AvayaService.monitorExtensions([user.cceConfig.extension], webhookUrl);
+          } catch (e) {
+            console.error("Avaya login or monitor failed:", e);
+          }
+        }
+
         const userData = PasswordHelper.createUserPayload(user, user.roles);
         return new ApiResponse({ res, status: 200, data: userData, message: 'Password updated and login successful' });
       } catch (error) {
@@ -57,6 +67,16 @@ export class AuthController {
       user.lastLogin = new Date();
       await user.save();
       
+      if (user.cceConfig && user.cceConfig.agentId && user.cceConfig.extension) {
+        try {
+          await AvayaService.agentLogin(user.cceConfig.agentId, user.cceConfig.extension, user.cceConfig.password || "123456");
+          const webhookUrl = process.env.AVAYA_WEBHOOK_URL || "https://backend.bugslayer.in/api/v1/telephony/webhook";
+          await AvayaService.monitorExtensions([user.cceConfig.extension], webhookUrl);
+        } catch (e) {
+          console.error("Avaya login or monitor failed:", e);
+        }
+      }
+
       const userData = PasswordHelper.createUserPayload(user, user.roles);
       
       return new ApiResponse({ 
@@ -178,6 +198,14 @@ export class AuthController {
     // We reuse the adminLogout logic to invalidate tokens issued before this time
     user.adminLogout = new Date();
     await user.save();
+
+    if (user.cceConfig && user.cceConfig.agentId && user.cceConfig.extension) {
+      try {
+        await AvayaService.agentLogout(user.cceConfig.agentId, user.cceConfig.extension);
+      } catch (e) {
+        console.error("Avaya logout failed:", e);
+      }
+    }
 
     return new ApiResponse({
       res,

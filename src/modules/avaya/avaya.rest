@@ -1,0 +1,97 @@
+### 1. Connect to Avaya PBX (Run this first!)
+POST https://avaya.lumirex.tech/api/telephony/system/connect
+Content-Type: application/json
+
+{
+    "adminProviderString": "AVAYA#AVAYAPOCCM2#CSTA#APSAES01;loginID=avayacti;passwd=Iccs@123"
+}
+
+### ----------------------------------------------------
+
+### 2. Make a Phone Call (Click-to-Call)
+POST https://avaya.lumirex.tech/api/telephony/call
+Content-Type: application/json
+
+{
+    "sourceExtension": "56001",
+    "clientNumber": "08307753758"
+}
+
+### ----------------------------------------------------
+
+### 2b. Answer/Accept an Incoming Call
+POST https://avaya.lumirex.tech/api/telephony/call/answer
+Content-Type: application/json
+
+{
+    "extension": "56001"
+}
+
+### ----------------------------------------------------
+
+### 3. Start Webhook Monitoring for Multiple Extensions
+POST https://avaya.lumirex.tech/api/telephony/monitor
+Content-Type: application/json
+
+{
+    "extensions": ["56001", "56002", "56003"],
+    "webhookUrl": "httpss://webhook.site/b5ffe974-e61e-4414-a719-3e5cf249df85"
+}
+
+### ----------------------------------------------------
+
+### 4. Agent Login (Log into a Support Queue)
+POST https://avaya.lumirex.tech/api/telephony/agent/login
+Content-Type: application/json
+
+{
+    "agentId": "66001",
+    "extension": "56002",
+    "password": "123456"
+}
+
+### ----------------------------------------------------
+
+### 5. Change Agent State (Set to Ready / Not Ready)
+POST https://avaya.lumirex.tech/api/telephony/agent/state
+Content-Type: application/json
+
+{
+    "agentId": "66002",
+    "isAvailable": true
+}
+
+### ----------------------------------------------------
+
+### 6. Agent Logout (End of Shift)
+POST https://avaya.lumirex.tech/api/telephony/agent/logout
+Content-Type: application/json
+
+{
+    "agentId": "66002",
+    "extension": "56001"
+}
+
+### ----------------------------------------------------
+
+### 7. Get Live Agent Status in a Queue
+GET https://avaya.lumirex.tech/api/telephony/queue/70/agents
+Content-Type: application/json
+
+### ----------------------------------------------------
+
+### 8. Find where a specific Agent is Logged In
+GET https://avaya.lumirex.tech/api/telephony/agent/66002/status
+Content-Type: application/json
+
+### ----------------------------------------------------
+
+### 9. Get Active Call Details (live duration, caller/called info)
+GET https://avaya.lumirex.tech/api/telephony/call/56001/details
+Content-Type: application/json
+
+### ----------------------------------------------------
+
+### 10. Get Call History (last 100 calls with duration)
+GET https://avaya.lumirex.tech/api/telephony/call/history
+Content-Type: application/json

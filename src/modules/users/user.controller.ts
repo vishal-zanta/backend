@@ -352,4 +352,40 @@ export class UserController {
 
     return new ApiResponse({ res, status: 200, message: 'User deleted successfully' });
   });
+
+  static updateCceConfig = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { agentId, extension, password } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      throw new ApiError({ status: 404, message: 'User not found' });
+    }
+
+    const cceConfig = user.cceConfig || { agentId: undefined, extension: undefined, password: undefined };
+
+    if (agentId !== undefined) {
+      if (agentId === "") cceConfig.agentId = undefined;
+      else cceConfig.agentId = agentId;
+    }
+    if (extension !== undefined) {
+      if (extension === "") cceConfig.extension = undefined;
+      else cceConfig.extension = extension;
+    }
+    if (password !== undefined) {
+      if (password === "") cceConfig.password = undefined;
+      else cceConfig.password = password;
+    }
+
+    user.cceConfig = cceConfig;
+
+    await user.save();
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: user.cceConfig,
+      message: 'CCE config updated successfully'
+    });
+  });
 }
