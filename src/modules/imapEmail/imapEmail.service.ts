@@ -158,9 +158,24 @@ export const fetchUnreadEmailsAndAssign = async () => {
               continue;
             }
 
-            // Round-robin pick
+            // Check if a previous email from the same sender exists (same conversation)
+            const senderEmail = parsed.from?.value?.[0]?.address || "";
             let assignedTo = undefined;
-            if (cceUsers.length > 0) {
+
+            if (senderEmail) {
+              const previousEmail = await Email.findOne({
+                fromEmail: senderEmail,
+                assignTo: { $exists: true, $ne: null },
+              }).sort({ createdAt: -1 });
+
+              if (previousEmail?.assignTo) {
+                // Same sender → assign to the same CCE (same conversation)
+                assignedTo = previousEmail.assignTo;
+              }
+            }
+
+            // Fallback to round-robin if no previous conversation found
+            if (!assignedTo && cceUsers.length > 0) {
               assignedTo = cceUsers[nextIndex]._id;
               nextIndex = (nextIndex + 1) % cceUsers.length;
             }

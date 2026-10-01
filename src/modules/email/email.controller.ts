@@ -96,8 +96,9 @@ export class EmailController {
     
     // Select only required fields, omitting large attachments or other heavy data
     const emails = await Email.find(query)
-      .select('emailId fromName fromEmail subject body status receivedAt grievance')
+      .select('emailId fromName fromEmail subject body status receivedAt grievance assignTo')
       .populate({ path: 'grievance', select: 'grievanceId' })
+      .populate({ path: 'assignTo', select: 'name email phone' })
       .sort({ receivedAt: -1 })
       .skip(pagination.offset)
       .limit(pagination.limit)
@@ -178,6 +179,7 @@ export class EmailController {
 
     const emailDoc = await Email.findOne({ $or: orConditions })
       .populate('grievance') // Populate full grievance details
+       .populate({ path: 'assignTo', select: 'name email phone' })
       .lean();
 
     if (!emailDoc) {

@@ -329,10 +329,22 @@ export class GrievanceController {
       citizenInfo,
       address,
       isCrpEqualPerAdd;
-    const dbWebsiteSourceId = await ComplaintSource.findOne({
-      title: RegExp("^website$", "i"),
-    });
-    const channel = dbWebsiteSourceId;
+    const isChatBot = req.body.isChatBot === true || req.body.isChatBot === "true";
+
+    let channel;
+    if (isChatBot) {
+      channel = await ComplaintSource.findOne({
+        title: RegExp("^chat$", "i"),
+      });
+      // Auto-create if not exists
+      if (!channel) {
+        channel = await ComplaintSource.create({ title: "Chat Bot" });
+      }
+    } else {
+      channel = await ComplaintSource.findOne({
+        title: RegExp("^website$", "i"),
+      });
+    }
     console.log("Received form-data:", req.body);
     try {
       classification =
