@@ -68,6 +68,20 @@ router.get(
   GrievanceController.getGrievanceCommunications
 );
 
+// Add a remark to a grievance timeline
+router.post(
+  "/officer/:id/remark",
+  authProtect,
+  GrievanceController.addRemark
+);
+
+// Edit a previously added remark in the timeline
+router.put(
+  "/officer/remark/:timelineId",
+  authProtect,
+  GrievanceController.editRemark
+);
+
 // Create a grievance by an officer on behalf of a citizen
 router.post("/officer/create",  authProtect,checkPermission("CREATE_GRIEVANCE"), upload.any('grievance'),  GrievanceController.createGrievanceByAgent);
 

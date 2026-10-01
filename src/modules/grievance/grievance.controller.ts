@@ -88,6 +88,114 @@ export class GrievanceController {
       message: "Grievance communications fetched successfully",
     });
   });
+
+  /**
+   * Add a remark to a grievance timeline
+   */
+  static addRemark = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { remark } = req.body;
+    const user = (req as any).user;
+
+    if (!remark || remark.trim().length === 0) {
+      throw new ApiError({ status: 400, message: "Remark text is required" });
+    }
+
+    const orConditions: any[] = [{ grievanceId: id }];
+    if (String(id).match(/^[0-9a-fA-F]{24}$/)) {
+      orConditions.push({ _id: id });
+    }
+    const grievance = await Grievance.findOne({ $or: orConditions }).select('_id');
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found" });
+    }
+
+    const event = await TimelineService.logEvent({
+      grievanceId: grievance._id,
+      type: 'REMARK_ADDED',
+      actor: {
+        id: user.id || user._id,
+        name: user.name,
+        role: user.roles?.[0]?.level || 'Officer',
+      },
+      metadata: timelineTemplates.REMARK_ADDED(remark),
+    });
+
+    return new ApiResponse({
+      res,
+      status: 201,
+      data: event,
+      message: "Remark added successfully",
+    });
+  });
+
+  /**
+   * Edit a previously added remark (allowed only within 2 hours by the same user)
+   */
+  static editRemark = asyncHandler(async (req: Request, res: Response) => {
+    const { timelineId } = req.params;
+    const { remark } = req.body;
+    const user = (req as any).user;
+
+    if (!remark || remark.trim().length === 0) {
+      throw new ApiError({ status: 400, message: "New remark text is required" });
+    }
+
+    // Must import Timeline from timeline.model.ts in the file
+    // Doing it dynamically here or we can just import at the top later. 
+    // Actually we will import it at the top of grievance.controller.ts shortly.
+    const { Timeline } = await import("../timeline/timeline.model.js");
+
+    const timelineEvent = await Timeline.findById(timelineId);
+    if (!timelineEvent) {
+      throw new ApiError({ status: 404, message: "Timeline event not found" });
+    }
+
+    if (timelineEvent.type !== 'REMARK_ADDED') {
+      throw new ApiError({ status: 400, message: "Only REMARK_ADDED events can be edited" });
+    }
+
+    // Check ownership
+    const actorId = timelineEvent.actor?.id?.toString();
+    const userId = (user.id || user._id).toString();
+    if (actorId !== userId) {
+      throw new ApiError({ status: 403, message: "You are not authorized to edit this remark" });
+    }
+
+    // Check time limit (2 hours)
+    const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
+    const now = new Date().getTime();
+    const createdAt = new Date(timelineEvent.createdAt).getTime();
+    if (now - createdAt > TWO_HOURS_IN_MS) {
+      throw new ApiError({ status: 403, message: "Remarks can only be edited within 2 hours of creation" });
+    }
+
+    // Archive old remark in history
+    const oldRemarkText = timelineEvent.metadata?.remarkText || timelineEvent.metadata?.description;
+    const history = timelineEvent.metadata?.editHistory || [];
+    history.push({
+      oldRemark: oldRemarkText,
+      editedAt: new Date()
+    });
+
+    // Update with new template
+    timelineEvent.metadata = {
+      ...timelineEvent.metadata,
+      ...timelineTemplates.REMARK_ADDED(remark, true),
+      editHistory: history
+    };
+
+    // Since metadata is Mixed, tell mongoose it changed
+    timelineEvent.markModified('metadata');
+    await timelineEvent.save();
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: timelineEvent,
+      message: "Remark updated successfully",
+    });
+  });
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
 

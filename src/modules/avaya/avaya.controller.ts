@@ -4,6 +4,8 @@ import ApiResponse from '../../utils/apiResponse.js';
 import { AvayaService } from './avaya.service.js';
 import { Call } from '../call/call.model.js';
 import { Grievance } from '../grievance/grievance.model.js';
+import { TimelineService } from '../timeline/timeline.service.js';
+import { timelineTemplates } from '../timeline/timeline.template.js';
 import mongoose from 'mongoose';
 
 export class AvayaController {
@@ -22,7 +24,7 @@ export class AvayaController {
     if (!sourceExtension) return new ApiResponse({ res, status: 400, message: 'cce config is required' });
     
     // Initiate call via Avaya Service
-    const data = await AvayaService.makeCall(sourceExtension, clientNumber);
+    const data = null//TODO: fix after vpn approve await AvayaService.makeCall(sourceExtension, clientNumber);
 
     // Look up the grievance if provided to attach its ObjectId
     let complaintObjectId: any = undefined;
@@ -54,16 +56,76 @@ export class AvayaController {
       // recordingUrl is handled by the default value in the schema
     });
 
+    // Log to grievance timeline if we have the grievance ObjectId
+    if (complaintObjectId) {
+      await TimelineService.logEvent({
+        grievanceId: complaintObjectId,
+        type: 'CALL_OUTBOUND',
+        actor: {
+          id: user.id || user._id,
+          name: user.name,
+          role: user.roles?.[0]?.level || 'Agent',
+        },
+        metadata: timelineTemplates.CALL_OUTBOUND(clientNumber),
+      });
+    }
+
     return new ApiResponse({ res, status: 200, data, message: 'Call initiated successfully' });
   });
 
   static answerCall = asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as any;
-    const extension =user?.cceConfig?.extension;
+    const extension = user?.cceConfig?.extension;
+    const { clientNumber, grievanceId } = req.body;
     
     if (!extension) return new ApiResponse({ res, status: 400, message: 'extension is required' });
 
+    // Answer call via Avaya Service
     const data = await AvayaService.answerCall(extension as string);
+
+    // If grievanceId is passed, link it to the grievance and log to timeline
+    if (grievanceId) {
+      let complaintObjectId: any = undefined;
+      if (mongoose.isValidObjectId(grievanceId)) {
+        complaintObjectId = grievanceId;
+      } else {
+        const grievance = await Grievance.findOne({ grievanceId });
+        if (grievance) {
+          complaintObjectId = grievance._id;
+        }
+      }
+
+      // Create a Call document for Inbound call
+      const callId = `CALL-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+      
+      await Call.create({
+        callId,
+        agent: user.id || user._id,
+        callType: 'Inbound',
+        citizenMobile: clientNumber || 'Unknown',
+        complaintIdString: grievanceId,
+        complaintId: complaintObjectId,
+        status: 'Initiated',
+        disposition: 'Call answered',
+        duration: '10s',
+        recordingDuration: '10s'
+      });
+
+      // Log to grievance timeline if we have the grievance ObjectId
+      if (complaintObjectId) {
+        await TimelineService.logEvent({
+          grievanceId: complaintObjectId,
+          type: 'CALL_INBOUND',
+          actor: {
+            id: user.id || user._id,
+            name: user.name,
+            role: user.roles?.[0]?.level || 'Agent',
+          },
+          metadata: timelineTemplates.CALL_INBOUND(clientNumber || 'Unknown'),
+        });
+      }
+    }
+
     return new ApiResponse({ res, status: 200, data, message: 'Call answered successfully' });
   });
 

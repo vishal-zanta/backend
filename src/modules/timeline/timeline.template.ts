@@ -63,4 +63,20 @@ export const timelineTemplates = {
     description: `Closed after ${afterHours}h of resolution with no dispute${remarks ? `. Remark: ${remarks}` : ''}`,
     description_local: `समाधान के ${afterHours} घंटे बाद बिना किसी विवाद के बंद किया गया${remarks ? `. टिप्पणी: ${remarks}` : ''}`,
   }),
+
+  CALL_OUTBOUND: (citizenMobile: string) => ({
+    description: `Outbound call initiated to citizen at ${citizenMobile}`,
+    description_local: `नागरिक को ${citizenMobile} पर आउटबाउंड कॉल की गई`,
+  }),
+
+  CALL_INBOUND: (citizenMobile: string) => ({
+    description: `Inbound call received from citizen at ${citizenMobile}`,
+    description_local: `नागरिक से ${citizenMobile} पर इनबाउंड कॉल प्राप्त हुई`,
+  }),
+
+  REMARK_ADDED: (remark: string, isEdited?: boolean) => ({
+    description: `Remark added: ${remark}${isEdited ? ' (Edited)' : ''}`,
+    description_local: `टिप्पणी जोड़ी गई: ${remark}${isEdited ? ' (संपादित)' : ''}`,
+    remarkText: remark
+  }),
 };

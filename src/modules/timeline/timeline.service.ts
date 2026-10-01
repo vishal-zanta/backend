@@ -15,7 +15,10 @@ type TimelineEventType =
   | "RESOLUTION_PHOTO"
   | "CITIZEN_FEEDBACK"
   | "COMPLAINT_CLOSED"
-  | "STATUS_CHANGE";
+  | "STATUS_CHANGE"
+  | "CALL_OUTBOUND"
+  | "CALL_INBOUND"
+  | "REMARK_ADDED";
 
 export class TimelineService {
   /**

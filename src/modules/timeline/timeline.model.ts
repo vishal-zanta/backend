@@ -38,6 +38,9 @@ const TimelineSchema = new Schema<ITimeline>(
         "CITIZEN_FEEDBACK",
         "COMPLAINT_CLOSED",
         "STATUS_CHANGE",
+        "CALL_OUTBOUND",
+        "CALL_INBOUND",
+        "REMARK_ADDED"
       ],
     },
     actor: {
