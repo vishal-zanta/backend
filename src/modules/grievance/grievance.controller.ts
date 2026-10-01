@@ -2145,6 +2145,21 @@ export class GrievanceController {
         metadata: metadataObj,
       });
 
+      if (!previousOfficer) {
+        await TimelineService.logEvent({
+          grievanceId: grievance._id as any,
+          type: "STATUS_CHANGE" as any,
+          actor: {
+            name: (req as any).user?.name || "System",
+            role: (req as any).user?.roles[0]?.designationEnglish || "System",
+          },
+          metadata: timelineTemplates.STATUS_CHANGE(
+            oldGrievance.status || "OPEN",
+            "IN_PROGRESS"
+          ),
+        });
+      }
+
       // Notify the new officer about the transfer
       NotificationService.notifyTransfer(
         assignedOfficer,
@@ -2707,6 +2722,51 @@ export class GrievanceController {
         status: 200,
         data: responseData,
         message: "Grievance status retrieved successfully",
+      });
+    },
+  );
+
+  /**
+   * CCE API to get all internal and external complaints by mobile number
+   */
+  static getGrievancesByMobileForCCE = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { mobile } = req.query;
+
+      if (!mobile || typeof mobile !== "string") {
+        throw new ApiError({
+          status: 400,
+          message: "Mobile number is required",
+        });
+      }
+
+      // Internal Grievances
+      const internalGrievances = await Grievance.find({
+        $or: [
+          { "citizenInfo.mobile": { $regex: new RegExp(`${mobile}$`) } },
+          { "citizenInfo.alternateMobile": { $regex: new RegExp(`${mobile}$`) } },
+        ],
+      })
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("assignedOfficer")
+        .lean();
+
+      // External Grievances
+      const externalGrievances = await ExternalGrievance.find({
+        mobile: { $regex: new RegExp(`${mobile}$`) },
+      }).lean();
+
+      // Combine and sort (newest first)
+      const combinedGrievances = [...internalGrievances, ...externalGrievances].sort((a: any, b: any) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: combinedGrievances,
+        message: "Grievances fetched successfully by mobile number",
       });
     },
   );

@@ -287,6 +287,17 @@ export class GrievanceService {
           },
           metadata: timelineTemplates.ASSIGNED(assignedUser?.roles?.[0]?.level || "Officer", assignedUser.name)
         });
+
+        await TimelineService.logEvent({
+          grievanceId: newGrievance._id,
+          type: "STATUS_CHANGE",
+          actor: {
+            id: actorId,
+            name: actorRole === "API_KEY" ? actorName : (officer?.name || "SYSTEM"),
+            role: actorRole === "API_KEY" ? actorRole : (officer?.roles?.[0]?.level || "SYSTEM"),
+          },
+          metadata: timelineTemplates.STATUS_CHANGE("OPEN", "IN_PROGRESS")
+        });
         
         // Notify officer of assignment
         NotificationService.notifyOfficerAssignment(

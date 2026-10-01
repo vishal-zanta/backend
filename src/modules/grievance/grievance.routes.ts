@@ -42,6 +42,9 @@ router.get("/analytics-summary", authProtect, GrievanceController.getGrievanceAn
 // Get CCE dashboard analytics
 router.get("/cce/dashboard-analytics", authProtect, checkPermission("CCE_DASHBOARD"), GrievanceController.getCCEDashboardAnalytics);
 
+// CCE: Get complaints history by mobile number
+router.get("/cce/complaints-by-mobile", authProtect, GrievanceController.getGrievancesByMobileForCCE);
+
 // Get admin dashboard analytics
 router.get("/admin/dashboard-analytics", authProtect,checkPermission("ADMIN_DASHBOARD"), GrievanceController.getAdminDashboardAnalytics);
 

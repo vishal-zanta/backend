@@ -228,6 +228,7 @@ console.log(currentRoleSla,"currentRoleSla")
 };
 
 import { sendDailyFieldVisitReminders } from "./fieldVisitReminder.cron.js";
+import { fetchUnreadEmailsAndAssign } from "../modules/imapEmail/imapEmail.service.js";
 
 export const initCronJobs = () => {
   console.log("[Cron] Initializing background jobs...");
@@ -251,4 +252,9 @@ export const initCronJobs = () => {
       await sendDailyFieldVisitReminders();
     }
   }, 60 * 1000);
+
+  // IMAP Unread Emails Check — every 5 seconds
+  setInterval(async () => {
+    await fetchUnreadEmailsAndAssign();
+  }, 5 * 1000);
 };

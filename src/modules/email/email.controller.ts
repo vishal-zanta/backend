@@ -59,6 +59,15 @@ export class EmailController {
 
     const query: any = {};
 
+    // CCE users can only see emails assigned to them; Admin/Supervisor see all
+    const userRoles = (req as any).user?.roles || [];
+    const isCCE = userRoles.some((r: any) => r.level === "CCE");
+    const isAdmin = userRoles.some((r: any) => ["Admin"].includes(r.level));
+
+    if (isCCE && !isAdmin) {
+      query.assignTo = (req as any).user?.id || (req as any).user?._id;
+    }
+
     if (req.query.status) {
       query.status = req.query.status;
     }
