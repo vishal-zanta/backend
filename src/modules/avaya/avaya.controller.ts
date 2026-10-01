@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../../middlewares/asyncHandler.js';
 import ApiResponse from '../../utils/apiResponse.js';
 import { AvayaService } from './avaya.service.js';
+import { Call } from '../call/call.model.js';
+import { Grievance } from '../grievance/grievance.model.js';
+import mongoose from 'mongoose';
 
 export class AvayaController {
   
@@ -14,11 +17,43 @@ export class AvayaController {
   static makeCall = asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as any;
     const sourceExtension =  user?.cceConfig?.extension;
-    const { clientNumber } = req.body;
+    const { clientNumber, grievanceId } = req.body;
     
     if (!sourceExtension) return new ApiResponse({ res, status: 400, message: 'cce config is required' });
     
+    // Initiate call via Avaya Service
     const data = await AvayaService.makeCall(sourceExtension, clientNumber);
+
+    // Look up the grievance if provided to attach its ObjectId
+    let complaintObjectId: any = undefined;
+    if (grievanceId) {
+      if (mongoose.isValidObjectId(grievanceId)) {
+        complaintObjectId = grievanceId;
+      } else {
+        const grievance = await Grievance.findOne({ grievanceId });
+        if (grievance) {
+          complaintObjectId = grievance._id;
+        }
+      }
+    }
+
+    // Create a Call document with available + dummy data
+    const callId = `CALL-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+    
+    await Call.create({
+      callId,
+      agent: user.id || user._id,
+      callType: 'Outbound',
+      citizenMobile: clientNumber,
+      complaintIdString: grievanceId,
+      complaintId: complaintObjectId,
+      status: 'Initiated',
+      disposition: 'Call placed',
+      duration: '10s',
+      recordingDuration: '10s'
+      // recordingUrl is handled by the default value in the schema
+    });
+
     return new ApiResponse({ res, status: 200, data, message: 'Call initiated successfully' });
   });
 

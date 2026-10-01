@@ -61,6 +61,13 @@ router.get(
   GrievanceController.getOfficerGrievanceById,
 );
 
+// Get all communications (calls & emails) for a grievance
+router.get(
+  "/officer/:id/communications",
+  authProtect,
+  GrievanceController.getGrievanceCommunications
+);
+
 // Create a grievance by an officer on behalf of a citizen
 router.post("/officer/create",  authProtect,checkPermission("CREATE_GRIEVANCE"), upload.any('grievance'),  GrievanceController.createGrievanceByAgent);
 

@@ -135,7 +135,9 @@ export class FieldVisitController {
                 'grievance.location': 1,
                 'grievance.citizenInfo': 1,
                 'grievance.geotaggedImages': 1,
-                'grievance.createdAt':1
+                'grievance.createdAt':1,
+                'grievance.assignedPriority':1,
+                
               }
             },
             {

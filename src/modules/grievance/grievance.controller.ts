@@ -37,7 +37,57 @@ import { AuditService } from "../audit/audit.service.js";
 import { SlaConfig } from "../slaConfig/slaConfig.model.js";
 import { ExternalGrievance } from "../externalGrievance/externalGrievance.model.js";
 import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
+import { Call } from "../call/call.model.js";
+import { Email } from "../email/email.model.js";
+
 export class GrievanceController {
+  
+  /**
+   * Get all calls and emails connected to a grievance
+   */
+  static getGrievanceCommunications = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    // Find grievance to ensure we have the correct ObjectId and string ID
+    const orConditions: any[] = [{ grievanceId: id }];
+    if (String(id).match(/^[0-9a-fA-F]{24}$/)) {
+      orConditions.push({ _id: id });
+    }
+    
+    const grievance = await Grievance.findOne({ $or: orConditions }).select('_id grievanceId');
+    if (!grievance) {
+      throw new ApiError({ status: 404, message: "Grievance not found" });
+    }
+
+    // Fetch related calls
+    const calls = await Call.find({
+      $or: [
+        { complaintId: grievance._id },
+        { complaintIdString: grievance.grievanceId }
+      ]
+    })
+    .populate('agent', 'name userCode')
+    .sort({ createdAt: -1 })
+    .lean();
+
+    // Fetch related emails
+    const emails = await Email.find({
+      $or: [
+        { grievance: grievance._id },
+        { complaintId: grievance.grievanceId }
+      ]
+    })
+    .populate('assignTo', 'name userCode')
+    .sort({ receivedAt: -1 })
+    .lean();
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: { calls, emails },
+      message: "Grievance communications fetched successfully",
+    });
+  });
   private static async validateReferences(data: any) {
     const checks: Promise<any>[] = [];
 
@@ -1344,6 +1394,11 @@ export class GrievanceController {
           status: { $in: ["RESOLVED"] },
           updatedAt: { $gte: startDate, $lt: endDate },
         });
+        const closedCount = await Grievance.countDocuments({
+          assignedOfficer: officerId,
+          status: { $in: ["CLOSED"] },
+          updatedAt: { $gte: startDate, $lt: endDate },
+        });
 
         const breachedCount = await GrievanceAnalyticLog.countDocuments({
           action: "ESCALATED",
@@ -1351,7 +1406,7 @@ export class GrievanceController {
           createdAt: { $gte: startDate, $lt: endDate },
         });
 
-        return { assignedCount, pendingCount, resolvedCount, breachedCount };
+        return { assignedCount, pendingCount, resolvedCount, breachedCount,closedCount };
       };
 
       const currentMetrics = await getMetrics(currentStart, now);
@@ -1366,12 +1421,14 @@ export class GrievanceController {
             pending: currentMetrics.pendingCount,
             resolved: currentMetrics.resolvedCount,
             slaBreached: currentMetrics.breachedCount,
+            closed:currentMetrics.closedCount
           },
           previousPeriod: {
             totalAssigned: lastMetrics.assignedCount,
             pending: lastMetrics.pendingCount,
             resolved: lastMetrics.resolvedCount,
             slaBreached: lastMetrics.breachedCount,
+             closed:lastMetrics.closedCount
           },
         },
         message: "Officer dashboard analytics fetched successfully",
