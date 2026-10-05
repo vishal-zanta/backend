@@ -4,7 +4,8 @@ import moment from "moment";
 import express from "express";
 import http from "http";
 import connectDB from "./db/mongo.js";
-import { initRedis } from "./libs/redis.lib.js";
+import mongoose from "mongoose";
+import { initRedis, isRedisAvailable } from "./libs/redis.lib.js";
 import config from "./config/index.js";
 import { initSocket } from "./config/socket.js";
 import apiLogger from "./middlewares/logger.js";
@@ -51,6 +52,30 @@ initCronJobs();
 
 // Routes
 app.use("/api/v1", indexRoutes);
+
+/**
+ * Public health check endpoint
+ * @route GET /health
+ */
+app.get("/health", (_req: Request, res: Response) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
+  const isRedisConnected = isRedisAvailable();
+  const isHealthy = isDbConnected;
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 200 : 503,
+    success: isHealthy,
+    message: isHealthy ? "Server is healthy" : "Server is unhealthy",
+    data: {
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      services: {
+        database: isDbConnected ? "connected" : "disconnected",
+        redis: isRedisConnected ? "connected" : "disconnected",
+      },
+    },
+  });
+});
 
 /**
  * Root endpoint to verify server is running
