@@ -24,7 +24,7 @@ export class AvayaController {
     if (!sourceExtension) return new ApiResponse({ res, status: 400, message: 'cce config is required' });
     
     // Initiate call via Avaya Service
-    const data = null//TODO: fix after vpn approve await AvayaService.makeCall(sourceExtension, clientNumber);
+    const data =  await AvayaService.makeCall(sourceExtension, clientNumber);
 
     // Look up the grievance if provided to attach its ObjectId
     let complaintObjectId: any = undefined;

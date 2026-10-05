@@ -13,7 +13,7 @@ POST https://avaya.lumirex.tech/api/telephony/call
 Content-Type: application/json
 
 {
-    "sourceExtension": "56001",
+    "sourceExtension": "56002",
     "clientNumber": "08307753758"
 }
 
@@ -24,7 +24,7 @@ POST https://avaya.lumirex.tech/api/telephony/call/answer
 Content-Type: application/json
 
 {
-    "extension": "56001"
+    "extension": "56002"
 }
 
 ### ----------------------------------------------------
@@ -69,7 +69,7 @@ Content-Type: application/json
 
 {
     "agentId": "66002",
-    "extension": "56001"
+    "extension": "56002"
 }
 
 ### ----------------------------------------------------
@@ -81,13 +81,13 @@ Content-Type: application/json
 ### ----------------------------------------------------
 
 ### 8. Find where a specific Agent is Logged In
-GET https://avaya.lumirex.tech/api/telephony/agent/66002/status
+GET https://avaya.lumirex.tech/api/telephony/agent/66001/status
 Content-Type: application/json
 
 ### ----------------------------------------------------
 
 ### 9. Get Active Call Details (live duration, caller/called info)
-GET https://avaya.lumirex.tech/api/telephony/call/56001/details
+GET https://avaya.lumirex.tech/api/telephony/call/56002/details
 Content-Type: application/json
 
 ### ----------------------------------------------------
