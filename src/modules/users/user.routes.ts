@@ -9,7 +9,7 @@ router.use(authProtect);
 
 router.post('/', checkPermission("USER_MANAGEMENT"), UserController.createUser);
 router.get('/',  UserController.getUsers);
-router.get('/cce-tracking',checkPermission("CCE_TRACK"), UserController.getCceTracking);
+router.get('/cce-tracking',checkPermission("TRACK_AGENT"), UserController.getCceTracking);
 router.patch('/profile', UserController.updateProfile);
 router.put('/:id', checkPermission("USER_MANAGEMENT"), UserController.updateUser);
 router.put('/:id/cce-config', checkPermission("USER_MANAGEMENT"), UserController.updateCceConfig);

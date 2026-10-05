@@ -8,6 +8,7 @@ import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';
 import { User } from '../users/user.model.js';
 import ApiResponse from '../../utils/apiResponse.js';
+import moment from 'moment';
 
 export class FieldVisitController {
   
@@ -329,6 +330,265 @@ export class FieldVisitController {
       status: 200,
       data: visit,
       message: 'Field visit updated successfully'
+    });
+  });
+
+  /**
+   * API 1: Line graph analytics - Date-wise count of field visits generated
+   * Supports 'from' / 'startDate' and 'to' / 'endDate' date filters
+   */
+  static getVisitTrend = asyncHandler(async (req: Request, res: Response) => {
+    const { startDate, endDate, status } = req.query;
+
+    const fromDateStr = ( startDate) as string;
+    const toDateStr = ( endDate) as string;
+
+    // Default to last 30 days if not provided
+    const now = new Date();
+    const endMoment = toDateStr ? moment(toDateStr).endOf('day') : moment(now).endOf('day');
+    const startMoment = fromDateStr
+      ? moment(fromDateStr).startOf('day')
+      : moment(endMoment).subtract(29, 'days').startOf('day');
+
+    const start = startMoment.toDate();
+    const end = endMoment.toDate();
+
+    const matchStage: any = {
+      createdAt: { $gte: start, $lte: end },
+    };
+
+    if (status && typeof status === 'string' && status !== 'ALL') {
+      matchStage.status = status;
+    }
+
+    const pipeline: any[] = [{ $match: matchStage }];
+
+   
+
+    pipeline.push(
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+              timezone: '+05:30',
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } }
+    );
+
+    const results = await FieldVisit.aggregate(pipeline);
+
+    // Build complete daily timeline between start and end (with 0 counts for missing days)
+    const dateMap = new Map<string, number>();
+    const current = moment(startMoment);
+    while (current.isSameOrBefore(endMoment, 'day')) {
+      dateMap.set(current.format('YYYY-MM-DD'), 0);
+      current.add(1, 'day');
+    }
+
+    let totalVisits = 0;
+    results.forEach((r: any) => {
+      if (dateMap.has(r._id)) {
+        dateMap.set(r._id, r.count);
+      }
+      totalVisits += r.count;
+    });
+
+    const timeline = Array.from(dateMap.entries()).map(([date, count]) => ({
+      date,
+      count,
+    }));
+
+    const totalDays = timeline.length || 1;
+    const avgPerDay = parseFloat((totalVisits / totalDays).toFixed(2));
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        summary: {
+          totalVisits,
+          fromDate: startMoment.format('YYYY-MM-DD'),
+          toDate: endMoment.format('YYYY-MM-DD'),
+          totalDays,
+          avgPerDay,
+        },
+        timeline,
+      },
+      message: 'Field visit trend fetched successfully',
+    });
+  });
+
+  /**
+   * API 2: Fetch all field visits for a single date
+   * Matching the line graph count using createdAt (+05:30 IST)
+   * with connected complaint/grievance and assigned officer details
+   */
+  static getVisitsByDate = asyncHandler(async (req: Request, res: Response) => {
+    const { date, page = 1, limit = 10 } = req.query;
+
+    const rawDateStr = (date as string) || moment().format('YYYY-MM-DD');
+    const cleanDateStr = rawDateStr.includes('T') ? rawDateStr.split('T')[0] : rawDateStr;
+
+    // Filter by createdAt in IST (+05:30) to exactly match the line graph count
+    const start = moment.parseZone(`${cleanDateStr}T00:00:00.000+05:30`).toDate();
+    const end = moment.parseZone(`${cleanDateStr}T23:59:59.999+05:30`).toDate();
+
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    const pipeline: any[] = [
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $lookup: {
+          from: 'grievances',
+          localField: 'grievance',
+          foreignField: '_id',
+          as: 'grievance',
+        },
+      },
+      { $unwind: '$grievance' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'grievance.assignedOfficer',
+          foreignField: '_id',
+          as: 'assignedOfficer',
+        },
+      },
+      { $unwind: { path: '$assignedOfficer', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'grievance.classification.service',
+          foreignField: '_id',
+          as: 'serviceDetails',
+        },
+      },
+      { $unwind: { path: '$serviceDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'grievance.classification.department',
+          foreignField: '_id',
+          as: 'departmentDetails',
+        },
+      },
+      { $unwind: { path: '$departmentDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'districts',
+          localField: 'grievance.location.district',
+          foreignField: '_id',
+          as: 'districtDetails',
+        },
+      },
+      { $unwind: { path: '$districtDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'blocks',
+          localField: 'grievance.location.block',
+          foreignField: '_id',
+          as: 'blockDetails',
+        },
+      },
+      { $unwind: { path: '$blockDetails', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'panchayats',
+          localField: 'grievance.location.panchayat',
+          foreignField: '_id',
+          as: 'panchayatDetails',
+        },
+      },
+      { $unwind: { path: '$panchayatDetails', preserveNullAndEmptyArrays: true } },
+      { $sort: { createdAt: -1 } },
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [
+            { $skip: skip },
+            { $limit: limitNum },
+            {
+              $project: {
+                _id: 1,
+                visitId: 1,
+                status: 1,
+                schedule: 1,
+                remark: 1,
+                logs: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                grievance: {
+                  _id: '$grievance._id',
+                  grievanceId: '$grievance.grievanceId',
+                  status: '$grievance.status',
+                  assignedPriority: '$grievance.assignedPriority',
+                  citizenInfo: '$grievance.citizenInfo',
+                  geotaggedImages: '$grievance.geotaggedImages',
+                  createdAt: '$grievance.createdAt',
+                  department: {
+                    _id: '$departmentDetails._id',
+                    name: '$departmentDetails.name',
+                    code: '$departmentDetails.code',
+                  },
+                  service: {
+                    _id: '$serviceDetails._id',
+                    title: '$serviceDetails.title',
+                    titleHindi: '$serviceDetails.titleHindi',
+                  },
+                  location: {
+                    district: '$districtDetails.name',
+                    block: '$blockDetails.name',
+                    panchayat: '$panchayatDetails.name',
+                    address: '$grievance.location.address',
+                    pincode: '$grievance.location.pincode',
+                  },
+                },
+                assignedOfficer: {
+                  _id: '$assignedOfficer._id',
+                  name: '$assignedOfficer.name',
+                  userCode: '$assignedOfficer.userCode',
+                  email: '$assignedOfficer.email',
+                  phone: '$assignedOfficer.phone',
+                },
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    const [facetResult] = await FieldVisit.aggregate(pipeline);
+
+    const total = facetResult?.metadata?.[0]?.total || 0;
+    const data = facetResult?.data || [];
+    const totalPages = Math.ceil(total / limitNum) || 1;
+
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: {
+        date: cleanDateStr,
+        docs: data,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages,
+        },
+      },
+      message: 'Field visits for the selected date fetched successfully',
     });
   });
 }
