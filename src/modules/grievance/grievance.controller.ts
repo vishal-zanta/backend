@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Request, Response } from "express";
 import { Grievance, IAttachment } from "./grievance.model.js";
 import { StorageService } from "../../libs/storage.lib.js";
@@ -1077,7 +1078,7 @@ export class GrievanceController {
    */
   static getAdminDashboardAnalytics = asyncHandler(
     async (req: Request, res: Response) => {
-      const { filter = "week" } = req.query;
+      const { filter = "week", district, districtId, limit } = req.query;
 
       let currentStart = new Date();
       let lastStart = new Date();
@@ -1274,6 +1275,7 @@ export class GrievanceController {
           $project: {
             _id: 1,
             name: { $ifNull: ["$districtDetails.name_en", "$_id"] },
+            count: "$total",
             total: 1,
             resolved: 1,
             pending: 1,
@@ -1282,6 +1284,89 @@ export class GrievanceController {
           },
         },
       ]);
+
+      const blockMatch: any = {
+        createdAt: { $gte: currentStart, $lt: now },
+        "location.block": { $exists: true, $ne: null },
+      };
+
+      const selectedDistrict = districtId || district;
+      if (selectedDistrict && typeof selectedDistrict === "string" && mongoose.isValidObjectId(selectedDistrict)) {
+        blockMatch["location.district"] = new mongoose.Types.ObjectId(selectedDistrict);
+      }
+
+      const blockPipeline: any[] = [
+        { $match: blockMatch },
+        {
+          $group: {
+            _id: "$location.block",
+            districtId: { $first: "$location.district" },
+            total: { $sum: 1 },
+            resolved: {
+              $sum: {
+                $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0],
+              },
+            },
+            pending: { $sum: { $cond: [{ $eq: ["$status", "OPEN"] }, 1, 0] } },
+            inProgress: {
+              $sum: { $cond: [{ $eq: ["$status", "IN_PROGRESS"] }, 1, 0] },
+            },
+            escalated: {
+              $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "blocks",
+            localField: "_id",
+            foreignField: "_id",
+            as: "blockDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$blockDetails",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $lookup: {
+            from: "districts",
+            localField: "districtId",
+            foreignField: "_id",
+            as: "districtDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$districtDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: { $ifNull: ["$blockDetails.name_en", "$_id"] },
+            name_local: "$blockDetails.name_local",
+            districtId: 1,
+            districtName: "$districtDetails.name_en",
+            count: "$total",
+            total: 1,
+            resolved: 1,
+            pending: 1,
+            inProgress: 1,
+            escalated: 1,
+          },
+        },
+        { $sort: { total: -1 } },
+      ];
+
+      if (limit && !isNaN(parseInt(limit as string))) {
+        blockPipeline.push({ $limit: parseInt(limit as string) });
+      }
+
+      const byBlock = await Grievance.aggregate(blockPipeline);
 
       const bySource = await Grievance.aggregate([
         { $match: { createdAt: { $gte: currentStart, $lt: now } } },
@@ -1328,8 +1413,10 @@ export class GrievanceController {
             },
             bySubservice,
             byDistrict,
+            byBlock,
             bySource,
           },
+          byBlock,
         },
         message: "Admin dashboard analytics fetched successfully",
       });
