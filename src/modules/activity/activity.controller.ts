@@ -9,28 +9,34 @@ export class ActivityController {
  
   static pulse = asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as any;
+    const { isActiveOnScreen = true, screenState } = req.body;
+    const active = isActiveOnScreen !== false;
     
     if (user.roles && Array.isArray(user.roles) && user.roles.length > 0) {
-      user.roles.forEach((r: any) => {
+      for (const r of user.roles) {
         const roleLevel = r.level || 'unknown';
-        ActivityService.recordPulse(user.id, String(roleLevel));
-      });
+        await ActivityService.recordPulse(user.id, String(roleLevel), active, screenState);
+      }
     } else {
-      ActivityService.recordPulse(user.id, 'unknown');
+      await ActivityService.recordPulse(user.id, 'unknown', active, screenState);
     }
 
     return new ApiResponse({
       res,
       status: 200,
+      data: {
+        isOnline: true,
+        isActiveOnScreen: active,
+        screenState: screenState || (active ? 'ACTIVE' : 'BACKGROUND'),
+      },
       message: 'Pulse recorded successfully for all active roles',
     });
   });
 
-
   static getActiveUsers = asyncHandler(async (req: Request, res: Response) => {
     const { roleLevel, countOnly } = req.query;
     
-    const result = ActivityService.getActiveUsers(roleLevel as string);
+    const result = await ActivityService.getActiveUsers(roleLevel as string);
 
     // If countOnly is true, return just the count
     if (countOnly === 'true') {

@@ -4,6 +4,7 @@ import moment from "moment";
 import express from "express";
 import http from "http";
 import connectDB from "./db/mongo.js";
+import { initRedis } from "./libs/redis.lib.js";
 import config from "./config/index.js";
 import { initSocket } from "./config/socket.js";
 import apiLogger from "./middlewares/logger.js";
@@ -38,6 +39,9 @@ app.use(apiLogger);
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize Redis
+initRedis();
 
 // Initialize Cron Jobs
 initCronJobs();

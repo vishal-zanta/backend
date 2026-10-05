@@ -58,7 +58,8 @@ export const API_PERMISSIONS = {
   ADMIN_DASHBOARD:"ADMIN_DASHBOARD",
   OFFICER_DASHBOARD:"OFFICER_DASHBOARD",
 
-
+// tracking
+CCE_TRACK:"CCE_TRACK",
 
   // Master Admin Permission
   ALL: "ALL",

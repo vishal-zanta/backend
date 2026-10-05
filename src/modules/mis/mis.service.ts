@@ -502,8 +502,8 @@ async function getIvrStatsReport(match: Record<string, unknown>) {
     resolvedCount: 0,
   };
 
-  const activeCce = ActivityService.getActiveUsers("CCE");
-  const activeSupervisors = ActivityService.getActiveUsers("Supervisor");
+  const activeCce = await ActivityService.getActiveUsers("CCE");
+  const activeSupervisors = await ActivityService.getActiveUsers("Supervisor");
   const activeAgents = activeCce.count + activeSupervisors.count;
   const totalAgents = agentUsers.length;
 
@@ -615,9 +615,11 @@ async function getAgentPerformanceReport(match: Record<string, unknown>) {
   ]);
 
   const statsByAgent = new Map(rows.map((r) => [r._id.toString(), r]));
+  const activeCceUsers = await ActivityService.getActiveUsers("CCE");
+  const activeSupervisorUsers = await ActivityService.getActiveUsers("Supervisor");
   const activeUsers = [
-    ...ActivityService.getActiveUsers("CCE").users,
-    ...ActivityService.getActiveUsers("Supervisor").users,
+    ...activeCceUsers.users,
+    ...activeSupervisorUsers.users,
   ];
   const activeSet = new Set(activeUsers.map((u) => u.userId));
 
