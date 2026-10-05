@@ -15,7 +15,14 @@ export class AvayaService {
    * 2. Make a Phone Call (Click-to-Call)
    */
   static async makeCall(sourceExtension: string, clientNumber: string) {
-    const response = await axios.post(`${AVAYA_BASE_URL}/call`, { sourceExtension, clientNumber });
+    const cleaned = String(clientNumber || '').replace(/\D/g, '');
+    const last10 = cleaned.length >= 10 ? cleaned.slice(-10) : cleaned;
+    const formattedClientNumber = `0${last10}`;
+
+    const response = await axios.post(`${AVAYA_BASE_URL}/call`, {
+      sourceExtension,
+      clientNumber: formattedClientNumber,
+    });
     return response.data;
   }
 
