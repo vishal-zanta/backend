@@ -68,7 +68,11 @@ export class ActivityController {
     }
 
     user.adminLogout = new Date();
+    user.isBreak = false;
     await user.save();
+
+    // Remove user activity from Redis
+    await ActivityService.removeUserActivity(user._id.toString());
 
     return new ApiResponse({
       res,

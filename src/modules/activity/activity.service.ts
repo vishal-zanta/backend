@@ -1,4 +1,4 @@
-import { redisSet, redisGet, redisKeys } from '../../libs/redis.lib.js';
+import { redisSet, redisGet, redisKeys, redisDel } from '../../libs/redis.lib.js';
 
 interface ActivityPulseData {
   userId: string;
@@ -38,6 +38,24 @@ export class ActivityService {
       redisSet(`activity:pulse:${roleLevel}:${userId}`, data, PULSE_TTL_SECONDS),
       redisSet(`activity:user:${userId}`, data, PULSE_TTL_SECONDS),
     ]);
+  }
+
+  /**
+   * Remove user activity and pulse from Redis upon logout
+   * @param userId user id
+   * @param roleLevel optional role level if known
+   */
+  static async removeUserActivity(userId: string, roleLevel?: string): Promise<void> {
+    const keysToDelete: string[] = [`activity:user:${userId}`];
+
+    if (roleLevel) {
+      keysToDelete.push(`activity:pulse:${roleLevel}:${userId}`);
+    } else {
+      const pulseKeys = await redisKeys(`activity:pulse:*:${userId}`);
+      keysToDelete.push(...pulseKeys);
+    }
+
+    await Promise.all(keysToDelete.map((key) => redisDel(key)));
   }
 
   /**

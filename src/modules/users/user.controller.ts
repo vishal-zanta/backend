@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import { User } from './user.model.js';
 import { Role } from '../roles/role.model.js';
@@ -410,7 +411,7 @@ export class UserController {
 
   
 
-    const { search, supervisorId, status, page, limit } = req.query;
+    const { search, supervisorId, status, currentStatus, screenState, page, limit } = req.query;
 
     // Find CCE role ID(s)
     const cceRoles = await Role.find({ level: { $regex: /^cce$/i } }).select('_id');
@@ -437,19 +438,25 @@ export class UserController {
     }
 
     if (search && typeof search === 'string') {
-      const searchRegex = new RegExp(search.trim(), 'i');
-      query.$or = [
+      const searchStr = search.trim();
+      const searchRegex = new RegExp(searchStr, 'i');
+      const orConditions: any[] = [
         { name: searchRegex },
         { userCode: searchRegex },
+        { loginId: searchRegex },
         { email: searchRegex },
         { phone: searchRegex },
         { 'cceConfig.agentId': searchRegex },
         { 'cceConfig.extension': searchRegex },
       ];
+      if (mongoose.isValidObjectId(searchStr)) {
+        orConditions.push({ _id: new mongoose.Types.ObjectId(searchStr) });
+      }
+      query.$or = orConditions;
     }
 
     const agents = await User.find(query)
-      .select('name userCode email phone supervisor cceConfig lastLogin adminLogout isBreak createdAt')
+      .select('name userCode loginId email phone supervisor cceConfig lastLogin adminLogout isBreak createdAt')
       .populate('supervisor', 'name userCode email phone')
       .lean();
 
@@ -489,6 +496,7 @@ export class UserController {
           _id: agent._id,
           name: agent.name,
           userCode: agent.userCode,
+          loginId: agent.loginId,
           email: agent.email,
           phone: agent.phone,
           supervisor: agent.supervisor,
@@ -505,10 +513,20 @@ export class UserController {
       })
     );
 
-    // Optional status filter
+    // Filters: currentStatus and screenState
     let filteredList = list;
-    if (status && typeof status === 'string' && status !== 'ALL') {
-      filteredList = filteredList.filter((a) => a.currentStatus === status || a.screenState === status);
+
+    const effectiveCurrentStatus = (currentStatus || status) as string;
+    if (effectiveCurrentStatus && typeof effectiveCurrentStatus === 'string' && effectiveCurrentStatus.toUpperCase() !== 'ALL') {
+      filteredList = filteredList.filter(
+        (a) => a.currentStatus.toUpperCase() === effectiveCurrentStatus.trim().toUpperCase()
+      );
+    }
+
+    if (screenState && typeof screenState === 'string' && (screenState as string).toUpperCase() !== 'ALL') {
+      filteredList = filteredList.filter(
+        (a) => a.screenState?.toUpperCase() === (screenState as string).trim().toUpperCase()
+      );
     }
 
     // Sort: Online & active on screen first, then on break, then offline

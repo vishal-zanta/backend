@@ -12,6 +12,7 @@ import { CaptchaService } from '../captcha/captcha.service.js';
 import { OfficerTagging } from '../officerTagging/officerTagging.model.js';
 import { Shift } from '../shift/shift.model.js';
 import { AvayaService } from '../avaya/avaya.service.js';
+import { ActivityService } from '../activity/activity.service.js';
 export class AuthController {
   static login = asyncHandler(async (req: Request, res: Response) => {
     const { email, loginId, password, token, captchaToken } = req.body;
@@ -197,7 +198,11 @@ export class AuthController {
 
     // We reuse the adminLogout logic to invalidate tokens issued before this time
     user.adminLogout = new Date();
+    user.isBreak = false;
     await user.save();
+
+    // Remove user activity from Redis
+    await ActivityService.removeUserActivity(id);
 
     if (user.cceConfig && user.cceConfig.agentId && user.cceConfig.extension) {
       try {
