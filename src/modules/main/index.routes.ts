@@ -32,9 +32,11 @@ import emailRoutes from "../email/email.routes.js";
 import translateRoutes from "../translate/translate.routes.js";
 import avayaRoutes from "../avaya/avaya.routes.js";
 import callRoutes from "../call/call.routes.js";
+import checkRoutes from "../checks/check.routes.js";
 const router = Router();
 
 router.use("/", healthRoutes);
+router.use("/checks", checkRoutes);
 router.use("/captcha", captchaRoutes);
 router.use("/citizen", citizenRoutes);
 router.use("/auth", authRoutes);
