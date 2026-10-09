@@ -25,6 +25,14 @@ export const handleErrorResponse = (
     console.error(error?.stack);
   }
 
+  // Attach error metadata to res.locals so auditTrailMiddleware can capture it
+  res.locals = res.locals || {};
+  res.locals.auditError = {
+    code: error?.code ? String(error.code) : (error?.name || "INTERNAL_ERROR"),
+    message: errorMessage || error?.message || "An unexpected error occurred",
+    details: error?.name?.includes('Mongo') || error?.name?.includes('Cast') ? { type: "DATABASE_ERROR", rawName: error.name } : undefined,
+  };
+
   if (error?.name === 'ValidationError') {
     errorMessage = "Invalid input data provided. Please check your request.";
     status = StatusCodes.BAD_REQUEST;

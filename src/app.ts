@@ -17,6 +17,10 @@ import { handleErrorResponse } from "./middlewares/errorHandler.js";
 import indexRoutes from "./modules/main/index.routes.js";
 // import { globalLimiter } from "./middlewares/rateLimiter.js";
 
+// Audit Trail
+import { auditTrailMiddleware } from "./middlewares/auditTrail.middleware.js";
+import { initAuditWorker } from "./modules/audit/audit.worker.js";
+
 // Cronjobs
 import { initCronJobs } from "./cronjobs/escalation.cron.js";
 
@@ -44,11 +48,17 @@ connectDB();
 // Initialize Redis
 initRedis();
 
+// Initialize Audit Queue Worker
+initAuditWorker();
+
 // Initialize Cron Jobs
 initCronJobs();
 
 // Global Rate Limiter
 // app.use(globalLimiter);
+
+// Global Government API Audit Trail Middleware (captures 100% of API requests)
+app.use(auditTrailMiddleware);
 
 // Routes
 app.use("/api/v1", indexRoutes);
