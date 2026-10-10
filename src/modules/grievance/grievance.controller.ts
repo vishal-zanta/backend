@@ -1643,7 +1643,9 @@ export class GrievanceController {
   );
 
   /**
-   * Get all grievances (for agents/admins) with search across ID, mobile, and service name
+   * Get all grievances (for agents/admins) with search across ID, mobile, and service name.
+   * Returns internal grievances first, followed by external grievances sequentially.
+   * Search is applied independently to each collection.
    */
   static getAllGrievances = asyncHandler(
     async (req: Request, res: Response) => {
@@ -1662,6 +1664,7 @@ export class GrievanceController {
         sortObj = { createdAt: sortOrder === 'asc' ? 1 : -1 };
       }
 
+      // Internal Grievance query
       const query: any = {};
       
       if (department) {
@@ -1670,17 +1673,11 @@ export class GrievanceController {
         };
       }
       if (status) {
-        query.status = {
-          $in: status.split(","),
-        };
+        query.status = { $in: status.split(",") };
       }
-
       if (priority) {
-        query.assignedPriority = {
-          $in: priority.split(","),
-        };
+        query.assignedPriority = { $in: priority.split(",") };
       }
-
       if (feedback === "true") {
         if (!query.status) query.status = { $in: ["RESOLVED", "CLOSED"] };
         query.rating = { $ne: null };
@@ -1692,66 +1689,130 @@ export class GrievanceController {
       if (search) {
         const searchRegex = new RegExp(search, "i");
         let serviceIds: any[] = [];
-
-        // Look up matching services by name
         try {
-          const matchingServices = await Service.find({
-            title: searchRegex,
-          }).select("_id");
+          const matchingServices = await Service.find({ title: searchRegex }).select("_id");
           serviceIds = matchingServices.map((s) => s._id);
         } catch (e) {
           console.error("Failed to lookup Service for search", e);
         }
-
         query.$or = [
           { grievanceId: searchRegex },
           { "citizenInfo.mobile": searchRegex },
+          { "citizenInfo.name": searchRegex },
         ];
-
-        // If any services matched the search string by name, include them in the OR clause
         if (serviceIds.length > 0) {
           query.$or.push({ "classification.service": { $in: serviceIds } });
         }
       }
 
-      const totalCount = await Grievance.countDocuments(query);
+      // External Grievance query
+      const extQuery: any = {};
+      if (status) {
+        extQuery.status = { $in: status.split(",") };
+      }
+      if (search) {
+        const searchRegex = new RegExp(search, "i");
+        const isMobileSearch = /^\d+$/.test(search) && search.length >= 10;
+        const extOrConditions: any[] = [
+          { internalId: searchRegex },
+          { externalComplaintId: searchRegex },
+          { departmentCode: searchRegex },
+          { "departmentPayload.applicantName": searchRegex },
+          { "departmentPayload.citizenName": searchRegex },
+          { "departmentPayload.name": searchRegex },
+          { "departmentPayload.serviceName": searchRegex },
+        ];
+        if (isMobileSearch) {
+          extOrConditions.push({ mobile: new RegExp(`${search.slice(-10)}$`) });
+        } else {
+          extOrConditions.push({ mobile: searchRegex });
+        }
+        extQuery.$or = extOrConditions;
+      }
+
+      // feedback=true/false is an internal concept only; skip external in that case
+      const shouldFetchExternal = feedback !== "true" && feedback !== "false";
+
+      // Count both collections
+      const [totalInternal, totalExternal] = await Promise.all([
+        Grievance.countDocuments(query),
+        shouldFetchExternal ? ExternalGrievance.countDocuments(extQuery) : Promise.resolve(0),
+      ]);
+
+      const totalCount = totalInternal + totalExternal;
       const pagination = buildPagination({ page, limit, totalCount });
 
-      const grievances = await Grievance.find(query)
-        .select(
-          "grievanceId classification location citizenInfo impact status assignedPriority createdAt citizenInfo assignedAt assignedOfficer resolvedAt",
-        )
-        .populate("classification.department")
-        .populate("classification.service")
-        .populate("classification.nature")
-        .populate("impact.affectedBeneficiary")
-        .populate({
-          path: "classification.service",
-          select: "title titleHindi sla department",
-          populate: { path: "department" },
-        })
-        .populate("location.district", "name_en name_local")
-        .populate("location.block", "name_en name_local")
-        .populate("location.panchayat", "name_en name_local")
-        .populate("location.village", "name_en name_local")
-        .populate("location.thana", "name_en name_local type")
-        .populate("location.urbanPanchayat", "name_en name_local")
-        .populate("location.ward", "name_en name_local")
-        .populate({
-          path: "assignedOfficer",
-          select: "name roles",
-          populate: {
-            path: "roles",
-            select: "_id level designationEnglish",
-          },
-        })
-        .sort(sortObj)
-        .skip(pagination.offset)
-        .limit(pagination.limit)
-        .lean();
+      // Fetch: internal first, then external
+      let internalDocs: any[] = [];
+      let externalDocs: any[] = [];
+      const offset = pagination.offset;
+      const pageLimit = pagination.limit;
 
-      const modifiedGrievances =
-        await GrievanceController.attachSlaToGrievancesList(grievances);
+      if (offset < totalInternal) {
+        const internalLimit = Math.min(pageLimit, totalInternal - offset);
+        internalDocs = await Grievance.find(query)
+          .select(
+            "grievanceId classification location citizenInfo impact status assignedPriority createdAt assignedAt assignedOfficer resolvedAt",
+          )
+          .populate("classification.department")
+          .populate("classification.service")
+          .populate("classification.nature")
+          .populate("impact.affectedBeneficiary")
+          .populate({
+            path: "classification.service",
+            select: "title titleHindi sla department",
+            populate: { path: "department" },
+          })
+          .populate("location.district", "name_en name_local")
+          .populate("location.block", "name_en name_local")
+          .populate("location.panchayat", "name_en name_local")
+          .populate("location.village", "name_en name_local")
+          .populate("location.thana", "name_en name_local type")
+          .populate("location.urbanPanchayat", "name_en name_local")
+          .populate("location.ward", "name_en name_local")
+          .populate({
+            path: "assignedOfficer",
+            select: "name roles",
+            populate: {
+              path: "roles",
+              select: "_id level designationEnglish",
+            },
+          })
+          .sort(sortObj)
+          .skip(offset)
+          .limit(internalLimit)
+          .lean();
+
+        const remainingSlots = pageLimit - internalDocs.length;
+        if (shouldFetchExternal && remainingSlots > 0 && totalExternal > 0) {
+          externalDocs = await ExternalGrievance.find(extQuery)
+            .sort(sortObj)
+            .skip(0)
+            .limit(remainingSlots)
+            .lean();
+        }
+      } else if (shouldFetchExternal) {
+        // Internal exhausted; paginate through external
+        const externalOffset = offset - totalInternal;
+        externalDocs = await ExternalGrievance.find(extQuery)
+          .sort(sortObj)
+          .skip(externalOffset)
+          .limit(pageLimit)
+          .lean();
+      }
+
+      const formattedInternal = internalDocs.map((g: any) => ({
+        ...g,
+        grievanceType: "INTERNAL",
+      }));
+      const withSla = await GrievanceController.attachSlaToGrievancesList(formattedInternal);
+
+      const formattedExternal = externalDocs.map((ext: any) => ({
+        ...ext,
+        grievanceType: "EXTERNAL",
+      }));
+
+      const modifiedGrievances = [...withSla, ...formattedExternal];
 
       return new ApiResponse({
         res,
@@ -1764,6 +1825,7 @@ export class GrievanceController {
       });
     },
   );
+
 
   /**
    * Get dashboard analytics for an officer
