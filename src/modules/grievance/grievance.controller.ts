@@ -33,6 +33,9 @@ import {
   BlockModel,
   PanchayatModel,
   ThanaModel,
+  VillageModel,
+  UrbanLocalBodyModel,
+  WardModel,
 } from "../address/address.model.js";
 import { AuditService } from "../audit/audit.service.js";
 import { SlaConfig } from "../slaConfig/slaConfig.model.js";
@@ -346,6 +349,88 @@ export class GrievanceController {
               });
           },
         ),
+      );
+    }
+
+    // Correspondence Address Validation (data.address)
+    if (data.address?.district) {
+      checks.push(
+        DistrictModel.exists({ _id: data.address.district }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid address.district: Reference does not exist",
+            });
+        }),
+      );
+    }
+    if (data.address?.block) {
+      checks.push(
+        BlockModel.exists({ _id: data.address.block }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid address.block: Reference does not exist",
+            });
+        }),
+      );
+    }
+    if (data.address?.panchayat) {
+      checks.push(
+        PanchayatModel.exists({ _id: data.address.panchayat }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid address.panchayat: Reference does not exist",
+            });
+        }),
+      );
+    }
+    if (data.address?.thana) {
+      checks.push(
+        ThanaModel.exists({ _id: data.address.thana }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid address.thana: Reference does not exist",
+            });
+        }),
+      );
+    }
+    if (data.address?.village) {
+      checks.push(
+        VillageModel.exists({ _id: data.address.village }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid address.village: Reference does not exist",
+            });
+        }),
+      );
+    }
+    if (data.address?.urbanPanchayat) {
+      checks.push(
+        UrbanLocalBodyModel.exists({ _id: data.address.urbanPanchayat }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message:
+                  "Invalid address.urbanPanchayat: Reference does not exist",
+              });
+          },
+        ),
+      );
+    }
+    if (data.address?.ward) {
+      checks.push(
+        WardModel.exists({ _id: data.address.ward }).then((exists) => {
+          if (!exists)
+            throw new ApiError({
+              status: 400,
+              message: "Invalid address.ward: Reference does not exist",
+            });
+        }),
       );
     }
 
@@ -924,7 +1009,14 @@ export class GrievanceController {
         .populate("citizenInfo.address.urbanPanchayat", "name_en name_local")
         .populate("citizenInfo.address.ward", "name_en name_local ward_number")
         .populate("citizenInfo.address.village", "name_en name_local")
-        .populate("citizenInfo.address.thana", "name_en type")
+        .populate("citizenInfo.address.thana", "name_en name_local type")
+        .populate("address.district", "name_en name_local")
+        .populate("address.block", "name_en name_local")
+        .populate("address.panchayat", "name_en name_local")
+        .populate("address.urbanPanchayat", "name_en name_local")
+        .populate("address.ward", "name_en name_local ward_number")
+        .populate("address.village", "name_en name_local")
+        .populate("address.thana", "name_en name_local type")
         .populate("channel", "title titleHindi");
 
       if (!grievance) {
@@ -2776,7 +2868,14 @@ export class GrievanceController {
         .populate("citizenInfo.address.urbanPanchayat", "name_en name_local")
         .populate("citizenInfo.address.ward", "name_en name_local ward_number")
         .populate("citizenInfo.address.village", "name_en name_local")
-        .populate("citizenInfo.address.thana", "name_en type")
+        .populate("citizenInfo.address.thana", "name_en name_local type")
+        .populate("address.district", "name_en name_local")
+        .populate("address.block", "name_en name_local")
+        .populate("address.panchayat", "name_en name_local")
+        .populate("address.urbanPanchayat", "name_en name_local")
+        .populate("address.ward", "name_en name_local ward_number")
+        .populate("address.village", "name_en name_local")
+        .populate("address.thana", "name_en name_local type")
         .populate("channel", "title titleHindi");
 
       if (!grievance) {
@@ -2850,7 +2949,14 @@ export class GrievanceController {
         .populate("citizenInfo.address.urbanPanchayat", "name_en name_local")
         .populate("citizenInfo.address.ward", "name_en name_local ward_number")
         .populate("citizenInfo.address.village", "name_en name_local")
-        .populate("citizenInfo.address.thana", "name_en type")
+        .populate("citizenInfo.address.thana", "name_en name_local type")
+        .populate("address.district", "name_en name_local")
+        .populate("address.block", "name_en name_local")
+        .populate("address.panchayat", "name_en name_local")
+        .populate("address.urbanPanchayat", "name_en name_local")
+        .populate("address.ward", "name_en name_local ward_number")
+        .populate("address.village", "name_en name_local")
+        .populate("address.thana", "name_en name_local type")
         .populate("channel", "title titleHindi");
 
       if (!grievance) {

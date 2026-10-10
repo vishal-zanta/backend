@@ -150,7 +150,7 @@ export class ThirdPartyGrievanceController {
       populate: {
         path: "roles"
       }
-    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("channel","title");
+    }).populate("location.district", "name_en name_local").populate("location.block", "name_en name_local").populate("location.panchayat", "name_en name_local").populate("location.thana", "name_en name_local").populate("citizenInfo.address.district", "name_en name_local").populate("citizenInfo.address.block", "name_en name_local").populate("citizenInfo.address.panchayat", "name_en name_local").populate("citizenInfo.address.thana", "name_en name_local").populate("address.district", "name_en name_local").populate("address.block", "name_en name_local").populate("address.panchayat", "name_en name_local").populate("address.urbanPanchayat", "name_en name_local").populate("address.ward", "name_en name_local ward_number").populate("address.village", "name_en name_local").populate("address.thana", "name_en name_local").populate("channel","title");
 
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found" });

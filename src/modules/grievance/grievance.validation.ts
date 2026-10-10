@@ -78,33 +78,11 @@ const finalAddressSchema = z.object({
     .max(50, "Address details cannot exceed 50 characters")
     .optional()
     .or(z.literal("")),
-  // .min(1, "Address details are required")
-  district: z
-    .string()
-    .max(50, "District cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
-  // .min(1, "District is required")
-  block: z
-    .string()
-    .max(50, "Block cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
-  panchayat: z
-    .string()
-    .max(50, "Panchayat cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
-  thana: z
-    .string()
-    .max(50, "Thana cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
-  village: z
-    .string()
-    .max(50, "Village cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
+  district: mongoId.optional().or(z.literal("")),
+  block: mongoId.optional().or(z.literal("")),
+  panchayat: mongoId.optional().or(z.literal("")),
+  thana: mongoId.optional().or(z.literal("")),
+  village: mongoId.optional().or(z.literal("")),
   pincode: z
     .string()
     .max(6, "Pincode cannot exceed 6 characters")
@@ -112,19 +90,8 @@ const finalAddressSchema = z.object({
     .or(z.literal("")),
 
   // urban
-  urbanPanchayat: z
-    .string()
-    .max(
-      50,
-      "Municipal corporation/municipal council/nagar panchayat cannot exceed 50 characters",
-    )
-    .optional()
-    .or(z.literal("")),
-  ward: z
-    .string()
-    .max(50, "Ward cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
+  urbanPanchayat: mongoId.optional().or(z.literal("")),
+  ward: mongoId.optional().or(z.literal("")),
   // correspondance
   state: z
     .string()
