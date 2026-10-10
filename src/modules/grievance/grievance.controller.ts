@@ -805,7 +805,7 @@ export class GrievanceController {
         .populate("location.district", "name_en name_local")
         .populate("location.block", "name_en name_local")
         .populate("location.panchayat", "name_en name_local")
-        .populate("location.thana", "name_en type")
+        .populate("location.thana", "name_en name_local type")
         .lean();
       }
 
@@ -917,7 +917,7 @@ export class GrievanceController {
         .populate("location.urbanPanchayat", "name_en name_local")
         .populate("location.ward", "name_en name_local ward_number")
         .populate("location.village", "name_en name_local")
-        .populate("location.thana", "name_en type")
+        .populate("location.thana", "name_en name_local type")
         .populate("citizenInfo.address.district", "name_en name_local")
         .populate("citizenInfo.address.block", "name_en name_local")
         .populate("citizenInfo.address.panchayat", "name_en name_local")
@@ -979,21 +979,24 @@ export class GrievanceController {
     async (req: Request, res: Response) => {
       const officerId = req.query.officerId as string;
 
-      const query: any = {};
-      if (officerId) {
-        query.assignedOfficer = officerId;
-      }
+      // Base query without assignedOfficer constraint if no officerId specified
+      const baseFilter = officerId ? { assignedOfficer: officerId } : {};
 
+      const total = await Grievance.countDocuments(baseFilter);
       const totalAssigned = await Grievance.countDocuments({
-        ...query,
+        ...baseFilter,
         assignedOfficer: { $ne: null },
       });
+      const unassignedCount = await Grievance.countDocuments({
+        ...baseFilter,
+        $or: [{ assignedOfficer: null }, { assignedOfficer: { $exists: false } }],
+      });
       const resolvedCount = await Grievance.countDocuments({
-        ...query,
+        ...baseFilter,
         status: { $in: ["RESOLVED", "CLOSED"] },
       });
       const pendingCount = await Grievance.countDocuments({
-        ...query,
+        ...baseFilter,
         status: { $nin: ["RESOLVED", "CLOSED"] },
       });
 
@@ -1014,7 +1017,9 @@ export class GrievanceController {
         res,
         status: 200,
         data: {
+          total,
           totalAssigned,
+          unassignedCount,
           resolvedCount,
           pendingCount,
           escalatedCount,
@@ -1515,7 +1520,7 @@ export class GrievanceController {
         .populate("location.block", "name_en name_local")
         .populate("location.panchayat", "name_en name_local")
         .populate("location.village", "name_en name_local")
-        .populate("location.thana", "name_en type")
+        .populate("location.thana", "name_en name_local type")
         .populate("location.urbanPanchayat", "name_en name_local")
         .populate("location.ward", "name_en name_local")
         .populate({
@@ -1734,7 +1739,7 @@ export class GrievanceController {
         .populate("location.block", "name_en name_local")
         .populate("location.panchayat", "name_en name_local")
         .populate("location.village", "name_en name_local")
-        .populate("location.thana", "name_en type")
+        .populate("location.thana", "name_en name_local type")
         .populate("location.urbanPanchayat", "name_en name_local")
         .populate("location.ward", "name_en name_local")
         .sort(sortObj)
@@ -2764,7 +2769,7 @@ export class GrievanceController {
         .populate("location.urbanPanchayat", "name_en name_local")
         .populate("location.ward", "name_en name_local ward_number")
         .populate("location.village", "name_en name_local")
-        .populate("location.thana", "name_en type")
+        .populate("location.thana", "name_en name_local type")
         .populate("citizenInfo.address.district", "name_en name_local")
         .populate("citizenInfo.address.block", "name_en name_local")
         .populate("citizenInfo.address.panchayat", "name_en name_local")
@@ -2838,7 +2843,7 @@ export class GrievanceController {
         .populate("location.urbanPanchayat", "name_en name_local")
         .populate("location.ward", "name_en name_local ward_number")
         .populate("location.village", "name_en name_local")
-        .populate("location.thana", "name_en type")
+        .populate("location.thana", "name_en name_local type")
         .populate("citizenInfo.address.district", "name_en name_local")
         .populate("citizenInfo.address.block", "name_en name_local")
         .populate("citizenInfo.address.panchayat", "name_en name_local")

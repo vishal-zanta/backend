@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IComplaintSource extends Document {
   title: string;
+  titleHindi?: string;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -13,6 +14,11 @@ const complaintSourceSchema = new Schema<IComplaintSource>({
     required: true,
     trim: true,
     unique: true
+  },
+  titleHindi: {
+    type: String,
+    required: false,
+    trim: true
   },
   active: {
     type: Boolean,

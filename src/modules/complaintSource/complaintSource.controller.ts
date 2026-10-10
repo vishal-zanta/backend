@@ -15,6 +15,9 @@ export class ComplaintSourceController {
         throw new ApiError({ status: 400, message: 'Complaint source with this title already exists' });
       } else {
         existingSource.title = req.body.title;
+        if (req.body.titleHindi !== undefined) {
+          existingSource.titleHindi = req.body.titleHindi;
+        }
         existingSource.active = true;
         await existingSource.save();
         return new ApiResponse({ res, status: 201, data: existingSource, message: 'Complaint source created successfully' });
