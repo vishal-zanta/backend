@@ -925,7 +925,7 @@ export class GrievanceController {
         .populate("citizenInfo.address.ward", "name_en name_local ward_number")
         .populate("citizenInfo.address.village", "name_en name_local")
         .populate("citizenInfo.address.thana", "name_en type")
-        .populate("channel", "title");
+        .populate("channel", "title titleHindi");
 
       if (!grievance) {
         throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -2777,7 +2777,7 @@ export class GrievanceController {
         .populate("citizenInfo.address.ward", "name_en name_local ward_number")
         .populate("citizenInfo.address.village", "name_en name_local")
         .populate("citizenInfo.address.thana", "name_en type")
-        .populate("channel", "title");
+        .populate("channel", "title titleHindi");
 
       if (!grievance) {
         throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -2851,7 +2851,7 @@ export class GrievanceController {
         .populate("citizenInfo.address.ward", "name_en name_local ward_number")
         .populate("citizenInfo.address.village", "name_en name_local")
         .populate("citizenInfo.address.thana", "name_en type")
-        .populate("channel", "title");
+        .populate("channel", "title titleHindi");
 
       if (!grievance) {
         throw new ApiError({ status: 404, message: "Grievance not found." });
