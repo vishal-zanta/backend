@@ -1075,23 +1075,54 @@ export class GrievanceController {
       // Base query without assignedOfficer constraint if no officerId specified
       const baseFilter = officerId ? { assignedOfficer: officerId } : {};
 
-      const total = await Grievance.countDocuments(baseFilter);
-      const totalAssigned = await Grievance.countDocuments({
-        ...baseFilter,
-        assignedOfficer: { $ne: null },
-      });
-      const unassignedCount = await Grievance.countDocuments({
-        ...baseFilter,
-        $or: [{ assignedOfficer: null }, { assignedOfficer: { $exists: false } }],
-      });
-      const resolvedCount = await Grievance.countDocuments({
-        ...baseFilter,
-        status: { $in: ["RESOLVED", "CLOSED"] },
-      });
-      const pendingCount = await Grievance.countDocuments({
-        ...baseFilter,
-        status: { $nin: ["RESOLVED", "CLOSED"] },
-      });
+      const [
+        internalTotal,
+        internalTotalAssigned,
+        internalUnassignedCount,
+        internalResolvedCount,
+        internalPendingCount,
+      ] = await Promise.all([
+        Grievance.countDocuments(baseFilter),
+        Grievance.countDocuments({
+          ...baseFilter,
+          assignedOfficer: { $ne: null },
+        }),
+        Grievance.countDocuments({
+          ...baseFilter,
+          $or: [{ assignedOfficer: null }, { assignedOfficer: { $exists: false } }],
+        }),
+        Grievance.countDocuments({
+          ...baseFilter,
+          status: { $in: ["RESOLVED", "CLOSED"] },
+        }),
+        Grievance.countDocuments({
+          ...baseFilter,
+          status: { $nin: ["RESOLVED", "CLOSED"] },
+        }),
+      ]);
+
+      let externalTotal = 0;
+      let externalResolvedCount = 0;
+      let externalPendingCount = 0;
+      let externalUnassignedCount = 0;
+
+      // If officerId is not specified (e.g. admin/general view), combine external grievances as well
+      if (!officerId) {
+        [
+          externalTotal,
+          externalResolvedCount,
+          externalPendingCount,
+        ] = await Promise.all([
+          ExternalGrievance.countDocuments(),
+          ExternalGrievance.countDocuments({
+            status: { $in: ["RESOLVED", "CLOSED"] },
+          }),
+          ExternalGrievance.countDocuments({
+            status: { $nin: ["RESOLVED", "CLOSED"] },
+          }),
+        ]);
+        externalUnassignedCount = externalTotal; // External grievances are unassigned to internal officers
+      }
 
       // For escalated, group by grievance so one grievance doesn't count multiple times
       const escalatedQuery: any = { action: "ESCALATED" };
@@ -1105,6 +1136,13 @@ export class GrievanceController {
         escalatedQuery,
       );
       const escalatedCount = escalatedGrievances.length;
+
+      // Sum of both tables directly in existing fields
+      const total = internalTotal + externalTotal;
+      const totalAssigned = internalTotalAssigned;
+      const unassignedCount = internalUnassignedCount + externalUnassignedCount;
+      const resolvedCount = internalResolvedCount + externalResolvedCount;
+      const pendingCount = internalPendingCount + externalPendingCount;
 
       return new ApiResponse({
         res,
@@ -1201,44 +1239,69 @@ export class GrievanceController {
 
       const getMetrics = async (startDate: Date, endDate: Date) => {
         const matchCondition = { createdAt: { $gte: startDate, $lt: endDate } };
-        const stats = await Grievance.aggregate([
-          { $match: matchCondition },
-          {
-            $group: {
-              _id: null,
-              total: { $sum: 1 },
-              active: {
-                $sum: {
-                  $cond: [
-                    { $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]] },
-                    1,
-                    0,
-                  ],
+        const [stats, extStats] = await Promise.all([
+          Grievance.aggregate([
+            { $match: matchCondition },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+                active: {
+                  $sum: {
+                    $cond: [
+                      { $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]] },
+                      1,
+                      0,
+                    ],
+                  },
                 },
-              },
-              resolved: {
-                $sum: {
-                  $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0],
+                resolved: {
+                  $sum: {
+                    $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0],
+                  },
                 },
-              },
-              escalated: {
-                $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] },
-              },
-              slaCompliant: {
-                $sum: {
-                  $cond: [{ $in: ["$escalationLevel", [0, null]] }, 1, 0],
+                escalated: {
+                  $sum: { $cond: [{ $eq: ["$status", "ESCALATED"] }, 1, 0] },
                 },
-              },
-              ratingSum: {
-                $sum: {
-                  $cond: [{ $ifNull: ["$rating", false] }, "$rating", 0],
+                slaCompliant: {
+                  $sum: {
+                    $cond: [{ $in: ["$escalationLevel", [0, null]] }, 1, 0],
+                  },
                 },
-              },
-              ratingCount: {
-                $sum: { $cond: [{ $ifNull: ["$rating", false] }, 1, 0] },
+                ratingSum: {
+                  $sum: {
+                    $cond: [{ $ifNull: ["$rating", false] }, "$rating", 0],
+                  },
+                },
+                ratingCount: {
+                  $sum: { $cond: [{ $ifNull: ["$rating", false] }, 1, 0] },
+                },
               },
             },
-          },
+          ]),
+          ExternalGrievance.aggregate([
+            { $match: matchCondition },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+                active: {
+                  $sum: {
+                    $cond: [
+                      { $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED", "PENDING"]] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                resolved: {
+                  $sum: {
+                    $cond: [{ $in: ["$status", ["RESOLVED", "CLOSED"]] }, 1, 0],
+                  },
+                },
+              },
+            },
+          ]),
         ]);
 
         const result = stats[0] || {
@@ -1251,14 +1314,25 @@ export class GrievanceController {
           ratingCount: 0,
         };
 
+        const extResult = extStats[0] || {
+          total: 0,
+          active: 0,
+          resolved: 0,
+        };
+
+        const combinedTotal = result.total + extResult.total;
+        const combinedActive = result.active + extResult.active;
+        const combinedResolved = result.resolved + extResult.resolved;
+        const combinedSlaCompliant = result.slaCompliant + extResult.total;
+
         return {
-          totalComplaints: result.total,
-          active: result.active,
-          resolved: result.resolved,
+          totalComplaints: combinedTotal,
+          active: combinedActive,
+          resolved: combinedResolved,
           escalated: result.escalated,
           slaCompliance:
-            result.total > 0
-              ? Number(((result.slaCompliant / result.total) * 100).toFixed(1))
+            combinedTotal > 0
+              ? Number(((combinedSlaCompliant / combinedTotal) * 100).toFixed(1))
               : 0,
           satisfaction:
             result.ratingCount > 0
@@ -1277,32 +1351,79 @@ export class GrievanceController {
       const formatStr =
         filter === "year" || filter === "lifetime" ? "%Y-%m" : "%Y-%m-%d";
 
-      const trendRaised = await Grievance.aggregate([
-        { $match: { createdAt: { $gte: currentStart, $lt: now } } },
-        {
-          $group: {
-            _id: { $dateToString: { format: formatStr, date: "$createdAt" } },
-            count: { $sum: 1 },
+      const [trendRaisedInternal, trendRaisedExternal] = await Promise.all([
+        Grievance.aggregate([
+          { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+          {
+            $group: {
+              _id: { $dateToString: { format: formatStr, date: "$createdAt" } },
+              count: { $sum: 1 },
+            },
           },
-        },
-        { $sort: { _id: 1 } },
+        ]),
+        ExternalGrievance.aggregate([
+          { $match: { createdAt: { $gte: currentStart, $lt: now } } },
+          {
+            $group: {
+              _id: { $dateToString: { format: formatStr, date: "$createdAt" } },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
       ]);
 
-      const trendResolved = await Grievance.aggregate([
-        {
-          $match: {
-            updatedAt: { $gte: currentStart, $lt: now },
-            status: { $in: ["RESOLVED", "CLOSED"] },
+      const trendRaisedMap = new Map<string, number>();
+      for (const item of trendRaisedInternal) {
+        trendRaisedMap.set(item._id, (trendRaisedMap.get(item._id) || 0) + item.count);
+      }
+      for (const item of trendRaisedExternal) {
+        trendRaisedMap.set(item._id, (trendRaisedMap.get(item._id) || 0) + item.count);
+      }
+      const trendRaised = Array.from(trendRaisedMap.entries())
+        .map(([_id, count]) => ({ _id, count }))
+        .sort((a, b) => a._id.localeCompare(b._id));
+
+      const [trendResolvedInternal, trendResolvedExternal] = await Promise.all([
+        Grievance.aggregate([
+          {
+            $match: {
+              updatedAt: { $gte: currentStart, $lt: now },
+              status: { $in: ["RESOLVED", "CLOSED"] },
+            },
           },
-        },
-        {
-          $group: {
-            _id: { $dateToString: { format: formatStr, date: "$updatedAt" } },
-            count: { $sum: 1 },
+          {
+            $group: {
+              _id: { $dateToString: { format: formatStr, date: "$updatedAt" } },
+              count: { $sum: 1 },
+            },
           },
-        },
-        { $sort: { _id: 1 } },
+        ]),
+        ExternalGrievance.aggregate([
+          {
+            $match: {
+              updatedAt: { $gte: currentStart, $lt: now },
+              status: { $in: ["RESOLVED", "CLOSED"] },
+            },
+          },
+          {
+            $group: {
+              _id: { $dateToString: { format: formatStr, date: "$updatedAt" } },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
       ]);
+
+      const trendResolvedMap = new Map<string, number>();
+      for (const item of trendResolvedInternal) {
+        trendResolvedMap.set(item._id, (trendResolvedMap.get(item._id) || 0) + item.count);
+      }
+      for (const item of trendResolvedExternal) {
+        trendResolvedMap.set(item._id, (trendResolvedMap.get(item._id) || 0) + item.count);
+      }
+      const trendResolved = Array.from(trendResolvedMap.entries())
+        .map(([_id, count]) => ({ _id, count }))
+        .sort((a, b) => a._id.localeCompare(b._id));
 
       const bySubservice = await Grievance.aggregate([
         { $match: { createdAt: { $gte: currentStart, $lt: now } } },
