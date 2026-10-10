@@ -906,6 +906,7 @@ export class GrievanceController {
       if (search) {
         extQuery.$or = [
           { externalComplaintId: new RegExp(search, "i") },
+          { internalId: new RegExp(search, "i") },
           { mobile: new RegExp(search, "i") },
         ];
       }

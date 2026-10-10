@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IExternalGrievance extends Document {
-  departmentCode: string;          // e.g., "HEALTH", "PANCHAYATI_RAJ" - Determines which API to call
-  externalComplaintId?: string;    // The ID returned by the external department's API (can be empty before sync)
-  mobile: string;                  // Primary search key for citizens
-  status: string;                  // Mapped status (e.g., "OPEN", "RESOLVED")
+  internalId?: string;           // Formatted internal ID (e.g., BR-IN-2026-000143)
+  departmentCode: string;        // e.g., "HEALTH", "PANCHAYATI_RAJ" - Determines which API to call
+  externalComplaintId?: string;  // The ID returned by the external department's API (can be empty before sync)
+  mobile: string;                // Primary search key for citizens
+  status: string;                // Mapped status (e.g., "OPEN", "RESOLVED")
   
   // The magic field: Stores the exact JSON payload expected by/received from the department
   departmentPayload: Record<string, any>; 
@@ -19,6 +20,7 @@ export interface IExternalGrievance extends Document {
 
 const externalGrievanceSchema = new Schema<IExternalGrievance>({
   // 1. CORE FIELDS (Strictly typed, highly indexed for fast searching)
+  internalId: { type: String, unique: true, sparse: true, index: true },
   departmentCode: { type: String, required: true, index: true },
   externalComplaintId: { type: String, index: true }, // Not required initially, populated after sync
   mobile: { type: String, required: true, index: true },

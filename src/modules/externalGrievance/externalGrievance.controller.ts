@@ -7,6 +7,7 @@ import { createExternalGrievanceSchema } from './externalGrievance.validation.js
 import { ExternalIntegrationService } from './integrationFactory.js';
 import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';
+import { getNextSequenceValue } from '../../utils/counter.model.js';
 
 export class ExternalGrievanceController {
   
@@ -22,11 +23,17 @@ export class ExternalGrievanceController {
 
     const { departmentCode, mobile, departmentPayload } = validation.data;
 
+    // Generate internal ID: BR-IN-YYYY-XXXXXX (6 digits sequence)
+    const year = new Date().getFullYear();
+    const seq = await getNextSequenceValue(`external_grievance_${year}`);
+    const internalId = `BR-IN-${year}-${String(seq).padStart(6, "0")}`;
+
     // 1. Call the external API directly
     const { complaintId, mobile: extractedMobile, status: externalStatus } = await ExternalIntegrationService.createExternalTicket(departmentCode, departmentPayload);
 
     // 2. Save to our local database with the confirmed ID
     const grievance = await ExternalGrievance.create({
+      internalId,
       departmentCode,
       mobile: mobile || extractedMobile, // Use explicitly provided mobile or fallback to extracted
       externalComplaintId: complaintId,
@@ -47,7 +54,11 @@ export class ExternalGrievanceController {
         name: actorName,
         role: actorRole
       },
-      metadata: timelineTemplates.COMPLAINT_REGISTERED(complaintId || grievance._id.toString(), (req as any).citizen ? "Citizen" : "System")
+      metadata: {
+        ...timelineTemplates.COMPLAINT_REGISTERED(internalId || grievance._id.toString(), (req as any).citizen ? "Citizen" : "System"),
+        internalId,
+        externalComplaintId: complaintId
+      }
     });
 
     return new ApiResponse({
@@ -79,7 +90,8 @@ export class ExternalGrievanceController {
       const searchRegex = new RegExp(search, "i");
       
       const orConditions: any[] = [
-        { externalComplaintId: searchRegex }
+        { externalComplaintId: searchRegex },
+        { internalId: searchRegex }
       ];
 
       if (isMobileSearch) {
@@ -131,7 +143,8 @@ export class ExternalGrievanceController {
     const grievance = await ExternalGrievance.findOne({
       $or: [
         { _id: id.length === 24 ? id : null },
-        { externalComplaintId: id }
+        { externalComplaintId: id },
+        { internalId: id }
       ]
     });
 
@@ -226,11 +239,12 @@ export class ExternalGrievanceController {
   static getGrievanceById = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     
-    // Allow searching by MongoDB _id OR externalComplaintId
+    // Allow searching by MongoDB _id OR externalComplaintId OR internalId
     const grievance = await ExternalGrievance.findOne({
       $or: [
         { _id: id.length === 24 ? id : null },
-        { externalComplaintId: id }
+        { externalComplaintId: id },
+        { internalId: id }
       ]
     });
 
@@ -357,11 +371,12 @@ export class ExternalGrievanceController {
   static uploadFiles = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     
-    // Find the grievance by MongoDB _id or externalComplaintId
+    // Find the grievance by MongoDB _id, externalComplaintId, or internalId
     const grievance = await ExternalGrievance.findOne({
       $or: [
         { _id: id.length === 24 ? id : null },
-        { externalComplaintId: id }
+        { externalComplaintId: id },
+        { internalId: id }
       ]
     });
 
