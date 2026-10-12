@@ -1656,6 +1656,7 @@ export class GrievanceController {
       const feedback = req.query.feedback as string;
       const priority = req.query.priority as string;
       const department = req.query.department as string;
+      const departmentCode = req.query.departmentCode as string;
       
       let sortObj: any = { createdAt: -1 };
       const sortBy = req.query.sortBy as string;
@@ -1709,6 +1710,9 @@ export class GrievanceController {
       const extQuery: any = {};
       if (status) {
         extQuery.status = { $in: status.split(",") };
+      }
+      if(departmentCode){
+        extQuery.departmentCode = { $in: departmentCode.split(",") };
       }
       if (search) {
         const searchRegex = new RegExp(search, "i");
