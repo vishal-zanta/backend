@@ -45,53 +45,56 @@ import { Call } from "../call/call.model.js";
 import { Email } from "../email/email.model.js";
 
 export class GrievanceController {
-  
   /**
    * Get all calls and emails connected to a grievance
    */
-  static getGrievanceCommunications = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    
-    // Find grievance to ensure we have the correct ObjectId and string ID
-    const orConditions: any[] = [{ grievanceId: id }];
-    if (String(id).match(/^[0-9a-fA-F]{24}$/)) {
-      orConditions.push({ _id: id });
-    }
-    
-    const grievance = await Grievance.findOne({ $or: orConditions }).select('_id grievanceId');
-    if (!grievance) {
-      throw new ApiError({ status: 404, message: "Grievance not found" });
-    }
+  static getGrievanceCommunications = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
 
-    // Fetch related calls
-    const calls = await Call.find({
-      $or: [
-        { complaintId: grievance._id },
-        { complaintIdString: grievance.grievanceId }
-      ]
-    })
-    .populate('agent', 'name userCode')
-    .sort({ createdAt: -1 })
-    .lean();
+      // Find grievance to ensure we have the correct ObjectId and string ID
+      const orConditions: any[] = [{ grievanceId: id }];
+      if (String(id).match(/^[0-9a-fA-F]{24}$/)) {
+        orConditions.push({ _id: id });
+      }
 
-    // Fetch related emails
-    const emails = await Email.find({
-      $or: [
-        { grievance: grievance._id },
-        { complaintId: grievance.grievanceId }
-      ]
-    })
-    .populate('assignTo', 'name userCode')
-    .sort({ receivedAt: -1 })
-    .lean();
+      const grievance = await Grievance.findOne({ $or: orConditions }).select(
+        "_id grievanceId",
+      );
+      if (!grievance) {
+        throw new ApiError({ status: 404, message: "Grievance not found" });
+      }
 
-    return new ApiResponse({
-      res,
-      status: 200,
-      data: { calls, emails },
-      message: "Grievance communications fetched successfully",
-    });
-  });
+      // Fetch related calls
+      const calls = await Call.find({
+        $or: [
+          { complaintId: grievance._id },
+          { complaintIdString: grievance.grievanceId },
+        ],
+      })
+        .populate("agent", "name userCode")
+        .sort({ createdAt: -1 })
+        .lean();
+
+      // Fetch related emails
+      const emails = await Email.find({
+        $or: [
+          { grievance: grievance._id },
+          { complaintId: grievance.grievanceId },
+        ],
+      })
+        .populate("assignTo", "name userCode")
+        .sort({ receivedAt: -1 })
+        .lean();
+
+      return new ApiResponse({
+        res,
+        status: 200,
+        data: { calls, emails },
+        message: "Grievance communications fetched successfully",
+      });
+    },
+  );
 
   /**
    * Add a remark to a grievance timeline
@@ -109,18 +112,20 @@ export class GrievanceController {
     if (String(id).match(/^[0-9a-fA-F]{24}$/)) {
       orConditions.push({ _id: id });
     }
-    const grievance = await Grievance.findOne({ $or: orConditions }).select('_id');
+    const grievance = await Grievance.findOne({ $or: orConditions }).select(
+      "_id",
+    );
     if (!grievance) {
       throw new ApiError({ status: 404, message: "Grievance not found" });
     }
 
     const event = await TimelineService.logEvent({
       grievanceId: grievance._id,
-      type: 'REMARK_ADDED',
+      type: "REMARK_ADDED",
       actor: {
         id: user.id || user._id,
         name: user.name,
-        role: user.roles?.[0]?.level || 'Officer',
+        role: user.roles?.[0]?.level || "Officer",
       },
       metadata: timelineTemplates.REMARK_ADDED(remark),
     });
@@ -142,11 +147,14 @@ export class GrievanceController {
     const user = (req as any).user;
 
     if (!remark || remark.trim().length === 0) {
-      throw new ApiError({ status: 400, message: "New remark text is required" });
+      throw new ApiError({
+        status: 400,
+        message: "New remark text is required",
+      });
     }
 
     // Must import Timeline from timeline.model.ts in the file
-    // Doing it dynamically here or we can just import at the top later. 
+    // Doing it dynamically here or we can just import at the top later.
     // Actually we will import it at the top of grievance.controller.ts shortly.
     const { Timeline } = await import("../timeline/timeline.model.js");
 
@@ -155,15 +163,21 @@ export class GrievanceController {
       throw new ApiError({ status: 404, message: "Timeline event not found" });
     }
 
-    if (timelineEvent.type !== 'REMARK_ADDED') {
-      throw new ApiError({ status: 400, message: "Only REMARK_ADDED events can be edited" });
+    if (timelineEvent.type !== "REMARK_ADDED") {
+      throw new ApiError({
+        status: 400,
+        message: "Only REMARK_ADDED events can be edited",
+      });
     }
 
     // Check ownership
     const actorId = timelineEvent.actor?.id?.toString();
     const userId = (user.id || user._id).toString();
     if (actorId !== userId) {
-      throw new ApiError({ status: 403, message: "You are not authorized to edit this remark" });
+      throw new ApiError({
+        status: 403,
+        message: "You are not authorized to edit this remark",
+      });
     }
 
     // Check time limit (2 hours)
@@ -171,26 +185,30 @@ export class GrievanceController {
     const now = new Date().getTime();
     const createdAt = new Date(timelineEvent.createdAt).getTime();
     if (now - createdAt > TWO_HOURS_IN_MS) {
-      throw new ApiError({ status: 403, message: "Remarks can only be edited within 2 hours of creation" });
+      throw new ApiError({
+        status: 403,
+        message: "Remarks can only be edited within 2 hours of creation",
+      });
     }
 
     // Archive old remark in history
-    const oldRemarkText = timelineEvent.metadata?.remarkText || timelineEvent.metadata?.description;
+    const oldRemarkText =
+      timelineEvent.metadata?.remarkText || timelineEvent.metadata?.description;
     const history = timelineEvent.metadata?.editHistory || [];
     history.push({
       oldRemark: oldRemarkText,
-      editedAt: new Date()
+      editedAt: new Date(),
     });
 
     // Update with new template
     timelineEvent.metadata = {
       ...timelineEvent.metadata,
       ...timelineTemplates.REMARK_ADDED(remark, true),
-      editHistory: history
+      editHistory: history,
     };
 
     // Since metadata is Mixed, tell mongoose it changed
-    timelineEvent.markModified('metadata');
+    timelineEvent.markModified("metadata");
     await timelineEvent.save();
 
     return new ApiResponse({
@@ -377,13 +395,15 @@ export class GrievanceController {
     }
     if (data.address?.panchayat) {
       checks.push(
-        PanchayatModel.exists({ _id: data.address.panchayat }).then((exists) => {
-          if (!exists)
-            throw new ApiError({
-              status: 400,
-              message: "Invalid address.panchayat: Reference does not exist",
-            });
-        }),
+        PanchayatModel.exists({ _id: data.address.panchayat }).then(
+          (exists) => {
+            if (!exists)
+              throw new ApiError({
+                status: 400,
+                message: "Invalid address.panchayat: Reference does not exist",
+              });
+          },
+        ),
       );
     }
     if (data.address?.thana) {
@@ -573,7 +593,8 @@ export class GrievanceController {
       citizenInfo,
       address,
       isCrpEqualPerAdd;
-    const isChatBot = req.body.isChatBot === true || req.body.isChatBot === "true";
+    const isChatBot =
+      req.body.isChatBot === true || req.body.isChatBot === "true";
 
     let channel;
     if (isChatBot) {
@@ -815,7 +836,8 @@ export class GrievanceController {
       const department = req.query.department as string;
       const departmentCode = req.query.departmentCode as string;
       const sortBy = (req.query.sortBy as string) || "createdAt";
-      const sortOrder = (req.query.sortOrder as string)?.toLowerCase() === "asc" ? 1 : -1;
+      const sortOrder =
+        (req.query.sortOrder as string)?.toLowerCase() === "asc" ? 1 : -1;
       const citizenMobile = citizen.mobile.slice(-10);
       const alternateMobile = citizen?.alternateMobile?.slice(-10);
       // Base query: Complaints linked directly to the citizen's ID OR created by an agent using their phone number
@@ -870,28 +892,28 @@ export class GrievanceController {
           .select(
             "grievanceId classification location citizenInfo impact status assignedPriority createdAt updatedAt feedbackText rating assignedOfficer",
           )
-        .populate("classification.department")
-        .populate("classification.service")
-        .populate("classification.nature")
-        .populate("impact.affectedBeneficiary")
-        .populate({
-          path: "classification.service",
-          select: "title titleHindi sla department",
-          populate: { path: "department" },
-        })
-        .populate({
-          path: "assignedOfficer",
-          select: "name roles",
-          populate: {
-            path: "roles",
-            select: "_id level designationEnglish designationHindi",
-          },
-        })
-        .populate("location.district", "name_en name_local")
-        .populate("location.block", "name_en name_local")
-        .populate("location.panchayat", "name_en name_local")
-        .populate("location.thana", "name_en name_local type")
-        .lean();
+          .populate("classification.department")
+          .populate("classification.service")
+          .populate("classification.nature")
+          .populate("impact.affectedBeneficiary")
+          .populate({
+            path: "classification.service",
+            select: "title titleHindi sla department",
+            populate: { path: "department" },
+          })
+          .populate({
+            path: "assignedOfficer",
+            select: "name roles",
+            populate: {
+              path: "roles",
+              select: "_id level designationEnglish designationHindi",
+            },
+          })
+          .populate("location.district", "name_en name_local")
+          .populate("location.block", "name_en name_local")
+          .populate("location.panchayat", "name_en name_local")
+          .populate("location.thana", "name_en name_local type")
+          .lean();
       }
 
       // Fetch External Grievances
@@ -910,7 +932,7 @@ export class GrievanceController {
           { mobile: new RegExp(search, "i") },
         ];
       }
-      
+
       if (departmentCode) {
         extQuery.departmentCode = departmentCode;
       }
@@ -931,19 +953,19 @@ export class GrievanceController {
         (a: any, b: any) => {
           let valA = a[sortBy];
           let valB = b[sortBy];
-          
-          if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
+
+          if (sortBy === "createdAt" || sortBy === "updatedAt") {
             valA = new Date(valA || 0).getTime();
             valB = new Date(valB || 0).getTime();
-          } else if (typeof valA === 'string' && typeof valB === 'string') {
+          } else if (typeof valA === "string" && typeof valB === "string") {
             valA = valA.toLowerCase();
             valB = valB.toLowerCase();
           }
-          
+
           if (valA < valB) return -1 * sortOrder;
           if (valA > valB) return 1 * sortOrder;
           return 0;
-        }
+        },
       );
 
       const totalCount = allGrievances.length;
@@ -1089,7 +1111,10 @@ export class GrievanceController {
         }),
         Grievance.countDocuments({
           ...baseFilter,
-          $or: [{ assignedOfficer: null }, { assignedOfficer: { $exists: false } }],
+          $or: [
+            { assignedOfficer: null },
+            { assignedOfficer: { $exists: false } },
+          ],
         }),
         Grievance.countDocuments({
           ...baseFilter,
@@ -1108,19 +1133,16 @@ export class GrievanceController {
 
       // If officerId is not specified (e.g. admin/general view), combine external grievances as well
       if (!officerId) {
-        [
-          externalTotal,
-          externalResolvedCount,
-          externalPendingCount,
-        ] = await Promise.all([
-          ExternalGrievance.countDocuments(),
-          ExternalGrievance.countDocuments({
-            status: { $in: ["RESOLVED", "CLOSED"] },
-          }),
-          ExternalGrievance.countDocuments({
-            status: { $nin: ["RESOLVED", "CLOSED"] },
-          }),
-        ]);
+        [externalTotal, externalResolvedCount, externalPendingCount] =
+          await Promise.all([
+            ExternalGrievance.countDocuments(),
+            ExternalGrievance.countDocuments({
+              status: { $in: ["RESOLVED", "CLOSED"] },
+            }),
+            ExternalGrievance.countDocuments({
+              status: { $nin: ["RESOLVED", "CLOSED"] },
+            }),
+          ]);
         externalUnassignedCount = externalTotal; // External grievances are unassigned to internal officers
       }
 
@@ -1249,7 +1271,9 @@ export class GrievanceController {
                 active: {
                   $sum: {
                     $cond: [
-                      { $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]] },
+                      {
+                        $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED"]],
+                      },
                       1,
                       0,
                     ],
@@ -1288,7 +1312,12 @@ export class GrievanceController {
                 active: {
                   $sum: {
                     $cond: [
-                      { $in: ["$status", ["OPEN", "IN_PROGRESS", "ESCALATED", "PENDING"]] },
+                      {
+                        $in: [
+                          "$status",
+                          ["OPEN", "IN_PROGRESS", "ESCALATED", "PENDING"],
+                        ],
+                      },
                       1,
                       0,
                     ],
@@ -1332,7 +1361,9 @@ export class GrievanceController {
           escalated: result.escalated,
           slaCompliance:
             combinedTotal > 0
-              ? Number(((combinedSlaCompliant / combinedTotal) * 100).toFixed(1))
+              ? Number(
+                  ((combinedSlaCompliant / combinedTotal) * 100).toFixed(1),
+                )
               : 0,
           satisfaction:
             result.ratingCount > 0
@@ -1374,10 +1405,16 @@ export class GrievanceController {
 
       const trendRaisedMap = new Map<string, number>();
       for (const item of trendRaisedInternal) {
-        trendRaisedMap.set(item._id, (trendRaisedMap.get(item._id) || 0) + item.count);
+        trendRaisedMap.set(
+          item._id,
+          (trendRaisedMap.get(item._id) || 0) + item.count,
+        );
       }
       for (const item of trendRaisedExternal) {
-        trendRaisedMap.set(item._id, (trendRaisedMap.get(item._id) || 0) + item.count);
+        trendRaisedMap.set(
+          item._id,
+          (trendRaisedMap.get(item._id) || 0) + item.count,
+        );
       }
       const trendRaised = Array.from(trendRaisedMap.entries())
         .map(([_id, count]) => ({ _id, count }))
@@ -1416,10 +1453,16 @@ export class GrievanceController {
 
       const trendResolvedMap = new Map<string, number>();
       for (const item of trendResolvedInternal) {
-        trendResolvedMap.set(item._id, (trendResolvedMap.get(item._id) || 0) + item.count);
+        trendResolvedMap.set(
+          item._id,
+          (trendResolvedMap.get(item._id) || 0) + item.count,
+        );
       }
       for (const item of trendResolvedExternal) {
-        trendResolvedMap.set(item._id, (trendResolvedMap.get(item._id) || 0) + item.count);
+        trendResolvedMap.set(
+          item._id,
+          (trendResolvedMap.get(item._id) || 0) + item.count,
+        );
       }
       const trendResolved = Array.from(trendResolvedMap.entries())
         .map(([_id, count]) => ({ _id, count }))
@@ -1510,8 +1553,14 @@ export class GrievanceController {
       };
 
       const selectedDistrict = districtId || district;
-      if (selectedDistrict && typeof selectedDistrict === "string" && mongoose.isValidObjectId(selectedDistrict)) {
-        blockMatch["location.district"] = new mongoose.Types.ObjectId(selectedDistrict);
+      if (
+        selectedDistrict &&
+        typeof selectedDistrict === "string" &&
+        mongoose.isValidObjectId(selectedDistrict)
+      ) {
+        blockMatch["location.district"] = new mongoose.Types.ObjectId(
+          selectedDistrict,
+        );
       }
 
       const blockPipeline: any[] = [
@@ -1657,21 +1706,24 @@ export class GrievanceController {
       const priority = req.query.priority as string;
       const department = req.query.department as string;
       const departmentCode = req.query.departmentCode as string;
-      
+
       let sortObj: any = { createdAt: -1 };
       const sortBy = req.query.sortBy as string;
       const sortOrder = req.query.sortOrder as string;
-      if (sortBy === 'raisedOn' || sortBy === 'createdAt') {
-        sortObj = { createdAt: sortOrder === 'asc' ? 1 : -1 };
+      if (sortBy === "raisedOn" || sortBy === "createdAt") {
+        sortObj = { createdAt: sortOrder === "asc" ? 1 : -1 };
       }
 
       // Internal Grievance query
       const query: any = {};
-      
+
       if (department) {
         query["classification.department"] = {
           $in: department.split(","),
         };
+      }
+      if (departmentCode) {
+        query["classification.department"] = null;
       }
       if (status) {
         query.status = { $in: status.split(",") };
@@ -1691,7 +1743,9 @@ export class GrievanceController {
         const searchRegex = new RegExp(search, "i");
         let serviceIds: any[] = [];
         try {
-          const matchingServices = await Service.find({ title: searchRegex }).select("_id");
+          const matchingServices = await Service.find({
+            title: searchRegex,
+          }).select("_id");
           serviceIds = matchingServices.map((s) => s._id);
         } catch (e) {
           console.error("Failed to lookup Service for search", e);
@@ -1711,7 +1765,7 @@ export class GrievanceController {
       if (status) {
         extQuery.status = { $in: status.split(",") };
       }
-      if(departmentCode){
+      if (departmentCode) {
         extQuery.departmentCode = { $in: departmentCode.split(",") };
       }
       if (search) {
@@ -1740,7 +1794,9 @@ export class GrievanceController {
       // Count both collections
       const [totalInternal, totalExternal] = await Promise.all([
         Grievance.countDocuments(query),
-        shouldFetchExternal ? ExternalGrievance.countDocuments(extQuery) : Promise.resolve(0),
+        shouldFetchExternal
+          ? ExternalGrievance.countDocuments(extQuery)
+          : Promise.resolve(0),
       ]);
 
       const totalCount = totalInternal + totalExternal;
@@ -1809,7 +1865,8 @@ export class GrievanceController {
         ...g,
         grievanceType: "INTERNAL",
       }));
-      const withSla = await GrievanceController.attachSlaToGrievancesList(formattedInternal);
+      const withSla =
+        await GrievanceController.attachSlaToGrievancesList(formattedInternal);
 
       const formattedExternal = externalDocs.map((ext: any) => ({
         ...ext,
@@ -1829,7 +1886,6 @@ export class GrievanceController {
       });
     },
   );
-
 
   /**
    * Get dashboard analytics for an officer
@@ -1886,7 +1942,13 @@ export class GrievanceController {
           createdAt: { $gte: startDate, $lt: endDate },
         });
 
-        return { assignedCount, pendingCount, resolvedCount, breachedCount,closedCount };
+        return {
+          assignedCount,
+          pendingCount,
+          resolvedCount,
+          breachedCount,
+          closedCount,
+        };
       };
 
       const currentMetrics = await getMetrics(currentStart, now);
@@ -1901,14 +1963,14 @@ export class GrievanceController {
             pending: currentMetrics.pendingCount,
             resolved: currentMetrics.resolvedCount,
             slaBreached: currentMetrics.breachedCount,
-            closed:currentMetrics.closedCount
+            closed: currentMetrics.closedCount,
           },
           previousPeriod: {
             totalAssigned: lastMetrics.assignedCount,
             pending: lastMetrics.pendingCount,
             resolved: lastMetrics.resolvedCount,
             slaBreached: lastMetrics.breachedCount,
-             closed:lastMetrics.closedCount
+            closed: lastMetrics.closedCount,
           },
         },
         message: "Officer dashboard analytics fetched successfully",
@@ -1938,12 +2000,12 @@ export class GrievanceController {
       const feedback = req.query.feedback as string;
       const priority = req.query.priority as string;
       const department = req.query.department as string;
-      
+
       let sortObj: any = { createdAt: -1 };
       const sortBy = req.query.sortBy as string;
       const sortOrder = req.query.sortOrder as string;
-      if (sortBy === 'raisedOn' || sortBy === 'createdAt') {
-        sortObj = { createdAt: sortOrder === 'asc' ? 1 : -1 };
+      if (sortBy === "raisedOn" || sortBy === "createdAt") {
+        sortObj = { createdAt: sortOrder === "asc" ? 1 : -1 };
       }
 
       const query: any = {
@@ -2316,8 +2378,10 @@ export class GrievanceController {
     // Enforce 7-day constraint based on resolvedAt (when status was likely resolved/closed)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    const referenceDate = grievance.resolvedAt ? new Date(grievance.resolvedAt) : new Date(grievance.updatedAt);
+
+    const referenceDate = grievance.resolvedAt
+      ? new Date(grievance.resolvedAt)
+      : new Date(grievance.updatedAt);
 
     if (referenceDate < sevenDaysAgo) {
       throw new ApiError({
@@ -2333,8 +2397,8 @@ export class GrievanceController {
     grievance.reOpenReason = reOpenReason;
 
     await FieldVisit.updateMany(
-      { grievance: grievance._id, status: 'COMPLETED' },
-      { $set: { status: 'PENDING' } }
+      { grievance: grievance._id, status: "COMPLETED" },
+      { $set: { status: "PENDING" } },
     );
 
     // Escalate to next level if available
@@ -2645,17 +2709,16 @@ export class GrievanceController {
         throw new ApiError({ status: 404, message: "Grievance not found." });
       }
       const previousOfficer = oldGrievance.assignedOfficer;
-      
+
       const updatePayload: any = { assignedOfficer, assignedAt: new Date() };
       if (!previousOfficer) {
         updatePayload.status = "IN_PROGRESS";
       }
 
-      const grievance = await Grievance.findByIdAndUpdate(
-        id,
-        updatePayload,
-        { new: true, runValidators: true },
-      );
+      const grievance = await Grievance.findByIdAndUpdate(id, updatePayload, {
+        new: true,
+        runValidators: true,
+      });
 
       if (!grievance) {
         throw new ApiError({ status: 404, message: "Grievance not found." });
@@ -2704,7 +2767,7 @@ export class GrievanceController {
           },
           metadata: timelineTemplates.STATUS_CHANGE(
             oldGrievance.status || "OPEN",
-            "IN_PROGRESS"
+            "IN_PROGRESS",
           ),
         });
       }
@@ -2755,8 +2818,10 @@ export class GrievanceController {
         }
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
-        const referenceDate = oldGrievance.resolvedAt ? new Date(oldGrievance.resolvedAt) : new Date(oldGrievance.updatedAt);
+
+        const referenceDate = oldGrievance.resolvedAt
+          ? new Date(oldGrievance.resolvedAt)
+          : new Date(oldGrievance.updatedAt);
 
         if (referenceDate < sevenDaysAgo) {
           throw new ApiError({
@@ -2766,8 +2831,8 @@ export class GrievanceController {
           });
         }
         await FieldVisit.updateMany(
-          { grievance: oldGrievance._id, status: 'COMPLETED' },
-          { $set: { status: 'PENDING' } }
+          { grievance: oldGrievance._id, status: "COMPLETED" },
+          { $set: { status: "PENDING" } },
         );
       }
 
@@ -3307,7 +3372,9 @@ export class GrievanceController {
       const internalGrievances = await Grievance.find({
         $or: [
           { "citizenInfo.mobile": { $regex: new RegExp(`${mobile}$`) } },
-          { "citizenInfo.alternateMobile": { $regex: new RegExp(`${mobile}$`) } },
+          {
+            "citizenInfo.alternateMobile": { $regex: new RegExp(`${mobile}$`) },
+          },
         ],
       })
         .populate("classification.department")
@@ -3321,8 +3388,13 @@ export class GrievanceController {
       }).lean();
 
       // Combine and sort (newest first)
-      const combinedGrievances = [...internalGrievances, ...externalGrievances].sort((a: any, b: any) => {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      const combinedGrievances = [
+        ...internalGrievances,
+        ...externalGrievances,
+      ].sort((a: any, b: any) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       });
 
       return new ApiResponse({
