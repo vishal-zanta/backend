@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IExternalGrievance extends Document {
-  internalId?: string;           // Formatted internal ID (e.g., BR-IN-2026-000143)
+  internalId?: string;           // Formatted internal ID (e.g., BR-2026-000143)
   departmentCode: string;        // e.g., "HEALTH", "PANCHAYATI_RAJ" - Determines which API to call
   externalComplaintId?: string;  // The ID returned by the external department's API (can be empty before sync)
   mobile: string;                // Primary search key for citizens

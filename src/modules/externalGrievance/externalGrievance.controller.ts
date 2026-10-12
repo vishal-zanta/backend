@@ -26,7 +26,7 @@ export class ExternalGrievanceController {
     // Generate internal ID: BR-IN-YYYY-XXXXXX (6 digits sequence sharing counter with internal grievances)
     const year = new Date().getFullYear();
     const seq = await getNextSequenceValue(`grievance_${year}`);
-    const internalId = `BR-IN-${year}-${String(seq).padStart(6, "0")}`;
+    const internalId = `BR-${year}-${String(seq).padStart(6, "0")}`;
 
     // 1. Call the external API directly
     const { complaintId, mobile: extractedMobile, status: externalStatus } = await ExternalIntegrationService.createExternalTicket(departmentCode, departmentPayload);
