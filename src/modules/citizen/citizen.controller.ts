@@ -178,28 +178,28 @@ export class CitizenController {
       PENDING: 0
     };
 
-    let totalComplaints = 0;
+    // let totalComplaints = 0;
 
-    internalAgg.forEach(item => {
-      totalComplaints += item.count;
-      const stat = item._id || "UNKNOWN";
-      statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
-    });
+    // internalAgg.forEach(item => {
+    //   totalComplaints += item.count;
+    //   const stat = item._id || "UNKNOWN";
+    //   statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
+    // });
 
-    externalAgg.forEach(item => {
-      totalComplaints += item.count;
-      const stat = item._id || "UNKNOWN";
-      if (String(stat).toUpperCase() !== "PENDING") {
-        statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
-      }
-    });
+    // externalAgg.forEach(item => {
+    //   totalComplaints += item.count;
+    //   const stat = item._id || "UNKNOWN";
+    //   if (String(stat).toUpperCase() !== "PENDING") {
+    //     statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
+    //   }
+    // });
 
     return new ApiResponse({
       res,
       status: 200,
       data: {
-        totalComplaints,
-        ...statusCounts
+        externalAgg,
+        internalAgg
       },
       message: "Dashboard analytics retrieved successfully"
     });
