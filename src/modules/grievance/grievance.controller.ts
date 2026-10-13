@@ -901,7 +901,7 @@ export class GrievanceController {
       }
 
       const hasDeptFilter = deptTokens.length > 0;
-      const shouldFetchInternal = !hasDeptFilter || deptObjectIds.length > 0;
+      const shouldFetchInternal = Boolean(status) || !hasDeptFilter || deptObjectIds.length > 0;
       const shouldFetchExternal = hasDeptFilter
         ? extDeptCodes.length > 0
         : !status;
