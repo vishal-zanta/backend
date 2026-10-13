@@ -180,10 +180,18 @@ export class CitizenController {
 
     let totalComplaints = 0;
 
-    [...internalAgg, ...externalAgg].forEach(item => {
+    internalAgg.forEach(item => {
       totalComplaints += item.count;
       const stat = item._id || "UNKNOWN";
       statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
+    });
+
+    externalAgg.forEach(item => {
+      totalComplaints += item.count;
+      const stat = item._id || "UNKNOWN";
+      if (String(stat).toUpperCase() !== "PENDING") {
+        statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
+      }
     });
 
     return new ApiResponse({

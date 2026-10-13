@@ -95,3 +95,10 @@ Content-Type: application/json
 ### 10. Get Call History (last 100 calls with duration)
 GET https://avaya.lumirex.tech/api/telephony/call/history
 Content-Type: application/json
+
+### 
+curl 'https://backend.bugslayer.in/api/v1/grievances/citizen?page=1&limit=10&status=IN_PROGRESS&department=HEALTH,EDUCATION,FOOD' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNmM0ZDUxZjExMWI4YjA5ZjAzMDcxYyIsIm1vYmlsZSI6Iis5MTc5ODI4NDY2MDciLCJyb2xlIjoiQ0lUSVpFTiIsImlhdCI6MTc5MTg3MTU0NSwiZXhwIjoxNzkxOTU3OTQ1fQ.bCj32cM7TbgzcctpIdkW3mXqFRzZlZxqEBp7lsweE4E' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: cross-site'

@@ -882,63 +882,105 @@ export class GrievanceController {
         };
       }
 
-      if (department) {
-        query["classification.department"] = department;
+      // Parse department and departmentCode filters:
+      // department can contain comma-separated MongoDB ObjectIds and/or external department codes
+      const deptTokens = [
+        ...(department ? department.split(",").map((d) => d.trim()).filter(Boolean) : []),
+        ...(departmentCode ? departmentCode.split(",").map((d) => d.trim()).filter(Boolean) : []),
+      ];
+
+      const deptObjectIds: string[] = [];
+      const extDeptCodes: string[] = [];
+
+      for (const token of deptTokens) {
+        if (mongoose.isValidObjectId(token) && token.length === 24) {
+          deptObjectIds.push(token);
+        } else {
+          extDeptCodes.push(token);
+        }
       }
 
+      // If specific internal department ObjectIds are passed, filter internal by them;
+      // otherwise, all internal grievances are included (matching status, etc.)
+      if (deptObjectIds.length > 0) {
+        query["classification.department"] = { $in: deptObjectIds };
+      }
+
+      // Fetch all internal grievances (filtered only by status, etc. or internal dept IDs if specifically provided)
       let internalGrievances: any[] = [];
-      if (!departmentCode || department) {
-        internalGrievances = await Grievance.find(query)
-          .select(
-            "grievanceId classification location citizenInfo impact status assignedPriority createdAt updatedAt feedbackText rating assignedOfficer",
-          )
-          .populate("classification.department")
-          .populate("classification.service")
-          .populate("classification.nature")
-          .populate("impact.affectedBeneficiary")
-          .populate({
-            path: "classification.service",
-            select: "title titleHindi sla department",
-            populate: { path: "department" },
-          })
-          .populate({
-            path: "assignedOfficer",
-            select: "name roles",
-            populate: {
-              path: "roles",
-              select: "_id level designationEnglish designationHindi",
-            },
-          })
-          .populate("location.district", "name_en name_local")
-          .populate("location.block", "name_en name_local")
-          .populate("location.panchayat", "name_en name_local")
-          .populate("location.thana", "name_en name_local type")
-          .lean();
-      }
+      internalGrievances = await Grievance.find(query)
+        .select(
+          "grievanceId classification location citizenInfo impact status assignedPriority createdAt updatedAt feedbackText rating assignedOfficer",
+        )
+        .populate("classification.department")
+        .populate("classification.service")
+        .populate("classification.nature")
+        .populate("impact.affectedBeneficiary")
+        .populate({
+          path: "classification.service",
+          select: "title titleHindi sla department",
+          populate: { path: "department" },
+        })
+        .populate({
+          path: "assignedOfficer",
+          select: "name roles",
+          populate: {
+            path: "roles",
+            select: "_id level designationEnglish designationHindi",
+          },
+        })
+        .populate("location.district", "name_en name_local")
+        .populate("location.block", "name_en name_local")
+        .populate("location.panchayat", "name_en name_local")
+        .populate("location.thana", "name_en name_local type")
+        .lean();
 
-      // Fetch External Grievances
-      const externalMobiles = [citizenMobile];
-      if (alternateMobile) externalMobiles.push(alternateMobile);
-      const extMobileRegex = new RegExp(`(${externalMobiles.join("|")})$`);
-
-      const extQuery: any = { mobile: extMobileRegex };
-      if (status) {
-        extQuery.status = { $in: status.split(",") };
-      }
-      if (search) {
-        extQuery.$or = [
-          { externalComplaintId: new RegExp(search, "i") },
-          { internalId: new RegExp(search, "i") },
-          { mobile: new RegExp(search, "i") },
-        ];
-      }
-
-      if (departmentCode) {
-        extQuery.departmentCode = departmentCode;
-      }
+      // Fetch External Grievances:
+      // If external department codes are mentioned, return ONLY external grievances for those mentioned departments.
+      // If no department filter was passed, include all external grievances.
+      const hasDeptFilter = deptTokens.length > 0;
+      const shouldFetchExternal = !hasDeptFilter || extDeptCodes.length > 0;
 
       let externalGrievances: any[] = [];
-      if (!department || departmentCode) {
+      if (shouldFetchExternal) {
+        const externalMobiles = [citizenMobile];
+        if (alternateMobile) externalMobiles.push(alternateMobile);
+        const extMobileRegex = new RegExp(`(${externalMobiles.join("|")})$`);
+
+        const extQuery: any = { mobile: extMobileRegex };
+        if (status) {
+          const statusTokens = status.split(",").map((s) => s.trim().toUpperCase());
+          const extStatusList = new Set<string>();
+
+          for (const s of statusTokens) {
+            extStatusList.add(s);
+            // Map common CRM grievance statuses to external department statuses
+            if (s === "IN_PROGRESS" || s === "OPEN") {
+              extStatusList.add("REGISTERED");
+              extStatusList.add("PENDING");
+              extStatusList.add("OPEN");
+              extStatusList.add("IN_PROGRESS");
+              extStatusList.add("INPROGRESS");
+            } else if (s === "RESOLVED" || s === "CLOSED") {
+              extStatusList.add("RESOLVED");
+              extStatusList.add("CLOSED");
+            }
+          }
+
+          extQuery.status = { $in: Array.from(extStatusList) };
+        }
+        if (search) {
+          extQuery.$or = [
+            { externalComplaintId: new RegExp(search, "i") },
+            { internalId: new RegExp(search, "i") },
+            { mobile: new RegExp(search, "i") },
+          ];
+        }
+
+        if (extDeptCodes.length > 0) {
+          extQuery.departmentCode = { $in: extDeptCodes };
+        }
+
         externalGrievances = await ExternalGrievance.find(extQuery).lean();
       }
       // Combine and mark type explicitly
@@ -1717,14 +1759,39 @@ export class GrievanceController {
       // Internal Grievance query
       const query: any = {};
 
-      if (department) {
-        query["classification.department"] = {
-          $in: department.split(","),
-        };
+      // Parse department and departmentCode filters:
+      // department can contain comma-separated MongoDB ObjectIds and/or external department codes
+      const deptTokens = [
+        ...(department ? department.split(",").map((d) => d.trim()).filter(Boolean) : []),
+        ...(departmentCode ? departmentCode.split(",").map((d) => d.trim()).filter(Boolean) : []),
+      ];
+
+      const deptObjectIds: string[] = [];
+      const extDeptCodes: string[] = [];
+
+      for (const token of deptTokens) {
+        if (mongoose.isValidObjectId(token) && token.length === 24) {
+          deptObjectIds.push(token);
+        } else {
+          extDeptCodes.push(token);
+        }
       }
-      if (departmentCode) {
-        query["classification.department"] = null;
+
+      // If specific internal department ObjectIds are passed, filter internal by them;
+      // otherwise, all internal grievances are included (matching status, etc.)
+      if (deptObjectIds.length > 0) {
+        query["classification.department"] = { $in: deptObjectIds };
       }
+
+      const hasDeptFilter = deptTokens.length > 0;
+      // All internal grievances matching status/filters are included
+      const shouldFetchInternal = true;
+      // feedback=true/false is an internal concept only; skip external in that case
+      const shouldFetchExternal =
+        (!hasDeptFilter || extDeptCodes.length > 0) &&
+        feedback !== "true" &&
+        feedback !== "false";
+
       if (status) {
         query.status = { $in: status.split(",") };
       }
@@ -1763,10 +1830,28 @@ export class GrievanceController {
       // External Grievance query
       const extQuery: any = {};
       if (status) {
-        extQuery.status = { $in: status.split(",") };
+        const statusTokens = status.split(",").map((s) => s.trim().toUpperCase());
+        const extStatusList = new Set<string>();
+
+        for (const s of statusTokens) {
+          extStatusList.add(s);
+          // Map common CRM grievance statuses to external department statuses
+          if (s === "IN_PROGRESS" || s === "OPEN") {
+            extStatusList.add("REGISTERED");
+            extStatusList.add("PENDING");
+            extStatusList.add("OPEN");
+            extStatusList.add("IN_PROGRESS");
+            extStatusList.add("INPROGRESS");
+          } else if (s === "RESOLVED" || s === "CLOSED") {
+            extStatusList.add("RESOLVED");
+            extStatusList.add("CLOSED");
+          }
+        }
+
+        extQuery.status = { $in: Array.from(extStatusList) };
       }
-      if (departmentCode) {
-        extQuery.departmentCode = { $in: departmentCode.split(",") };
+      if (extDeptCodes.length > 0) {
+        extQuery.departmentCode = { $in: extDeptCodes };
       }
       if (search) {
         const searchRegex = new RegExp(search, "i");
@@ -1788,12 +1873,9 @@ export class GrievanceController {
         extQuery.$or = extOrConditions;
       }
 
-      // feedback=true/false is an internal concept only; skip external in that case
-      const shouldFetchExternal = feedback !== "true" && feedback !== "false";
-
       // Count both collections
       const [totalInternal, totalExternal] = await Promise.all([
-        Grievance.countDocuments(query),
+        shouldFetchInternal ? Grievance.countDocuments(query) : Promise.resolve(0),
         shouldFetchExternal
           ? ExternalGrievance.countDocuments(extQuery)
           : Promise.resolve(0),
