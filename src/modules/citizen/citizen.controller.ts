@@ -8,6 +8,7 @@ import { ApiError } from "../../middlewares/errorHandler.js";
 import ApiResponse from "../../utils/apiResponse.js";
 import { PasswordHelper } from "../../utils/passwordHelper.js";
 import { Grievance } from "../grievance/grievance.model.js";
+import { GrievanceAnalyticLog } from "../grievance/grievanceAnalyticLog.model.js";
 import { ExternalGrievance } from "../externalGrievance/externalGrievance.model.js";
 export class CitizenController {
   /**
@@ -168,38 +169,46 @@ export class CitizenController {
       }
     ]);
 
-    const statusCounts: Record<string, number> = {
-      OPEN: 0,
-      IN_PROGRESS: 0,
-      RESOLVED: 0,
-      CLOSED: 0,
-      ESCALATED: 0,
-      REJECTED: 0,
-      PENDING: 0
-    };
+    // Calculate internal complaints escalated count
+    const citizenGrievanceIds = await Grievance.find({ $or: baseConditions }).distinct("_id");
+    const loggedEscalatedIds = citizenGrievanceIds.length > 0
+      ? await GrievanceAnalyticLog.distinct("grievance", {
+          grievance: { $in: citizenGrievanceIds },
+          action: "ESCALATED",
+        })
+      : [];
 
-    // let totalComplaints = 0;
+    const escalatedCount = await Grievance.countDocuments({
+      $and: [
+        { $or: baseConditions },
+        {
+          $or: [
+            { status: "ESCALATED" },
+            { escalationLevel: { $gt: 0 } },
+            ...(loggedEscalatedIds.length > 0 ? [{ _id: { $in: loggedEscalatedIds } }] : []),
+          ],
+        },
+      ],
+    });
 
-    // internalAgg.forEach(item => {
-    //   totalComplaints += item.count;
-    //   const stat = item._id || "UNKNOWN";
-    //   statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
-    // });
-
-    // externalAgg.forEach(item => {
-    //   totalComplaints += item.count;
-    //   const stat = item._id || "UNKNOWN";
-    //   if (String(stat).toUpperCase() !== "PENDING") {
-    //     statusCounts[stat] = (statusCounts[stat] || 0) + item.count;
-    //   }
-    // });
+    const existingEscalatedIndex = internalAgg.findIndex(
+      (item: any) => String(item._id).toUpperCase() === "ESCALATED"
+    );
+    if (existingEscalatedIndex !== -1) {
+      internalAgg[existingEscalatedIndex].count = Math.max(
+        internalAgg[existingEscalatedIndex].count,
+        escalatedCount
+      );
+    } else {
+      internalAgg.push({ _id: "ESCALATED", count: escalatedCount });
+    }
 
     return new ApiResponse({
       res,
       status: 200,
       data: {
         externalAgg,
-        internalAgg
+        internalAgg,
       },
       message: "Dashboard analytics retrieved successfully"
     });
