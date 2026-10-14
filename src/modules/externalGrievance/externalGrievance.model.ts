@@ -13,6 +13,8 @@ export interface IExternalGrievance extends Document {
   // Metadata for tracking the API request
   apiSyncStatus: "PENDING" | "SYNCED" | "FAILED";
   lastSyncAttempt?: Date;
+  syncAttempts?: number;
+  lastSyncError?: string | null;
   
   createdAt: Date;
   updatedAt: Date;
@@ -36,7 +38,9 @@ const externalGrievanceSchema = new Schema<IExternalGrievance>({
     default: "PENDING", 
     index: true 
   },
-  lastSyncAttempt: { type: Date }
+  lastSyncAttempt: { type: Date },
+  syncAttempts: { type: Number, default: 0 },
+  lastSyncError: { type: String, default: null }
 }, {
   timestamps: true
 });

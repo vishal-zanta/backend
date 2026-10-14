@@ -229,6 +229,7 @@ console.log(currentRoleSla,"currentRoleSla")
 
 import { sendDailyFieldVisitReminders } from "./fieldVisitReminder.cron.js";
 import { fetchUnreadEmailsAndAssign } from "../modules/imapEmail/imapEmail.service.js";
+import { syncPendingExternalGrievances } from "./externalSync.cron.js";
 
 export const initCronJobs = () => {
   console.log("[Cron] Initializing background jobs...");
@@ -257,4 +258,13 @@ export const initCronJobs = () => {
   setInterval(async () => {
     await fetchUnreadEmailsAndAssign();
   }, 5 * 1000);
+
+  // External Grievance Sync Check — every 2 minutes (and on initial startup)
+  setTimeout(async () => {
+    await syncPendingExternalGrievances().catch(err => console.error("[Cron Error] initial syncPendingExternalGrievances:", err));
+  }, 10 * 1000);
+
+  setInterval(async () => {
+    await syncPendingExternalGrievances().catch(err => console.error("[Cron Error] syncPendingExternalGrievances:", err));
+  }, 2 * 60 * 1000);
 };

@@ -5,6 +5,8 @@ import { ApiError } from '../../middlewares/errorHandler.js';
 import { ExternalGrievance } from './externalGrievance.model.js';
 import { createExternalGrievanceSchema } from './externalGrievance.validation.js';
 import { ExternalIntegrationService } from './integrationFactory.js';
+import { ExternalMasterDataService } from './externalMasterData.service.js';
+import { syncPendingExternalGrievances } from '../../cronjobs/externalSync.cron.js';
 import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';
 import { getNextSequenceValue } from '../../utils/counter.model.js';
@@ -13,7 +15,7 @@ export class ExternalGrievanceController {
   
   /**
    * Create a new external grievance.
-   * This saves the dynamic payload to the DB so the cron job can push it to the external department.
+   * If the external department platform is down, saves locally with PENDING status and queues for sync.
    */
   static createGrievance = asyncHandler(async (req: Request, res: Response) => {
     const validation = createExternalGrievanceSchema.safeParse(req.body);
@@ -23,23 +25,55 @@ export class ExternalGrievanceController {
 
     const { departmentCode, mobile, departmentPayload } = validation.data;
 
-    // Generate internal ID: BR-IN-YYYY-XXXXXX (6 digits sequence sharing counter with internal grievances)
+    // Generate internal ID: BR-YYYY-XXXXXX (6 digits sequence sharing counter with internal grievances)
     const year = new Date().getFullYear();
     const seq = await getNextSequenceValue(`grievance_${year}`);
     const internalId = `BR-${year}-${String(seq).padStart(6, "0")}`;
 
-    // 1. Call the external API directly
-    const { complaintId, mobile: extractedMobile, status: externalStatus } = await ExternalIntegrationService.createExternalTicket(departmentCode, departmentPayload);
+    // Resolve mobile number from input or payload fields
+    const resolvedMobile =
+      mobile ||
+      departmentPayload?.mobile ||
+      departmentPayload?.mobileNo ||
+      departmentPayload?.complainant?.mobile ||
+      departmentPayload?.citizen?.mobileNumber ||
+      "";
 
-    // 2. Save to our local database with the confirmed ID
+    let externalComplaintId: string | null = null;
+    let externalStatus = "PENDING";
+    let apiSyncStatus: "PENDING" | "SYNCED" | "FAILED" = "PENDING";
+    let lastSyncError: string | null = null;
+    let extractedMobile: string | undefined = undefined;
+
+    // 1. Attempt to call external API directly
+    try {
+      const result = await ExternalIntegrationService.createExternalTicket(departmentCode, departmentPayload);
+      externalComplaintId = result.complaintId;
+      extractedMobile = result.mobile;
+      externalStatus = result.status || "OPEN";
+      apiSyncStatus = "SYNCED";
+    } catch (error: any) {
+      console.warn(
+        `[ExternalGrievance] Department ${departmentCode} API is unavailable/failed. Saving locally for deferred sync:`,
+        error?.message
+      );
+      lastSyncError = error?.message || "External department API unreachable";
+      apiSyncStatus = "PENDING";
+      externalStatus = "PENDING";
+    }
+
+    // 2. Save to our local database (either as SYNCED with external ID or PENDING for retry)
     const grievance = await ExternalGrievance.create({
       internalId,
       departmentCode,
-      mobile: mobile || extractedMobile, // Use explicitly provided mobile or fallback to extracted
-      externalComplaintId: complaintId,
+      mobile: extractedMobile || resolvedMobile,
+      externalComplaintId: externalComplaintId || undefined,
       departmentPayload,
-      status: externalStatus || "OPEN",
-      apiSyncStatus: "PENDING" // Pending sync status
+      status: externalStatus,
+      apiSyncStatus,
+      lastSyncAttempt: new Date(),
+      syncAttempts: 1,
+      lastSyncError: lastSyncError || undefined
     });
 
     const actorId = (req as any).user?._id || (req as any).citizen?._id || null;
@@ -57,7 +91,11 @@ export class ExternalGrievanceController {
       metadata: {
         ...timelineTemplates.COMPLAINT_REGISTERED(internalId || grievance._id.toString(), (req as any).citizen ? "Citizen" : "System"),
         internalId,
-        externalComplaintId: complaintId
+        externalComplaintId,
+        syncStatus: apiSyncStatus,
+        description: apiSyncStatus === "SYNCED"
+          ? `External grievance registered and synced with ${departmentCode} (ID: ${externalComplaintId}).`
+          : `External department platform (${departmentCode}) is currently offline. Recorded locally as ${internalId} and queued for sync.`
       }
     });
 
@@ -65,7 +103,9 @@ export class ExternalGrievanceController {
       res,
       status: 201,
       data: grievance,
-      message: "External grievance created successfully and queued for sync."
+      message: apiSyncStatus === "SYNCED"
+        ? "External grievance created successfully and synced with department platform."
+        : `External department platform is temporarily offline. Grievance recorded locally (ID: ${internalId}) and queued for automatic background sync.`
     });
   });
 
@@ -319,7 +359,8 @@ export class ExternalGrievanceController {
   });
 
   /**
-   * Get master data for a specific external department
+   * Get master data for a specific external department.
+   * Leverages local caching and fallback so dropdowns never break when external platforms are down.
    */
   static getMasterData = asyncHandler(async (req: Request, res: Response) => {
     const { departmentCode } = req.params;
@@ -328,10 +369,10 @@ export class ExternalGrievanceController {
       throw new ApiError({ status: 400, message: "departmentCode is required" });
     }
 
-    // Extract optional `type` and remaining query params for departments like Education
+    // Extract optional `type` and remaining query params for departments like Education/Food
     const { type, ...queryParams } = req.query as Record<string, string>;
 
-    const data = await ExternalIntegrationService.fetchMasterData(
+    const data = await ExternalMasterDataService.getMasterData(
       String(departmentCode).toUpperCase(),
       type,
       queryParams as Record<string, string | number>,
@@ -346,7 +387,7 @@ export class ExternalGrievanceController {
   });
 
   /**
-   * Get district data for a specific external department
+   * Get district data for a specific external department with local caching.
    */
   static getDistrictData = asyncHandler(async (req: Request, res: Response) => {
     const { departmentCode } = req.params;
@@ -355,13 +396,39 @@ export class ExternalGrievanceController {
       throw new ApiError({ status: 400, message: "departmentCode is required" });
     }
 
-    const data = await ExternalIntegrationService.fetchDistrictData(String(departmentCode).toUpperCase());
+    const data = await ExternalMasterDataService.getDistrictData(String(departmentCode).toUpperCase());
     
     return new ApiResponse({
       res,
       status: 200,
       data,
       message: `District data for ${departmentCode} fetched successfully.`
+    });
+  });
+
+  /**
+   * On-demand trigger to sync pending external grievances that failed during initial creation
+   */
+  static syncPendingGrievances = asyncHandler(async (req: Request, res: Response) => {
+    const stats = await syncPendingExternalGrievances();
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: stats,
+      message: `Background sync executed. Processed: ${stats.totalProcessed}, Synced: ${stats.syncedCount}, Failed: ${stats.failedCount}`
+    });
+  });
+
+  /**
+   * On-demand trigger to sync and pre-cache all standalone/non-sequential master data
+   */
+  static syncMasterData = asyncHandler(async (req: Request, res: Response) => {
+    const result = await ExternalMasterDataService.syncAllStaticData();
+    return new ApiResponse({
+      res,
+      status: 200,
+      data: result,
+      message: `Master data sync completed. Synced: ${result.synced.length}, Errors: ${result.errors.length}`
     });
   });
 

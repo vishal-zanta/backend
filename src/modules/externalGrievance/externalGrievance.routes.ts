@@ -24,6 +24,8 @@ router.get('/master-data/:departmentCode', authProtect, ExternalGrievanceControl
 router.get('/district-data/:departmentCode', authProtect, ExternalGrievanceController.getDistrictData);
 router.get('/:id', authProtect, ExternalGrievanceController.getGrievanceById);
 router.post('/:id/files', authProtect, upload.any(), ExternalGrievanceController.uploadFiles);
+router.post('/sync-pending', authProtect, ExternalGrievanceController.syncPendingGrievances);
+router.post('/sync-master-data', authProtect, ExternalGrievanceController.syncMasterData);
 
 export default router;
  
