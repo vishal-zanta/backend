@@ -20,6 +20,7 @@ import indexRoutes from "./modules/main/index.routes.js";
 // Audit Trail
 import { auditTrailMiddleware } from "./middlewares/auditTrail.middleware.js";
 import { initAuditWorker } from "./modules/audit/audit.worker.js";
+import { initSmsWorkers } from "./modules/sms/sms.worker.js";
 
 // Cronjobs
 import { initCronJobs } from "./cronjobs/escalation.cron.js";
@@ -50,6 +51,9 @@ initRedis();
 
 // Initialize Audit Queue Worker
 initAuditWorker();
+
+// Initialize BullMQ SMS Workers (OTP, Internal Officer, Citizen)
+initSmsWorkers();
 
 // Initialize Cron Jobs
 initCronJobs();

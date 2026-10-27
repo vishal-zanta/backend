@@ -13,6 +13,8 @@ import { Citizen } from "../citizen/citizen.model.js";
 import { WorkflowLevel } from "../workflowLevel/workflowLevel.model.js";
 import { OfficerTagging } from "../officerTagging/officerTagging.model.js";
 import { NotificationService } from "../notifications/notification.service.js";
+import { SmsService } from "../sms/sms.service.js";
+import moment from "moment";
 
 // Helper to determine the Attachment schema 'type' from mimetype
 const getAttachmentType = (mimetype: string): "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" => {
@@ -274,6 +276,13 @@ export class GrievanceService {
     // Notify CCE of new complaint creation
     NotificationService.notifyNewComplaint(newGrievance._id, newGrievance.grievanceId).catch(e => console.error(e));
 
+    // Send Grievance Registration SMS to Citizen
+    if (finalCitizenInfo?.phone) {
+      SmsService.sendGrievanceRegistered(finalCitizenInfo.phone, newGrievance.grievanceId).catch(e =>
+        console.error("[Grievance Service] SMS error for citizen registration:", e?.message)
+      );
+    }
+
     if (newGrievance.assignedOfficer) {
       const assignedUser: any = await User.findById(newGrievance.assignedOfficer).populate("roles").lean();
       if (assignedUser) {
@@ -305,6 +314,21 @@ export class GrievanceService {
           newGrievance._id, 
           newGrievance.grievanceId
         ).catch(e => console.error(e));
+
+        // Send Grievance Assignment SMS to Citizen
+        if (finalCitizenInfo?.phone) {
+          SmsService.sendGrievanceAssigned(finalCitizenInfo.phone, newGrievance.grievanceId).catch(e =>
+            console.error("[Grievance Service] SMS error for citizen assign:", e?.message)
+          );
+        }
+
+        // Send Officer Task Assignment SMS to Officer
+        if (assignedUser.phone) {
+          const slaDeadline = moment().add(48, "hours").format("DD-MM-YYYY hh:mm A");
+          SmsService.sendOfficerTaskAssigned(assignedUser.phone, newGrievance.grievanceId, slaDeadline).catch(e =>
+            console.error("[Grievance Service] SMS error for officer assign:", e?.message)
+          );
+        }
       }
     }
 

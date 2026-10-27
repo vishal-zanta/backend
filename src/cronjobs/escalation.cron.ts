@@ -9,6 +9,8 @@ import { GrievanceAnalyticLog } from "../modules/grievance/grievanceAnalyticLog.
 import { OfficerTagging } from "../modules/officerTagging/officerTagging.model.js";
 import { SystemConfig } from "../modules/systemConfig/systemConfig.model.js";
 import { NotificationService } from "../modules/notifications/notification.service.js";
+import { SmsService } from "../modules/sms/sms.service.js";
+import moment from "moment";
 
 export const checkAndEscalateGrievances = async () => {
   try {
@@ -213,11 +215,33 @@ console.log(currentRoleSla,"currentRoleSla")
           NotificationService.notifySLABreach(grievance._id, grievance.grievanceId).catch(e => console.error(e));
           NotificationService.notifyEscalation(nextOfficer._id, assignedUser?._id, grievance._id, grievance.grievanceId).catch(e => console.error(e));
           
+          // Send Officer Task Assignment SMS for newly escalated officer
+          if (nextOfficer.phone) {
+            const nextStepRole = workflowLevels[nextValidLevelIndex]?.role?.toString();
+            const nextStepSla = slaConfig.escalations.find((e: any) => e.role?.toString() === nextStepRole);
+            const deadlineHours = nextStepSla?.slaHours || 24;
+            const slaDeadline = moment().add(deadlineHours, "hours").format("DD-MM-YYYY hh:mm A");
+            SmsService.sendOfficerTaskAssigned(nextOfficer.phone, grievance.grievanceId, slaDeadline).catch(e =>
+              console.error("[Cron Escalation SMS Error]:", e?.message)
+            );
+          }
+
           console.log(`[Cron] Grievance ${grievance.grievanceId} escalated to ${nextOfficer.name} (Level ${grievance.escalationLevel})`);
         }
       } else if (timePassedMs >= warningMs && !grievance.slaWarningSent && grievance.assignedOfficer) {
-        // Send SLA Warning
+        // Send SLA Warning in-app notification
         NotificationService.notifySLAWarning(grievance.assignedOfficer, grievance._id, grievance.grievanceId).catch(e => console.error(e));
+        
+        // Send SLA Warning SMS to assigned officer
+        const officerDoc = assignedUser || (await User.findById(grievance.assignedOfficer).lean());
+        if (officerDoc?.phone) {
+          const deadlineDate = new Date(grievance.createdAt.getTime() + slaMs);
+          const formattedDeadline = moment(deadlineDate).format("DD-MM-YYYY hh:mm A");
+          SmsService.sendSlaWarning(officerDoc.phone, grievance.grievanceId, formattedDeadline).catch(e =>
+            console.error("[Cron SLA Warning SMS Error]:", e?.message)
+          );
+        }
+
         grievance.slaWarningSent = true;
         await grievance.save();
       }

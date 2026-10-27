@@ -1,6 +1,7 @@
 import { ExternalGrievance } from "../modules/externalGrievance/externalGrievance.model.js";
 import { ExternalIntegrationService } from "../modules/externalGrievance/integrationFactory.js";
 import { TimelineService } from "../modules/timeline/timeline.service.js";
+import { SmsService } from "../modules/sms/sms.service.js";
 
 /**
  * Background worker to sync grievances that were saved locally when external platforms were down.

@@ -10,6 +10,7 @@ import { syncPendingExternalGrievances } from '../../cronjobs/externalSync.cron.
 import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';
 import { getNextSequenceValue } from '../../utils/counter.model.js';
+import { SmsService } from '../sms/sms.service.js';
 
 export class ExternalGrievanceController {
   
@@ -98,6 +99,14 @@ export class ExternalGrievanceController {
           : `External department platform (${departmentCode}) is currently offline. Recorded locally as ${internalId} and queued for sync.`
       }
     });
+
+    // Send Grievance Registration SMS to citizen using our internal grievance ID
+    const targetMobile = extractedMobile || resolvedMobile;
+    if (targetMobile) {
+      SmsService.sendGrievanceRegistered(targetMobile, internalId).catch((err) => {
+        console.error(`[ExternalGrievance] Failed to enqueue registration SMS to ${targetMobile}:`, err?.message);
+      });
+    }
 
     return new ApiResponse({
       res,

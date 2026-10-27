@@ -1,5 +1,6 @@
 import config from "../../config/index.js";
 import { Otp } from "./otp.model.js";
+import { SmsService } from "../sms/sms.service.js";
 
 export class OtpService {
   /**
@@ -8,6 +9,7 @@ export class OtpService {
   static async generateOtp(identifier: string): Promise<string> {
     // Generate a 6-digit OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const finalCode = config.nodeEnv === "production" ? code : "123456"; // Fixed OTP in non-prod if needed
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
 
     // Delete existing OTPs for this identifier to prevent spam
@@ -15,14 +17,18 @@ export class OtpService {
 
     await Otp.create({
       identifier,
-      code:config.nodeEnv === "production" ? code : "123456", //TODO: Use a fixed OTP in non-production environments for testing ,remove at prod
+      code: finalCode,
       expiresAt,
     });
 
-    // TODO: Integrate with an SMS service to send the OTP to the user's mobile number
-    console.log(`Generated OTP for ${identifier}: ${code}`);
+    // Enqueue OTP into BullMQ high-priority queue without blocking the API response
+    SmsService.sendOtp(identifier, finalCode).catch((err) => {
+      console.error(`[OtpService] Error enqueuing OTP SMS to ${identifier}:`, err?.message);
+    });
+
+    console.log(`Generated OTP for ${identifier}: ${finalCode}`);
     
-    return code;
+    return finalCode;
   }
 
   /**
