@@ -151,6 +151,46 @@ export class ExternalMasterDataService {
   }
 
   /**
+   * Normalize dataType aliases across singular/plural and default types
+   * e.g. source -> sources, school -> schools, category -> categories
+   */
+  static normalizeDataType(departmentCode: string, type?: string): string {
+    const dept = departmentCode.toUpperCase();
+    const raw = (type || "").trim().toLowerCase();
+    if (!raw) {
+      if (dept === "HEALTH") return "master";
+      if (dept === "EDUCATION") return "categories";
+      if (dept === "FOOD") return "types";
+      return "master";
+    }
+
+    const map: Record<string, string> = {
+      source: "sources",
+      sources: "sources",
+      school: "schools",
+      schools: "schools",
+      category: "categories",
+      categories: "categories",
+      district: "districts",
+      districts: "districts",
+      block: "blocks",
+      blocks: "blocks",
+      panchayat: "panchayats",
+      panchayats: "panchayats",
+      village: "villages",
+      villages: "villages",
+      status: "statuses",
+      statuses: "statuses",
+      type: "types",
+      types: "types",
+      state: "states",
+      states: "states",
+    };
+
+    return map[raw] || raw;
+  }
+
+  /**
    * Fetch master data with database caching and 7-day renewal.
    *
    * Logic:
@@ -165,7 +205,7 @@ export class ExternalMasterDataService {
     queryParams?: Record<string, any>
   ): Promise<any> {
     const dept = departmentCode.toUpperCase();
-    const dataType = type || (dept === "HEALTH" ? "master" : "categories");
+    const dataType = this.normalizeDataType(dept, type);
     const subKey = this.buildSubKey(queryParams);
 
     // 1. Search local DB cache for matching department + dataType + exact query params
@@ -187,7 +227,10 @@ export class ExternalMasterDataService {
 
       // Existing cached data without translations -> translate, update DB, and return
       console.log(`[MasterDataService] Existing DB cache for ${dept} (${dataType}) lacks translations. Appending nameHindi...`);
-      const translatedData = await TranslateService.appendMasterDataTranslations(cached.data);
+      const translatedData = await TranslateService.appendMasterDataTranslations(cached.data, {
+        departmentCode: dept,
+        dataType,
+      });
 
       await ExternalMasterData.updateOne(
         { _id: cached._id },
@@ -210,7 +253,10 @@ export class ExternalMasterDataService {
       if (liveData) {
         // Keep exact original API response structure and only append nameHindi field
         console.log(`[MasterDataService] Appending nameHindi for ${dept} (${dataType})...`);
-        const translatedData = await TranslateService.appendMasterDataTranslations(liveData);
+        const translatedData = await TranslateService.appendMasterDataTranslations(liveData, {
+          departmentCode: dept,
+          dataType,
+        });
 
         // Upsert into DB with exact query parameters, isTranslated: true, and current timestamp
         await ExternalMasterData.findOneAndUpdate(
@@ -252,7 +298,10 @@ export class ExternalMasterDataService {
     const fallback = DEFAULT_FALLBACKS[dept]?.[dataType];
     if (fallback) {
       console.log(`[MasterDataService] Returning default static fallback for ${dept} (${dataType})`);
-      return await TranslateService.appendMasterDataTranslations(fallback);
+      return await TranslateService.appendMasterDataTranslations(fallback, {
+        departmentCode: dept,
+        dataType,
+      });
     }
 
     throw new Error(
@@ -287,7 +336,10 @@ export class ExternalMasterDataService {
       }
 
       console.log(`[MasterDataService] Existing district cache for ${dept} lacks translations. Appending nameHindi...`);
-      const translatedData = await TranslateService.appendMasterDataTranslations(cached.data);
+      const translatedData = await TranslateService.appendMasterDataTranslations(cached.data, {
+        departmentCode: dept,
+        dataType,
+      });
 
       await ExternalMasterData.updateOne(
         { _id: cached._id },
@@ -305,7 +357,10 @@ export class ExternalMasterDataService {
       const liveData = await ExternalIntegrationService.fetchDistrictData(dept);
       if (liveData) {
         console.log(`[MasterDataService] Appending nameHindi to original structure for ${dept} district data...`);
-        const translatedData = await TranslateService.appendMasterDataTranslations(liveData);
+        const translatedData = await TranslateService.appendMasterDataTranslations(liveData, {
+          departmentCode: dept,
+          dataType,
+        });
 
         await ExternalMasterData.findOneAndUpdate(
           { departmentCode: dept, dataType, subKey },
@@ -341,7 +396,10 @@ export class ExternalMasterDataService {
     // 5. Default fallback
     const fallback = DEFAULT_FALLBACKS[dept]?.[dataType];
     if (fallback) {
-      return await TranslateService.appendMasterDataTranslations(fallback);
+      return await TranslateService.appendMasterDataTranslations(fallback, {
+        departmentCode: dept,
+        dataType,
+      });
     }
 
     throw new Error(`District data for ${dept} is temporarily unavailable.`);
@@ -375,7 +433,10 @@ export class ExternalMasterDataService {
       try {
         if (task.isDistrict) {
           const rawData = await ExternalIntegrationService.fetchDistrictData(task.dept);
-          const data = await TranslateService.appendMasterDataTranslations(rawData);
+          const data = await TranslateService.appendMasterDataTranslations(rawData, {
+            departmentCode: task.dept,
+            dataType: "district_data",
+          });
           await ExternalMasterData.findOneAndUpdate(
             { departmentCode: task.dept, dataType: "district_data", subKey: "" },
             { departmentCode: task.dept, dataType: "district_data", subKey: "", data, isTranslated: true, lastSyncedAt: new Date(), isStatic: true },
@@ -384,7 +445,10 @@ export class ExternalMasterDataService {
           synced.push(`${task.dept}:district_data`);
         } else if (task.type) {
           const rawData = await ExternalIntegrationService.fetchMasterData(task.dept, task.type);
-          const data = await TranslateService.appendMasterDataTranslations(rawData);
+          const data = await TranslateService.appendMasterDataTranslations(rawData, {
+            departmentCode: task.dept,
+            dataType: task.type,
+          });
           await ExternalMasterData.findOneAndUpdate(
             { departmentCode: task.dept, dataType: task.type, subKey: "" },
             { departmentCode: task.dept, dataType: task.type, subKey: "", data, isTranslated: true, lastSyncedAt: new Date(), isStatic: true },

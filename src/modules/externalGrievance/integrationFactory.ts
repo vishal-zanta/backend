@@ -113,17 +113,43 @@ export class ExternalIntegrationService {
       return await HealthDepartmentService.getMasterData();
     }
     if (departmentCode === "EDUCATION") {
-      const masterType = (type || 'categories') as any;
+      const typeAliases: Record<string, string> = {
+        source: 'sources',
+        sources: 'sources',
+        school: 'schools',
+        schools: 'schools',
+        category: 'categories',
+        categories: 'categories',
+        district: 'districts',
+        districts: 'districts',
+        block: 'blocks',
+        blocks: 'blocks',
+        panchayat: 'panchayats',
+        panchayats: 'panchayats',
+        village: 'villages',
+        villages: 'villages',
+        status: 'statuses',
+        statuses: 'statuses',
+      };
+      const masterType = (typeAliases[(type || '').trim().toLowerCase()] || type || 'categories') as any;
       return await EducationDepartmentService.getMasterData(masterType, params);
     }
     if (departmentCode === "FOOD") {
-      switch (type) {
+      const normalizedType = (type || '').trim().toLowerCase();
+      switch (normalizedType) {
+        case 'type':
         case 'types': return await FoodDepartmentService.getTypes();
+        case 'category':
         case 'categories': return await FoodDepartmentService.getCategories();
+        case 'state':
         case 'states': return await FoodDepartmentService.getStates();
+        case 'district':
         case 'districts': return await FoodDepartmentService.getDistricts(String(params?.stateId || '10'));
+        case 'block':
         case 'blocks': return await FoodDepartmentService.getBlocks(String(params?.districtId || ''));
+        case 'panchayat':
         case 'panchayats': return await FoodDepartmentService.getPanchayats(String(params?.blockId || ''));
+        case 'village':
         case 'villages': return await FoodDepartmentService.getVillages(String(params?.panchayatId || ''));
         default: 
           return {

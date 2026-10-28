@@ -11,25 +11,41 @@ const translateClient = new v2.Translate({
     path.join(process.cwd(), "hozo-translation-prod-247bbeac1b85.json"),
 });
 
-// Candidate property names representing the name of an item in master data
+// Candidate property names representing names or labels in master data
 const TARGET_NAME_FIELDS = [
+  "schoolName",
+  "villageName",
+  "panchayatName",
+  "blockName",
+  "districtName",
   "name",
   "localname",
-  "typeName",
+  "category",
   "categoryName",
-  "districtName",
-  "blockName",
-  "panchayatName",
-  "villageName",
-  "schoolName",
+  "source",
+  "status",
+  "type",
+  "typeName",
+  "subType",
+  "description",
   "serviceName",
   "title",
+  "label",
 ];
+
+export interface DualTranslation {
+  hindi: string;
+  english: string;
+}
+
+export function isHindiText(text: string): boolean {
+  return /[\u0900-\u097F]/.test(text || "");
+}
 
 export class TranslateService {
   /**
    * Transliterate a single text phonetically into Hindi script (Devanagari).
-   * E.g. "Patna" -> "पटना", "Consumer Related Issues" -> "कंस्यूमर रिलेटेड इश्यूज"
+   * E.g. "Patna" -> "पटना", "HELPLINE" -> "हेल्पलाइन"
    */
   static async transliterateText(text: string): Promise<string> {
     const trimmed = (text || "").trim();
@@ -60,14 +76,32 @@ export class TranslateService {
   }
 
   /**
-   * Bulk transliterates an array of texts.
-   * 1. Checks TranslateName DB collection first for existing phonetic Hindi versions.
-   * 2. Transliterates any missing texts phonetically into Devanagari Hindi script.
-   * 3. Saves newly converted names into TranslateName DB.
-   * 4. Returns map of { [englishName]: hindiVersion }
+   * Translate a Hindi text into English.
+   * E.g. "विद्यालय" -> "School", "आधारभूत संरचना" -> "Infrastructure"
    */
-  static async translateBatch(texts: string[]): Promise<Record<string, string>> {
-    const result: Record<string, string> = {};
+  static async translateTextToEnglish(text: string): Promise<string> {
+    const trimmed = (text || "").trim();
+    if (!trimmed) return "";
+
+    try {
+      const [translation] = await translateClient.translate(trimmed, "en");
+      return String(translation || trimmed).trim();
+    } catch (e: any) {
+      console.warn(`[TranslateService] Failed to translate "${trimmed}" to English:`, e?.message);
+      return trimmed;
+    }
+  }
+
+  /**
+   * Bulk transliterates / translates an array of texts.
+   * 1. Checks TranslateName DB collection first for existing Hindi & English versions.
+   * 2. If text is Hindi -> translates to English.
+   * 3. If text is English -> transliterates/translates to Hindi.
+   * 4. Saves newly converted names into TranslateName DB with nameHindi and nameEng.
+   * 5. Returns map of { [text]: { hindi, english } }
+   */
+  static async translateBatch(texts: string[]): Promise<Record<string, DualTranslation>> {
+    const result: Record<string, DualTranslation> = {};
     const uniqueClean = Array.from(
       new Set(
         texts
@@ -78,18 +112,28 @@ export class TranslateService {
 
     if (uniqueClean.length === 0) return result;
 
-    // 1. Query DB for existing Hindi versions in TranslateName
+    // 1. Query DB for existing translations in TranslateName
     const cachedDocs = await TranslateName.find({ name: { $in: uniqueClean } }).lean();
     cachedDocs.forEach((doc) => {
-      result[doc.name] = doc.nameHindi;
+      const isHindi = isHindiText(doc.name);
+      result[doc.name] = {
+        hindi: doc.nameHindi || (isHindi ? doc.name : ""),
+        english: doc.nameEng || (!isHindi ? doc.name : ""),
+      };
     });
 
-    const missingTexts = uniqueClean.filter((text) => !result[text]);
+    const missingTexts = uniqueClean.filter(
+      (text) =>
+        !result[text] ||
+        !result[text].hindi ||
+        !result[text].english
+    );
+
     if (missingTexts.length === 0) {
       return result;
     }
 
-    // 2. Transliterate missing texts in parallel (chunks of 10)
+    // 2. Translate/transliterate missing texts in chunks
     const chunkSize = 10;
     const bulkOps: any[] = [];
 
@@ -97,13 +141,33 @@ export class TranslateService {
       const chunk = missingTexts.slice(i, i + chunkSize);
       await Promise.all(
         chunk.map(async (text) => {
-          const hindi = await this.transliterateText(text);
-          result[text] = hindi;
+          let hindi = result[text]?.hindi || "";
+          let english = result[text]?.english || "";
+
+          if (isHindiText(text)) {
+            hindi = text;
+            if (!english) {
+              english = await this.translateTextToEnglish(text);
+            }
+          } else {
+            english = text;
+            if (!hindi) {
+              hindi = await this.transliterateText(text);
+            }
+          }
+
+          result[text] = { hindi, english };
 
           bulkOps.push({
             updateOne: {
               filter: { name: text },
-              update: { $set: { name: text, nameHindi: hindi } },
+              update: {
+                $set: {
+                  name: text,
+                  nameHindi: hindi,
+                  nameEng: english,
+                },
+              },
               upsert: true,
             },
           });
@@ -111,7 +175,7 @@ export class TranslateService {
       );
     }
 
-    // 3. Save new phonetic Hindi versions into TranslateName DB
+    // 3. Save new versions into TranslateName DB
     if (bulkOps.length > 0) {
       await TranslateName.bulkWrite(bulkOps).catch((err) =>
         console.warn("[TranslateService] Bulk write error for TranslateName:", err?.message)
@@ -122,15 +186,56 @@ export class TranslateService {
   }
 
   /**
-   * Scans external master data items and appends only one new field: `nameHindi`
+   * Helper to determine primary identifier property and value of an object.
+   * Priority: schoolName (for schools) > villageName > panchayatName > blockName > districtName > name > localname > category > source > status > ...
    */
-  static async appendMasterDataTranslations(payload: any): Promise<any> {
+  static getPrimaryField(node: any): { key: string; value: string } | null {
+    if (!node || typeof node !== "object") return null;
+
+    const priorityFields = [
+      "schoolName",
+      "villageName",
+      "panchayatName",
+      "blockName",
+      "districtName",
+      "name",
+      "localname",
+      "category",
+      "categoryName",
+      "source",
+      "status",
+      "type",
+      "typeName",
+      "subType",
+      "serviceName",
+      "title",
+      "label",
+    ];
+
+    for (const field of priorityFields) {
+      if (typeof node[field] === "string" && node[field].trim()) {
+        return { key: field, value: node[field].trim() };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Scans master data items and appends `nameHindi`, `nameEng`, and field-specific
+   * `samekeyEng` / `samekeyHindi` counterparts (especially for EDUCATION department).
+   */
+  static async appendMasterDataTranslations(
+    payload: any,
+    options?: { departmentCode?: string; dataType?: string }
+  ): Promise<any> {
     if (!payload) return payload;
 
     const cloned = JSON.parse(JSON.stringify(payload));
     const extractedTexts: string[] = [];
+    const isEducation = options?.departmentCode?.toUpperCase() === "EDUCATION";
 
-    // 1. Recursively collect text from all candidate name fields
+    // 1. Recursively collect text from all candidate name/label fields
     const collectTexts = (node: any) => {
       if (!node || typeof node !== "object") return;
 
@@ -158,69 +263,95 @@ export class TranslateService {
       return cloned;
     }
 
-    // 2. Fetch or generate Hindi phonetic versions
+    // 2. Fetch or generate Hindi and English versions
     const translationMap = await this.translateBatch(extractedTexts);
 
-    // 3. Recursively append ONLY `nameHindi` placed at the top next to `name`
-    const injectNameHindi = (node: any): any => {
+    // 3. Recursively append translations
+    const injectTranslations = (node: any): any => {
       if (!node || typeof node !== "object") return node;
 
       if (Array.isArray(node)) {
-        return node.map(injectNameHindi);
+        return node.map(injectTranslations);
       }
 
-      // Find the primary name identifier for this item
-      const primaryName =
-        node.name ||
-        node.localname ||
-        node.typeName ||
-        node.categoryName ||
-        node.districtName ||
-        node.blockName ||
-        node.panchayatName ||
-        node.villageName ||
-        node.schoolName ||
-        node.serviceName ||
-        node.title;
-
-      const hindi =
-        typeof primaryName === "string" && primaryName.trim()
-          ? translationMap[primaryName.trim()]
-          : undefined;
+      const primary = this.getPrimaryField(node);
+      const primaryTrans = primary ? translationMap[primary.value] : undefined;
 
       const updatedEntries: [string, any][] = [];
-      let hindiInserted = false;
+      let nameInserted = false;
 
       for (const [key, val] of Object.entries(node)) {
-        if (key === "nameHindi") continue;
+        // Skip existing translation keys to avoid duplicates when re-syncing
+        if (key === "nameHindi" || key === "nameEng") continue;
+        if (
+          isEducation &&
+          (key.endsWith("Hindi") || key.endsWith("Eng")) &&
+          TARGET_NAME_FIELDS.some(
+            (tf) => key === `${tf}Hindi` || key === `${tf}Eng`
+          )
+        ) {
+          continue;
+        }
 
-        const processedVal = val && typeof val === "object" ? injectNameHindi(val) : val;
+        const processedVal =
+          val && typeof val === "object" ? injectTranslations(val) : val;
         updatedEntries.push([key, processedVal]);
 
-        // Place nameHindi immediately after the name field so it appears at the top before large children arrays
+        // Education department special logic: add samekeyEng / samekeyHindi
         if (
-          hindi &&
-          !hindiInserted &&
-          (TARGET_NAME_FIELDS.includes(key) || key === "name")
+          isEducation &&
+          typeof val === "string" &&
+          val.trim() &&
+          TARGET_NAME_FIELDS.includes(key)
         ) {
-          updatedEntries.push(["nameHindi", hindi]);
-          hindiInserted = true;
+          const trans = translationMap[val.trim()];
+          if (trans) {
+            if (isHindiText(val)) {
+              // Hindi source text -> add keyEng
+              updatedEntries.push([`${key}Eng`, trans.english]);
+            } else {
+              // English source text -> add keyHindi and keyEng
+              updatedEntries.push([`${key}Hindi`, trans.hindi]);
+              updatedEntries.push([`${key}Eng`, trans.english]);
+            }
+          }
+        }
+
+        // Place nameHindi & nameEng immediately after primary identifier key
+        if (primary && key === primary.key && primaryTrans && !nameInserted) {
+          updatedEntries.push(["nameHindi", primaryTrans.hindi]);
+          if (primaryTrans.english) {
+            updatedEntries.push(["nameEng", primaryTrans.english]);
+          }
+          nameInserted = true;
+        } else if (
+          !isEducation &&
+          (TARGET_NAME_FIELDS.includes(key) || key === "name") &&
+          primaryTrans &&
+          !nameInserted
+        ) {
+          updatedEntries.push(["nameHindi", primaryTrans.hindi]);
+          if (primary && isHindiText(primary.value) && primaryTrans.english) {
+            updatedEntries.push(["nameEng", primaryTrans.english]);
+          }
+          nameInserted = true;
         }
       }
 
-      // Fallback: If not inserted yet (e.g. key named differently), place before children or at top
-      if (hindi && !hindiInserted) {
+      // Fallback: If nameHindi not inserted yet, place before children or at end
+      if (primaryTrans && !nameInserted) {
         const childrenIdx = updatedEntries.findIndex(([k]) => k === "children");
-        if (childrenIdx !== -1) {
-          updatedEntries.splice(childrenIdx, 0, ["nameHindi", hindi]);
-        } else {
-          updatedEntries.push(["nameHindi", hindi]);
+        const insertIdx = childrenIdx !== -1 ? childrenIdx : updatedEntries.length;
+        const additions: [string, any][] = [["nameHindi", primaryTrans.hindi]];
+        if (primaryTrans.english) {
+          additions.push(["nameEng", primaryTrans.english]);
         }
+        updatedEntries.splice(insertIdx, 0, ...additions);
       }
 
       return Object.fromEntries(updatedEntries);
     };
 
-    return injectNameHindi(cloned);
+    return injectTranslations(cloned);
   }
 }
