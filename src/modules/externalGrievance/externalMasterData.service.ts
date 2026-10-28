@@ -1,5 +1,6 @@
 import { ExternalMasterData } from "./externalMasterData.model.js";
 import { ExternalIntegrationService } from "./integrationFactory.js";
+import { TranslateService } from "../translate/translate.service.js";
 
 // Built-in fallback seeds for non-sequential data when external platform is unreachable
 const DEFAULT_FALLBACKS: Record<string, Record<string, any>> = {
@@ -115,130 +116,232 @@ const DEFAULT_FALLBACKS: Record<string, Record<string, any>> = {
   }
 };
 
+// Cache validity duration: 7 days
+export const MASTER_DATA_TTL_DAYS = 7;
+export const MASTER_DATA_TTL_MS = MASTER_DATA_TTL_DAYS * 24 * 60 * 60 * 1000;
+
 export class ExternalMasterDataService {
   /**
-   * Helper to construct subKey string from query params
+   * Helper to determine if cached master data is still fresh (younger than 7 days)
    */
-  private static buildSubKey(params?: Record<string, string | number>): string {
-    if (!params || Object.keys(params).length === 0) return "";
+  static isCacheValid(lastSyncedAt?: Date | null): boolean {
+    if (!lastSyncedAt) return false;
+    const ageMs = Date.now() - new Date(lastSyncedAt).getTime();
+    return ageMs < MASTER_DATA_TTL_MS;
+  }
+
+  /**
+   * Helper to construct a normalized, deterministic subKey string from query params.
+   * - Filters out departmentCode, type (as they are part of primary query keys).
+   * - Filters out null, undefined, empty strings.
+   * - Sorts parameter keys alphabetically so { a: 1, b: 2 } matches { b: 2, a: 1 }.
+   */
+  static buildSubKey(params?: Record<string, any>): string {
+    if (!params || typeof params !== "object") return "";
+
     return Object.entries(params)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, v]) => `${k}=${v}`)
+      .filter(([k, v]) => {
+        const lower = k.trim().toLowerCase();
+        if (lower === "departmentcode" || lower === "type") return false;
+        return v !== undefined && v !== null && String(v).trim() !== "";
+      })
+      .sort(([a], [b]) => a.trim().toLowerCase().localeCompare(b.trim().toLowerCase()))
+      .map(([k, v]) => `${k.trim()}=${String(v).trim()}`)
       .join("&");
   }
 
   /**
-   * Fetch master data with database caching and seamless offline fallback
+   * Fetch master data with database caching and 7-day renewal.
+   *
+   * Logic:
+   * 1. Check DB for exact match on (departmentCode, dataType, queryParams/subKey).
+   * 2. If present AND younger than 7 days -> Return saved DB cache directly (no external API hit).
+   * 3. If NOT in DB (first time for this query) OR older than 7 days -> Fetch from external API, save to DB with lastSyncedAt, and return.
+   * 4. If external API is down -> Fallback to existing stale DB cache.
    */
   static async getMasterData(
     departmentCode: string,
     type?: string,
-    queryParams?: Record<string, string | number>
+    queryParams?: Record<string, any>
   ): Promise<any> {
     const dept = departmentCode.toUpperCase();
     const dataType = type || (dept === "HEALTH" ? "master" : "categories");
     const subKey = this.buildSubKey(queryParams);
 
-    // 1. Try to fetch live data from the external department API
-    try {
-      const liveData = await ExternalIntegrationService.fetchMasterData(dept, type, queryParams);
-      if (liveData) {
-        // Cache/upsert into local DB asynchronously without blocking
-        ExternalMasterData.findOneAndUpdate(
-          { departmentCode: dept, dataType, subKey },
-          {
-            departmentCode: dept,
-            dataType,
-            subKey,
-            data: liveData,
-            lastSyncedAt: new Date(),
-            isStatic: !subKey
-          },
-          { upsert: true, returnDocument: 'after' }
-        ).catch((err) => console.warn(`[MasterDataService] Cache save error for ${dept}-${dataType}:`, err?.message));
-
-        return liveData;
-      }
-    } catch (apiError: any) {
-      console.warn(
-        `[MasterDataService] External API unavailable for ${dept} (${dataType}). Checking local database cache:`,
-        apiError?.message
-      );
-    }
-
-    // 2. Fallback to cached data in local database
+    // 1. Search local DB cache for matching department + dataType + exact query params
     const cached = await ExternalMasterData.findOne({
       departmentCode: dept,
       dataType,
       subKey
     }).lean();
 
-    if (cached && cached.data) {
-      console.log(`[MasterDataService] Returning cached master data for ${dept} (${dataType})`);
-      return cached.data;
+    // 2. Return from DB if present and within 7-day validity
+    if (cached && cached.data && this.isCacheValid(cached.lastSyncedAt)) {
+      if (cached.isTranslated) {
+        const ageHours = Math.round((Date.now() - new Date(cached.lastSyncedAt).getTime()) / (1000 * 60 * 60));
+        console.log(
+          `[MasterDataService] DB Cache Hit (Translated): Serving ${dept} [type=${dataType}${subKey ? `, params: ${subKey}` : ""}] from DB (Cache age: ${ageHours}h / 168h)`
+        );
+        return cached.data;
+      }
+
+      // Existing cached data without translations -> translate, update DB, and return
+      console.log(`[MasterDataService] Existing DB cache for ${dept} (${dataType}) lacks translations. Appending nameHindi...`);
+      const translatedData = await TranslateService.appendMasterDataTranslations(cached.data);
+
+      await ExternalMasterData.updateOne(
+        { _id: cached._id },
+        { $set: { data: translatedData, isTranslated: true } }
+      ).catch(() => {});
+      return translatedData;
     }
 
-    // 3. Fallback to built-in default seed if available
-    const fallback = DEFAULT_FALLBACKS[dept]?.[dataType];
-    if (fallback) {
-      console.log(`[MasterDataService] Returning default static fallback for ${dept} (${dataType})`);
-      return fallback;
-    }
-
-    throw new Error(
-      `Master data for ${dept} (${dataType}) is temporarily unavailable and not yet cached locally.`
+    // 3. First-time fetch (no cache in DB) OR expired (> 7 days) -> Fetch from external API
+    console.log(
+      `[MasterDataService] ${
+        !cached
+          ? "First-time query (not in DB)"
+          : "Cache expired (> 7 days)"
+      } for ${dept} [type=${dataType}${subKey ? `, params: ${subKey}` : ""}]. Fetching from external API...`
     );
-  }
 
-  /**
-   * Fetch district data with database caching and offline fallback
-   */
-  static async getDistrictData(departmentCode: string): Promise<any> {
-    const dept = departmentCode.toUpperCase();
-    const dataType = "district_data";
-
-    // 1. Try live external API
     try {
-      const liveData = await ExternalIntegrationService.fetchDistrictData(dept);
+      const liveData = await ExternalIntegrationService.fetchMasterData(dept, type, queryParams);
       if (liveData) {
-        ExternalMasterData.findOneAndUpdate(
-          { departmentCode: dept, dataType, subKey: "" },
+        // Keep exact original API response structure and only append nameHindi field
+        console.log(`[MasterDataService] Appending nameHindi for ${dept} (${dataType})...`);
+        const translatedData = await TranslateService.appendMasterDataTranslations(liveData);
+
+        // Upsert into DB with exact query parameters, isTranslated: true, and current timestamp
+        await ExternalMasterData.findOneAndUpdate(
+          { departmentCode: dept, dataType, subKey },
           {
             departmentCode: dept,
             dataType,
-            subKey: "",
-            data: liveData,
+            subKey,
+            queryParams: queryParams || {},
+            data: translatedData,
+            isTranslated: true,
             lastSyncedAt: new Date(),
-            isStatic: true
+            isStatic: !subKey
           },
           { upsert: true, returnDocument: 'after' }
-        ).catch((err) => console.warn(`[MasterDataService] District cache save error for ${dept}:`, err?.message));
+        );
 
-        return liveData;
+        console.log(
+          `[MasterDataService] Saved fresh master data with nameHindi to DB for ${dept} [type=${dataType}${subKey ? `, params: ${subKey}` : ""}] (valid for 7 days).`
+        );
+        return translatedData;
       }
     } catch (apiError: any) {
       console.warn(
-        `[MasterDataService] External District API unavailable for ${dept}. Checking local database cache:`,
+        `[MasterDataService] Failed to fetch external API for ${dept} (${dataType}) with params [${subKey}]:`,
         apiError?.message
       );
     }
 
-    // 2. Fallback to cached database record
-    const cached = await ExternalMasterData.findOne({
-      departmentCode: dept,
-      dataType,
-      subKey: ""
-    }).lean();
-
+    // 4. Stale-while-error fallback: return existing cached data even if expired (> 7 days) to avoid breaking UI
     if (cached && cached.data) {
-      console.log(`[MasterDataService] Returning cached district data for ${dept}`);
+      console.log(
+        `[MasterDataService] Serving stale cached master data from DB for ${dept} (${dataType}) [${subKey}] due to external API outage`
+      );
       return cached.data;
     }
 
-    // 3. Built-in fallback
+    // 5. Fallback to built-in default seed if available
     const fallback = DEFAULT_FALLBACKS[dept]?.[dataType];
     if (fallback) {
-      return fallback;
+      console.log(`[MasterDataService] Returning default static fallback for ${dept} (${dataType})`);
+      return await TranslateService.appendMasterDataTranslations(fallback);
+    }
+
+    throw new Error(
+      `Master data for ${dept} (${dataType}) with query parameters [${subKey || "none"}] is temporarily unavailable and not yet cached locally.`
+    );
+  }
+
+  /**
+   * Fetch district data with database caching and 7-day renewal.
+   */
+  static async getDistrictData(
+    departmentCode: string,
+    queryParams?: Record<string, any>
+  ): Promise<any> {
+    const dept = departmentCode.toUpperCase();
+    const dataType = "district_data";
+    const subKey = this.buildSubKey(queryParams);
+
+    // 1. Look up cached district data in local database
+    const cached = await ExternalMasterData.findOne({
+      departmentCode: dept,
+      dataType,
+      subKey
+    }).lean();
+
+    // 2. Serve from DB if valid (< 7 days)
+    if (cached && cached.data && this.isCacheValid(cached.lastSyncedAt)) {
+      if (cached.isTranslated) {
+        const ageHours = Math.round((Date.now() - new Date(cached.lastSyncedAt).getTime()) / (1000 * 60 * 60));
+        console.log(`[MasterDataService] DB Cache Hit (Translated): Serving district data from DB for ${dept} [params: ${subKey || "none"}] (Age: ${ageHours}h / 168h)`);
+        return cached.data;
+      }
+
+      console.log(`[MasterDataService] Existing district cache for ${dept} lacks translations. Appending nameHindi...`);
+      const translatedData = await TranslateService.appendMasterDataTranslations(cached.data);
+
+      await ExternalMasterData.updateOne(
+        { _id: cached._id },
+        { $set: { data: translatedData, isTranslated: true } }
+      ).catch(() => {});
+      return translatedData;
+    }
+
+    // 3. First time or expired (> 7 days) -> renew from external API
+    console.log(
+      `[MasterDataService] District data ${!cached ? 'first-time query (not in DB)' : 'cache expired (> 7 days)'} for ${dept}. Fetching from external API...`
+    );
+
+    try {
+      const liveData = await ExternalIntegrationService.fetchDistrictData(dept);
+      if (liveData) {
+        console.log(`[MasterDataService] Appending nameHindi to original structure for ${dept} district data...`);
+        const translatedData = await TranslateService.appendMasterDataTranslations(liveData);
+
+        await ExternalMasterData.findOneAndUpdate(
+          { departmentCode: dept, dataType, subKey },
+          {
+            departmentCode: dept,
+            dataType,
+            subKey,
+            queryParams: queryParams || {},
+            data: translatedData,
+            isTranslated: true,
+            lastSyncedAt: new Date(),
+            isStatic: !subKey
+          },
+          { upsert: true, returnDocument: 'after' }
+        );
+
+        console.log(`[MasterDataService] Saved fresh district data with nameHindi to DB for ${dept} (valid for 7 days).`);
+        return translatedData;
+      }
+    } catch (apiError: any) {
+      console.warn(
+        `[MasterDataService] External District API unavailable for ${dept} during renewal:`,
+        apiError?.message
+      );
+    }
+
+    // 4. Stale fallback
+    if (cached && cached.data) {
+      console.log(`[MasterDataService] Serving stale cached district data from DB for ${dept}`);
+      return cached.data;
+    }
+
+    // 5. Default fallback
+    const fallback = DEFAULT_FALLBACKS[dept]?.[dataType];
+    if (fallback) {
+      return await TranslateService.appendMasterDataTranslations(fallback);
     }
 
     throw new Error(`District data for ${dept} is temporarily unavailable.`);
@@ -271,18 +374,20 @@ export class ExternalMasterDataService {
     for (const task of tasks) {
       try {
         if (task.isDistrict) {
-          const data = await ExternalIntegrationService.fetchDistrictData(task.dept);
+          const rawData = await ExternalIntegrationService.fetchDistrictData(task.dept);
+          const data = await TranslateService.appendMasterDataTranslations(rawData);
           await ExternalMasterData.findOneAndUpdate(
             { departmentCode: task.dept, dataType: "district_data", subKey: "" },
-            { departmentCode: task.dept, dataType: "district_data", subKey: "", data, lastSyncedAt: new Date(), isStatic: true },
+            { departmentCode: task.dept, dataType: "district_data", subKey: "", data, isTranslated: true, lastSyncedAt: new Date(), isStatic: true },
             { upsert: true, returnDocument: 'after' }
           );
           synced.push(`${task.dept}:district_data`);
         } else if (task.type) {
-          const data = await ExternalIntegrationService.fetchMasterData(task.dept, task.type);
+          const rawData = await ExternalIntegrationService.fetchMasterData(task.dept, task.type);
+          const data = await TranslateService.appendMasterDataTranslations(rawData);
           await ExternalMasterData.findOneAndUpdate(
             { departmentCode: task.dept, dataType: task.type, subKey: "" },
-            { departmentCode: task.dept, dataType: task.type, subKey: "", data, lastSyncedAt: new Date(), isStatic: true },
+            { departmentCode: task.dept, dataType: task.type, subKey: "", data, isTranslated: true, lastSyncedAt: new Date(), isStatic: true },
             { upsert: true, returnDocument: 'after' }
           );
           synced.push(`${task.dept}:${task.type}`);
@@ -296,7 +401,7 @@ export class ExternalMasterDataService {
         if (fallback) {
           await ExternalMasterData.findOneAndUpdate(
             { departmentCode: task.dept, dataType: task.isDistrict ? "district_data" : task.type!, subKey: "" },
-            { departmentCode: task.dept, dataType: task.isDistrict ? "district_data" : task.type!, subKey: "", data: fallback, lastSyncedAt: new Date(), isStatic: true },
+            { departmentCode: task.dept, dataType: task.isDistrict ? "district_data" : task.type!, subKey: "", data: fallback, isTranslated: false, lastSyncedAt: new Date(), isStatic: true },
             { upsert: true, returnDocument: 'after' }
           );
         }

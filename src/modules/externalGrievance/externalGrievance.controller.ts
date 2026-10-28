@@ -372,19 +372,19 @@ export class ExternalGrievanceController {
    * Leverages local caching and fallback so dropdowns never break when external platforms are down.
    */
   static getMasterData = asyncHandler(async (req: Request, res: Response) => {
-    const { departmentCode } = req.params;
+    const departmentCode = req.params.departmentCode || (req.query.departmentCode as string);
     
     if (!departmentCode) {
       throw new ApiError({ status: 400, message: "departmentCode is required" });
     }
 
     // Extract optional `type` and remaining query params for departments like Education/Food
-    const { type, ...queryParams } = req.query as Record<string, string>;
+    const { type, departmentCode: _ignored, ...queryParams } = req.query as Record<string, string>;
 
     const data = await ExternalMasterDataService.getMasterData(
       String(departmentCode).toUpperCase(),
       type,
-      queryParams as Record<string, string | number>,
+      queryParams as Record<string, string | number>
     );
     
     return new ApiResponse({
@@ -399,13 +399,17 @@ export class ExternalGrievanceController {
    * Get district data for a specific external department with local caching.
    */
   static getDistrictData = asyncHandler(async (req: Request, res: Response) => {
-    const { departmentCode } = req.params;
+    const departmentCode = req.params.departmentCode || (req.query.departmentCode as string);
     
     if (!departmentCode) {
       throw new ApiError({ status: 400, message: "departmentCode is required" });
     }
 
-    const data = await ExternalMasterDataService.getDistrictData(String(departmentCode).toUpperCase());
+    const { departmentCode: _ignored, ...queryParams } = req.query as Record<string, string>;
+    const data = await ExternalMasterDataService.getDistrictData(
+      String(departmentCode).toUpperCase(),
+      queryParams
+    );
     
     return new ApiResponse({
       res,

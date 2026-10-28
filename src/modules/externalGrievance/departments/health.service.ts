@@ -231,8 +231,11 @@ export class HealthDepartmentService {
       console.error("[HealthService] Get Master Data Error:", error);
       throw error;
     }
-
   }
+}
 
-
-    }
+export {
+  getMappedMasterData,
+  getDistrictMappedData,
+  getFinalFormData,
+} from "./health.mapper.js";
