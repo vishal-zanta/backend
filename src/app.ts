@@ -66,7 +66,7 @@ app.use(auditTrailMiddleware);
 
 // Global Telephony Webhook at Root (PBX can post to /webhook directly)
 import { AvayaController } from "./modules/avaya/avaya.controller.js";
-app.post("/webhook", AvayaController.handleWebhook);
+// app.post("/webhook", AvayaController.handleWebhook);
 
 // Routes
 app.use("/api/v1", indexRoutes);

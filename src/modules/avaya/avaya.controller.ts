@@ -197,7 +197,7 @@ export class AvayaController {
     if (!avayaStatus?.isLoggedIn || avayaStatus?.state === 'LOGGED_OUT') {
       try {
         await AvayaService.agentLogin(agentId, extension, password || '123456');
-        const webhookUrl = process.env.AVAYA_WEBHOOK_URL || 'https://backend.bugslayer.in/api/v1/telephony/webhook';
+        const webhookUrl = process.env.AVAYA_WEBHOOK_URL || 'https://portal-backend.lumirex.tech/api/v1/telephony/webhook';
         await AvayaService.monitorExtensions([extension], webhookUrl);
         reconnected = true;
         // Re-fetch status after login

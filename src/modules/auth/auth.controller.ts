@@ -40,7 +40,7 @@ export class AuthController {
         if (user.cceConfig && user.cceConfig.agentId && user.cceConfig.extension) {
           try {
             await AvayaService.agentLogin(user.cceConfig.agentId, user.cceConfig.extension, user.cceConfig.password || "123456");
-            const webhookUrl = process.env.AVAYA_WEBHOOK_URL || "https://backend.bugslayer.in/api/v1/telephony/webhook";
+            const webhookUrl = process.env.AVAYA_WEBHOOK_URL || "https://portal-backend.lumirex.tech/api/v1/telephony/webhook";
             await AvayaService.monitorExtensions([user.cceConfig.extension], webhookUrl);
           } catch (e) {
             console.error("Avaya login or monitor failed:", e);
@@ -71,7 +71,7 @@ export class AuthController {
       if (user.cceConfig && user.cceConfig.agentId && user.cceConfig.extension) {
         try {
           await AvayaService.agentLogin(user.cceConfig.agentId, user.cceConfig.extension, user.cceConfig.password || "123456");
-          const webhookUrl = process.env.AVAYA_WEBHOOK_URL || "https://backend.bugslayer.in/api/v1/telephony/webhook";
+          const webhookUrl = process.env.AVAYA_WEBHOOK_URL || "https://portal-backend.lumirex.tech/api/v1/telephony/webhook";
           await AvayaService.monitorExtensions([user.cceConfig.extension], webhookUrl);
         } catch (e) {
           console.error("Avaya login or monitor failed:", e);
