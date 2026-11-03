@@ -49,15 +49,15 @@ export const checkAndEscalateGrievances = async () => {
     }
 
     for (const grievance of activeGrievances) {
-      console.log("complain",grievance.grievanceId)
+      // console.log("complain",grievance.grievanceId)
       const serviceId = grievance.classification?.service?._id?.toString();
       const departmentId = (grievance.classification?.service as any)?.department?.toString();
       
-      console.log(serviceId,"serviceId")
+      // console.log(serviceId,"serviceId")
       if (!serviceId || !departmentId) continue;
 
       const slaConfig = slaConfigMap.get(serviceId);
-      console.log(slaConfig,"slaConfig")
+      // console.log(slaConfig,"slaConfig")
 
       if (!slaConfig || !slaConfig.escalations || slaConfig.escalations.length === 0) continue;
 
@@ -73,17 +73,17 @@ export const checkAndEscalateGrievances = async () => {
           currentLevelIndex = foundIndex;
         }
       }
-      console.log(currentLevelIndex,workflowLevels.length - 1,"currentLevelIndex")
+      // console.log(currentLevelIndex,workflowLevels.length - 1,"currentLevelIndex")
       // If already at or beyond max level, we can't escalate further
       if (currentLevelIndex >= workflowLevels.length - 1) continue;
 
       const currentWorkflowLevel = workflowLevels[currentLevelIndex];
-console.log(currentWorkflowLevel,"currentWorkflowLevel")
+// console.log(currentWorkflowLevel,"currentWorkflowLevel")
       // Find the SLA hours for the CURRENT role
       const currentRoleSla = slaConfig.escalations.find(
         (esc: any) => esc.role?.toString() === currentWorkflowLevel.role?.toString()
       );
-console.log(currentRoleSla,"currentRoleSla")
+// console.log(currentRoleSla,"currentRoleSla")
       if (!currentRoleSla) continue;
 
       // Calculate cumulative SLA up to the current level because "time per officer" is additive
@@ -94,13 +94,13 @@ console.log(currentRoleSla,"currentRoleSla")
         const stepSla = slaConfig.escalations.find((e: any) => e.role?.toString() === stepRole);
         if (stepSla) cumulativeSlaHours += stepSla.slaHours;
       }
-      console.log(cumulativeSlaHours, "cumulativeSlaHours")
+      // console.log(cumulativeSlaHours, "cumulativeSlaHours")
       
       const slaMs = cumulativeSlaHours * 60 * 60 * 1000;
       const warningMs = slaMs * (slaWarningPercent / 100);
       const timePassedMs = Date.now() - grievance.createdAt.getTime();
 
-      console.log(`timePassedMs: ${timePassedMs}ms (${Math.round(timePassedMs/1000/60)} mins), slaMs: ${slaMs}ms (${cumulativeSlaHours} hours)`);
+      // console.log(`timePassedMs: ${timePassedMs}ms (${Math.round(timePassedMs/1000/60)} mins), slaMs: ${slaMs}ms (${cumulativeSlaHours} hours)`);
 
       if (timePassedMs > slaMs) {
         // SLA Breached! Find the NEXT valid role in the workflow that is ALSO in the SlaConfig (OPTIMIZATION 3)

@@ -2,6 +2,7 @@ import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import config from './index.js';
+import { User } from '../modules/users/user.model.js';
 
 let io: Server;
 
@@ -37,11 +38,38 @@ export const initSocket = (server: HttpServer) => {
     }
   });
 
-  io.on('connection', (socket: Socket) => {
-    const userId = (socket as any).user.id;
-    
-    // User joins a personal room to receive targeted messages
-    socket.join(userId.toString());
+  io.on('connection', async (socket: Socket) => {
+    const userId = (socket as any).user?.id;
+    if (userId) {
+      // User joins a personal room to receive targeted messages
+      socket.join(userId.toString());
+
+      // Auto-join CCE extension room if user has one configured
+      try {
+        const user = await User.findById(userId).select('cceConfig').lean();
+        if (user?.cceConfig?.extension) {
+          socket.join(`extension:${user.cceConfig.extension}`);
+          socket.join(user.cceConfig.extension.toString());
+        }
+      } catch (e) {
+        // Continue even if DB lookup fails
+      }
+    }
+
+    // Allow manual join to extension room if needed
+    socket.on('joinExtension', (extension: string) => {
+      if (extension) {
+        socket.join(`extension:${extension}`);
+        socket.join(extension.toString());
+      }
+    });
+
+    socket.on('leaveExtension', (extension: string) => {
+      if (extension) {
+        socket.leave(`extension:${extension}`);
+        socket.leave(extension.toString());
+      }
+    });
     
     socket.on('disconnect', () => {
       // Clean up if needed

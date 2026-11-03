@@ -4,25 +4,16 @@ import { authProtect } from '../../middlewares/authMiddleware.js';
 
 const router = Router();
 
-// Public Webhook endpoint for Avaya to post events to
+// Public — PBX posts events here
 router.post('/webhook', AvayaController.handleWebhook);
 
-// Require authentication for telephony operations
+// Authenticated
 router.use(authProtect);
 
-// 1. System
-// router.post('/system/connect', AvayaController.connectSystem);
-
-// 2. Call
 router.post('/call', AvayaController.makeCall);
-router.post('/call/answer', AvayaController.answerCall);
+router.post('/call/pickup', AvayaController.pickupCall);
+router.get('/call/details', AvayaController.getActiveCallDetails);
 router.get('/call/history', AvayaController.getCallHistory);
-router.get('/call/:extension/details', AvayaController.getActiveCallDetails);
-
-// 4. Agent
-router.get('/agent/:agentId/status', AvayaController.getAgentStatus);
-
-// 5. Queue
-router.get('/queue/:queue/agents', AvayaController.getQueueAgents);
+router.get('/agent/status', AvayaController.getAgentStatus);
 
 export default router;

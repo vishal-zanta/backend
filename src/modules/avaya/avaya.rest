@@ -1,104 +1,73 @@
-### 1. Connect to Avaya PBX (Run this first!)
-POST https://avaya.lumirex.tech/api/telephony/system/connect
+### ====================================================
+### BIHAR CRM TELEPHONY APIs
+### ====================================================
+
+### 1. Webhook (RINGING)
+POST http://localhost:5000/webhook
 Content-Type: application/json
 
 {
-    "adminProviderString": "AVAYA#AVAYAPOCCM2#CSTA#APSAES01;loginID=avayacti;passwd=Iccs@123"
+  "event": "RINGING",
+  "extension": "56001",
+  "callerId": "08307753758",
+  "calledId": "56001",
+  "durationSeconds": 0,
+  "timestamp": "2026-11-02T10:24:15.123Z"
+}
+
+### 2. Webhook (ANSWERED)
+POST http://localhost:5000/webhook
+Content-Type: application/json
+
+{
+  "event": "ANSWERED",
+  "extension": "56001",
+  "callerId": "08307753758",
+  "calledId": "56001",
+  "durationSeconds": 0,
+  "timestamp": "2026-11-02T10:24:20.456Z"
+}
+
+### 3. Webhook (DROPPED)
+POST http://localhost:5000/webhook
+Content-Type: application/json
+
+{
+  "event": "DROPPED",
+  "extension": "56001",
+  "callerId": "08307753758",
+  "calledId": "56001",
+  "durationSeconds": 65,
+  "timestamp": "2026-11-02T10:25:25.789Z"
 }
 
 ### ----------------------------------------------------
 
-### 2. Make a Phone Call (Click-to-Call)
-POST https://avaya.lumirex.tech/api/telephony/call
+### 4. Pickup Call (no body needed)
+POST http://localhost:5000/api/v1/telephony/call/pickup
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 5. Make Outbound Call
+POST http://localhost:5000/api/v1/telephony/call
+Authorization: Bearer <TOKEN>
 Content-Type: application/json
 
 {
-    "sourceExtension": "56002",
-    "clientNumber": "08307753758"
+  "clientNumber": "08307753758",
+  "grievanceId": ""
 }
 
-### ----------------------------------------------------
+### 6. Agent Status (auto-reconnects if disconnected)
+GET http://localhost:5000/api/v1/telephony/agent/status
+Authorization: Bearer <TOKEN>
 
-### 2b. Answer/Accept an Incoming Call
-POST https://avaya.lumirex.tech/api/telephony/call/answer
-Content-Type: application/json
+### 7. Active Call Details
+GET http://localhost:5000/api/v1/telephony/call/details
+Authorization: Bearer <TOKEN>
 
-{
-    "extension": "56002"
-}
-
-### ----------------------------------------------------
-
-### 3. Start Webhook Monitoring for Multiple Extensions
-POST https://avaya.lumirex.tech/api/telephony/monitor
-Content-Type: application/json
-
-{
-    "extensions": ["56001", "56002", "56003"],
-    "webhookUrl": "httpss://webhook.site/b5ffe974-e61e-4414-a719-3e5cf249df85"
-}
-
-### ----------------------------------------------------
-
-### 4. Agent Login (Log into a Support Queue)
-POST https://avaya.lumirex.tech/api/telephony/agent/login
-Content-Type: application/json
-
-{
-    "agentId": "66001",
-    "extension": "56002",
-    "password": "123456"
-}
-
-### ----------------------------------------------------
-
-### 5. Change Agent State (Set to Ready / Not Ready)
-POST https://avaya.lumirex.tech/api/telephony/agent/state
-Content-Type: application/json
-
-{
-    "agentId": "66002",
-    "isAvailable": true
-}
-
-### ----------------------------------------------------
-
-### 6. Agent Logout (End of Shift)
-POST https://avaya.lumirex.tech/api/telephony/agent/logout
-Content-Type: application/json
-
-{
-    "agentId": "66002",
-    "extension": "56002"
-}
-
-### ----------------------------------------------------
-
-### 7. Get Live Agent Status in a Queue
-GET https://avaya.lumirex.tech/api/telephony/queue/70/agents
-Content-Type: application/json
-
-### ----------------------------------------------------
-
-### 8. Find where a specific Agent is Logged In
-GET https://avaya.lumirex.tech/api/telephony/agent/66001/status
-Content-Type: application/json
-
-### ----------------------------------------------------
-
-### 9. Get Active Call Details (live duration, caller/called info)
-GET https://avaya.lumirex.tech/api/telephony/call/56002/details
-Content-Type: application/json
-
-### ----------------------------------------------------
-
-### 10. Get Call History (last 100 calls with duration)
-GET https://avaya.lumirex.tech/api/telephony/call/history
-Content-Type: application/json
-
-### 
-curl 'https://backend.bugslayer.in/api/v1/grievances/citizen?page=1&limit=10&status=IN_PROGRESS&department=HEALTH,EDUCATION,FOOD' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNmM0ZDUxZjExMWI4YjA5ZjAzMDcxYyIsIm1vYmlsZSI6Iis5MTc5ODI4NDY2MDciLCJyb2xlIjoiQ0lUSVpFTiIsImlhdCI6MTc5MTg3MTU0NSwiZXhwIjoxNzkxOTU3OTQ1fQ.bCj32cM7TbgzcctpIdkW3mXqFRzZlZxqEBp7lsweE4E' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Sec-Fetch-Site: cross-site'
+### 8. Call History
+GET http://localhost:5000/api/v1/telephony/call/history
+Authorization: Bearer <TOKEN>

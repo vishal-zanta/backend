@@ -64,6 +64,10 @@ initCronJobs();
 // Global Government API Audit Trail Middleware (captures 100% of API requests)
 app.use(auditTrailMiddleware);
 
+// Global Telephony Webhook at Root (PBX can post to /webhook directly)
+import { AvayaController } from "./modules/avaya/avaya.controller.js";
+app.post("/webhook", AvayaController.handleWebhook);
+
 // Routes
 app.use("/api/v1", indexRoutes);
 
