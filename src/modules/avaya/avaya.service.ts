@@ -29,6 +29,68 @@ export class AvayaService {
     return response.data;
   }
 
+  // 2c. Hold Call
+  static async holdCall(extension: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/hold`, { extension });
+    return response.data;
+  }
+
+  // 2d. Unhold / Retrieve Call
+  static async unholdCall(extension: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/unhold`, { extension });
+    return response.data;
+  }
+
+  // 2e. Mute Call
+  static async muteCall(extension: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/mute`, { extension });
+    return response.data;
+  }
+
+  // 2f. Unmute Call
+  static async unmuteCall(extension: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/unmute`, { extension });
+    return response.data;
+  }
+
+  // 2g. Drop / Hangup Call
+  static async dropCall(extension: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/drop`, { extension });
+    return response.data;
+  }
+
+  // 2h / 2k. Transfer Call (Blind Transfer if destination provided; Complete Attended Transfer if no destination)
+  static async transferCall(extension: string, destination?: string) {
+    const payload: any = { extension };
+    if (destination) {
+      payload.destination = destination;
+    }
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/transfer`, payload);
+    return response.data;
+  }
+
+  // 2i. Consultation Call (Put customer on hold & consult supervisor/agent)
+  static async consultCall(extension: string, destination: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/consult`, { extension, destination });
+    return response.data;
+  }
+
+  // 2j. Cancel Consultation Call (Drop consult & return to customer)
+  static async cancelConsultCall(extension: string) {
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/consult/cancel`, { extension });
+    return response.data;
+  }
+
+  // 2l. Conference Call (Merge ongoing consult into 3-way conference OR add party)
+  static async conferenceCall(extension: string, destination?: string) {
+    const payload: any = { extension };
+    if (destination) {
+      payload.destination = destination;
+    }
+    const response = await axios.post(`${AVAYA_BASE_URL}/call/conference`, payload);
+    return response.data;
+  }
+
   // 3. Start Webhook Monitoring for Multiple Extensions
   static async monitorExtensions(extensions: string[], webhookUrl: string) {
     const response = await axios.post(`${AVAYA_BASE_URL}/monitor`, { extensions, webhookUrl });

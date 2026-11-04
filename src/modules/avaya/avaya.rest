@@ -12,7 +12,7 @@ Content-Type: application/json
   "callerId": "08307753758",
   "calledId": "56001",
   "durationSeconds": 0,
-  "timestamp": "2026-11-02T10:24:15.123Z"
+  "timestamp": "2026-11-03T10:24:15.123Z"
 }
 
 ### 2. Webhook (ANSWERED)
@@ -25,7 +25,7 @@ Content-Type: application/json
   "callerId": "08307753758",
   "calledId": "56001",
   "durationSeconds": 0,
-  "timestamp": "2026-11-02T10:24:20.456Z"
+  "timestamp": "2026-11-03T10:24:20.456Z"
 }
 
 ### 3. Webhook (DROPPED)
@@ -38,19 +38,14 @@ Content-Type: application/json
   "callerId": "08307753758",
   "calledId": "56001",
   "durationSeconds": 65,
-  "timestamp": "2026-11-02T10:25:25.789Z"
+  "timestamp": "2026-11-03T10:25:25.789Z"
 }
 
 ### ----------------------------------------------------
+### CALL BASIC CONTROLS
+### ----------------------------------------------------
 
-### 4. Pickup Call (no body needed)
-POST http://localhost:5000/api/v1/telephony/call/pickup
-Authorization: Bearer <TOKEN>
-Content-Type: application/json
-
-{}
-
-### 5. Make Outbound Call
+### 4. Make Outbound Call (Click-to-Call)
 POST http://localhost:5000/api/v1/telephony/call
 Authorization: Bearer <TOKEN>
 Content-Type: application/json
@@ -60,14 +55,109 @@ Content-Type: application/json
   "grievanceId": ""
 }
 
-### 6. Agent Status (auto-reconnects if disconnected)
+### 5. Pickup / Answer Call
+POST http://localhost:5000/api/v1/telephony/call/pickup
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 6. Drop / Hangup Call
+POST http://localhost:5000/api/v1/telephony/call/drop
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 7. Hold Call
+POST http://localhost:5000/api/v1/telephony/call/hold
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 8. Unhold / Retrieve Call
+POST http://localhost:5000/api/v1/telephony/call/unhold
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 9. Mute Call
+POST http://localhost:5000/api/v1/telephony/call/mute
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 10. Unmute Call
+POST http://localhost:5000/api/v1/telephony/call/unmute
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### ----------------------------------------------------
+### TRANSFER, CONSULTATION & CONFERENCE
+### ----------------------------------------------------
+
+### 11. Get Available Transfer/Consult Targets (Parent Supervisor, Supervisors, CCEs)
+GET http://localhost:5000/api/v1/telephony/transfer-targets
+Authorization: Bearer <TOKEN>
+
+### 12. Blind Transfer Call (Pass target user's _id)
+POST http://localhost:5000/api/v1/telephony/call/transfer
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{
+  "targetUserId": "672b123456789abcdef01234"
+}
+
+### 13. Consultation Call (Put customer on hold & consult supervisor/cce)
+POST http://localhost:5000/api/v1/telephony/call/consult
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{
+  "targetUserId": "672b123456789abcdef01234"
+}
+
+### 14. Cancel Consultation Call (Drop supervisor & return to customer)
+POST http://localhost:5000/api/v1/telephony/call/consult/cancel
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 15. Complete Attended Transfer (After consultation, merge customer to supervisor)
+POST http://localhost:5000/api/v1/telephony/call/transfer
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 16. Conference Call (Merge ongoing consult into 3-way conference OR add party)
+POST http://localhost:5000/api/v1/telephony/call/conference
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{
+  "targetUserId": "672b123456789abcdef01234"
+}
+
+### ----------------------------------------------------
+### STATUS & HISTORY
+### ----------------------------------------------------
+
+### 17. Agent Status (auto-reconnects if disconnected)
 GET http://localhost:5000/api/v1/telephony/agent/status
 Authorization: Bearer <TOKEN>
 
-### 7. Active Call Details
+### 18. Active Call Details
 GET http://localhost:5000/api/v1/telephony/call/details
 Authorization: Bearer <TOKEN>
 
-### 8. Call History
+### 19. Call History
 GET http://localhost:5000/api/v1/telephony/call/history
 Authorization: Bearer <TOKEN>
