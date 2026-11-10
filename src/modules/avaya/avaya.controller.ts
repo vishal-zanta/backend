@@ -21,28 +21,43 @@ export class AvayaController {
    * Passing an array of rooms to io.to([...]) ensures Socket.io automatically deduplicates
    * sockets across rooms, so a client connected to both user room and extension room receives the event only ONCE.
    */
-  private static emitSocketEvent(eventName: string, data: any, userId?: string, extension?: string) {
+  public static emitSocketEvent(eventName: string, data: any, userId?: string, extension?: string) {
     try {
       const io = getIO();
       const rooms: string[] = [];
       if (userId) rooms.push(userId.toString());
       if (extension) {
-        rooms.push(`extension:${extension}`);
-        rooms.push(extension.toString());
+        const extStr = String(extension).trim();
+        rooms.push(`extension:${extStr}`);
+        rooms.push(extStr);
       }
-      if (rooms.length > 0) {
-        io.to(rooms).emit(eventName, data);
-      }
-    } catch (e) {
-      console.warn('Socket emission failed:', e);
+      // Also broadcast to general telephony room so any connected dashboard/tester receives it
+      rooms.push('telephony');
+
+      // Count connected sockets in target rooms for logging
+      let totalRecipients = 0;
+      rooms.forEach((r) => {
+        totalRecipients += io.sockets?.adapter?.rooms?.get(r)?.size || 0;
+      });
+
+      clog.info(`[Socket] Emitting "${eventName}"`, {
+        targetRooms: rooms,
+        recipientSocketsFound: totalRecipients,
+        event: data?.event || eventName,
+        extension: extension || data?.extension
+      });
+
+      io.to(rooms).emit(eventName, data);
+    } catch (e: any) {
+      clog.warn(`[Socket] Socket emission failed for "${eventName}":`, e?.message);
     }
   }
 
   /**
-   * Webhook Receiver — handles RINGING, ANSWERED, DROPPED from PBX
+   * Webhook Receiver — handles RINGING, ANSWERED, TALKING, DROPPED from PBX
    */
   static handleWebhook = asyncHandler(async (req: Request, res: Response) => {
-    clog.info("avaya webhook", req.body);
+    clog.info("avaya webhook received", req.body);
     const { event, extension, callerId, calledId, durationSeconds, timestamp } = req.body;
     const eventTime = timestamp || new Date().toISOString();
 
@@ -50,16 +65,31 @@ export class AvayaController {
       return res.status(400).json({ success: false, message: 'event and extension are required' });
     }
 
-    const agent = await User.findOne({ 'cceConfig.extension': extension }).lean();
+    const extStr = String(extension).trim();
+    const normalizedEvent = String(event).toUpperCase().trim();
+
+    // Find agent by extension (string match)
+    const agent = await User.findOne({ 'cceConfig.extension': extStr }).lean();
 
     const emitEvent = (eventName: string, data: any) => {
-      AvayaController.emitSocketEvent(eventName, data, agent?._id?.toString(), extension);
+      AvayaController.emitSocketEvent(eventName, data, agent?._id?.toString(), extStr);
     };
 
-    if (event === 'RINGING') {
-      const citizen = callerId ? await Citizen.findOne({ mobile: callerId }).lean() : null;
-      const recentGrievances = callerId
-        ? await Grievance.find({ 'citizenInfo.mobile': callerId })
+    // Helper to extract clean 10-digit mobile if present
+    const cleanNumber = (num: any) => {
+      if (!num) return '';
+      const digits = String(num).replace(/\D/g, '');
+      return digits.length >= 10 ? digits.slice(-10) : digits;
+    };
+
+    const cleanCaller = cleanNumber(callerId);
+    const cleanCalled = cleanNumber(calledId);
+
+    // 1. RINGING / ALERTING / OFFERED
+    if (normalizedEvent === 'RINGING' || normalizedEvent === 'ALERTING' || normalizedEvent === 'OFFERED') {
+      const citizen = cleanCaller ? await Citizen.findOne({ mobile: cleanCaller }).lean() : null;
+      const recentGrievances = cleanCaller
+        ? await Grievance.find({ 'citizenInfo.mobile': cleanCaller })
             .select('grievanceId status priority classification createdAt')
             .sort({ createdAt: -1 }).limit(5).lean()
         : [];
@@ -68,8 +98,8 @@ export class AvayaController {
       const callDoc = await Call.create({
         callId,
         agent: agent?._id,
-        callType: callerId === extension ? 'Outbound' : 'Inbound',
-        citizenMobile: callerId,
+        callType: callerId === extStr ? 'Outbound' : 'Inbound',
+        citizenMobile: cleanCaller || callerId,
         complaintId: recentGrievances[0]?._id,
         complaintIdString: recentGrievances[0]?.grievanceId,
         status: 'Ringing',
@@ -79,16 +109,24 @@ export class AvayaController {
       });
 
       const payload = {
-        event: 'RINGING', callId: callDoc.callId, extension, callerId, calledId, timestamp: eventTime,
-        screenPop: { callerMobile: callerId, isRegisteredCitizen: !!citizen, citizen, recentGrievances }
+        event: 'RINGING', callId: callDoc.callId, extension: extStr, callerId, calledId, timestamp: eventTime,
+        screenPop: { callerMobile: cleanCaller || callerId, isRegisteredCitizen: !!citizen, citizen, recentGrievances }
       };
       emitEvent('call:ringing', payload);
       return res.status(200).json({ success: true, message: 'RINGING event processed', data: payload });
     }
 
-    if (event === 'ANSWERED') {
+    // 2. ANSWERED / TALKING / ESTABLISHED / CONNECTED
+    if (normalizedEvent === 'ANSWERED' || normalizedEvent === 'TALKING' || normalizedEvent === 'ESTABLISHED' || normalizedEvent === 'CONNECTED') {
       const callDoc = await Call.findOne({
-        citizenMobile: callerId, status: { $in: ['Ringing', 'Initiated', 'Pending'] }
+        $or: [
+          ...(callerId ? [{ citizenMobile: callerId }] : []),
+          ...(calledId ? [{ citizenMobile: calledId }] : []),
+          ...(cleanCaller ? [{ citizenMobile: cleanCaller }] : []),
+          ...(cleanCalled ? [{ citizenMobile: cleanCalled }] : []),
+          ...(agent?._id ? [{ agent: agent._id }] : [])
+        ],
+        status: { $in: ['Ringing', 'Initiated', 'Pending', 'In Call'] }
       }).sort({ createdAt: -1 });
 
       if (callDoc) {
@@ -97,15 +135,23 @@ export class AvayaController {
         await callDoc.save();
       }
 
-      const payload = { event: 'ANSWERED', callId: callDoc?.callId, extension, callerId, calledId, timestamp: eventTime, agentStatus: 'In Call' };
+      const payload = { event: 'ANSWERED', callId: callDoc?.callId, extension: extStr, callerId, calledId, timestamp: eventTime, agentStatus: 'In Call' };
       emitEvent('call:answered', payload);
-      return res.status(200).json({ success: true, message: 'ANSWERED event processed', data: payload });
+      return res.status(200).json({ success: true, message: `${normalizedEvent} event processed as ANSWERED`, data: payload });
     }
 
-    if (event === 'DROPPED') {
+    // 3. DROPPED / DISCONNECTED / IDLE / HANGUP
+    if (normalizedEvent === 'DROPPED' || normalizedEvent === 'DISCONNECTED' || normalizedEvent === 'IDLE' || normalizedEvent === 'HANGUP') {
       const duration = `${durationSeconds || 0}s`;
       const callDoc = await Call.findOne({
-        citizenMobile: callerId, status: { $in: ['In Call', 'Ringing', 'Initiated', 'Pending'] }
+        $or: [
+          ...(callerId ? [{ citizenMobile: callerId }] : []),
+          ...(calledId ? [{ citizenMobile: calledId }] : []),
+          ...(cleanCaller ? [{ citizenMobile: cleanCaller }] : []),
+          ...(cleanCalled ? [{ citizenMobile: cleanCalled }] : []),
+          ...(agent?._id ? [{ agent: agent._id }] : [])
+        ],
+        status: { $in: ['In Call', 'Ringing', 'Initiated', 'Pending'] }
       }).sort({ createdAt: -1 });
 
       if (callDoc) {
@@ -116,12 +162,29 @@ export class AvayaController {
         await callDoc.save();
       }
 
-      const payload = { event: 'DROPPED', callId: callDoc?.callId, extension, callerId, calledId, durationSeconds: durationSeconds || 0, timestamp: eventTime, agentStatus: 'Available' };
+      const payload = { event: 'DROPPED', callId: callDoc?.callId, extension: extStr, callerId, calledId, durationSeconds: durationSeconds || 0, timestamp: eventTime, agentStatus: 'Available' };
       emitEvent('call:dropped', payload);
-      return res.status(200).json({ success: true, message: 'DROPPED event processed', data: payload });
+      return res.status(200).json({ success: true, message: `${normalizedEvent} event processed as DROPPED`, data: payload });
     }
 
-    return res.status(200).json({ success: true, message: `Event ${event} acknowledged` });
+    // 4. HELD / HOLD
+    if (normalizedEvent === 'HELD' || normalizedEvent === 'HOLD') {
+      const payload = { event: 'HELD', extension: extStr, callerId, calledId, timestamp: eventTime, agentStatus: 'On Hold' };
+      emitEvent('call:hold', payload);
+      return res.status(200).json({ success: true, message: 'HELD event processed', data: payload });
+    }
+
+    // 5. UNHELD / RETRIEVED
+    if (normalizedEvent === 'UNHELD' || normalizedEvent === 'RETRIEVED') {
+      const payload = { event: 'UNHELD', extension: extStr, callerId, calledId, timestamp: eventTime, agentStatus: 'In Call' };
+      emitEvent('call:unhold', payload);
+      return res.status(200).json({ success: true, message: 'UNHELD event processed', data: payload });
+    }
+
+    // Generic fallback: emit event so frontend is always notified of custom PBX events
+    const genericPayload = { event: normalizedEvent, extension: extStr, callerId, calledId, timestamp: eventTime };
+    emitEvent(`call:${normalizedEvent.toLowerCase()}`, genericPayload);
+    return res.status(200).json({ success: true, message: `Event ${event} acknowledged and emitted as call:${normalizedEvent.toLowerCase()}` });
   });
 
   /**
@@ -154,6 +217,19 @@ export class AvayaController {
         metadata: timelineTemplates.CALL_OUTBOUND(clientNumber),
       });
     }
+
+    // Emit socket event for the initiated outbound call
+    const payload = {
+      event: 'INITIATED',
+      callId: callDoc.callId,
+      extension: String(extension).trim(),
+      callerId: String(extension).trim(),
+      calledId: clientNumber,
+      timestamp: new Date().toISOString(),
+      agentStatus: 'Dialing',
+      call: callDoc
+    };
+    AvayaController.emitSocketEvent('call:initiated', payload, (user.id || user._id)?.toString(), String(extension).trim());
 
     return new ApiResponse({ res, status: 200, data: { avaya: data, call: callDoc }, message: 'Call initiated successfully' });
   });

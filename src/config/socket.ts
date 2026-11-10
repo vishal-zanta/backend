@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import config from './index.js';
 import { User } from '../modules/users/user.model.js';
+import clog from '../utils/customLog.js';
 
 let io: Server;
 
@@ -19,7 +20,8 @@ export const initSocket = (server: HttpServer) => {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
     
     if (!token) {
-      return next(new Error('Authentication error'));
+      clog.warn(`[Socket Auth] Connection rejected: No token provided (socket: ${socket.id})`);
+      return next(new Error('Authentication error: token missing'));
     }
     
     try {
@@ -28,18 +30,25 @@ export const initSocket = (server: HttpServer) => {
       
       const userId = decoded.id || decoded.userId;
       if (!userId) {
+        clog.warn(`[Socket Auth] Connection rejected: Token missing user id (socket: ${socket.id})`);
         return next(new Error('Invalid token payload'));
       }
       
       (socket as any).user = { id: userId };
       next();
-    } catch (err) {
+    } catch (err: any) {
+      clog.warn(`[Socket Auth] Connection rejected: ${err.message} (socket: ${socket.id})`);
       next(new Error('Authentication error'));
     }
   });
 
   io.on('connection', async (socket: Socket) => {
     const userId = (socket as any).user?.id;
+    clog.info(`[Socket] Client connected: ${socket.id} (userId: ${userId})`);
+
+    // Auto-join general telephony channel so all authenticated clients can monitor call events
+    socket.join('telephony');
+
     if (userId) {
       // User joins a personal room to receive targeted messages
       socket.join(userId.toString());
@@ -48,31 +57,37 @@ export const initSocket = (server: HttpServer) => {
       try {
         const user = await User.findById(userId).select('cceConfig').lean();
         if (user?.cceConfig?.extension) {
-          socket.join(`extension:${user.cceConfig.extension}`);
-          socket.join(user.cceConfig.extension.toString());
+          const ext = String(user.cceConfig.extension).trim();
+          socket.join(`extension:${ext}`);
+          socket.join(ext);
+          clog.info(`[Socket] Socket ${socket.id} joined extension rooms: "extension:${ext}", "${ext}"`);
         }
-      } catch (e) {
-        // Continue even if DB lookup fails
+      } catch (e: any) {
+        clog.warn(`[Socket] Error fetching user cceConfig for ${userId}:`, e?.message);
       }
     }
 
     // Allow manual join to extension room if needed
     socket.on('joinExtension', (extension: string) => {
       if (extension) {
-        socket.join(`extension:${extension}`);
-        socket.join(extension.toString());
+        const ext = String(extension).trim();
+        socket.join(`extension:${ext}`);
+        socket.join(ext);
+        clog.info(`[Socket] Socket ${socket.id} manually joined extension "${ext}"`);
       }
     });
 
     socket.on('leaveExtension', (extension: string) => {
       if (extension) {
-        socket.leave(`extension:${extension}`);
-        socket.leave(extension.toString());
+        const ext = String(extension).trim();
+        socket.leave(`extension:${ext}`);
+        socket.leave(ext);
+        clog.info(`[Socket] Socket ${socket.id} left extension "${ext}"`);
       }
     });
     
-    socket.on('disconnect', () => {
-      // Clean up if needed
+    socket.on('disconnect', (reason) => {
+      clog.info(`[Socket] Client disconnected: ${socket.id} (reason: ${reason})`);
     });
   });
 
