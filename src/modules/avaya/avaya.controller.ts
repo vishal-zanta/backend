@@ -31,8 +31,11 @@ export class AvayaController {
         rooms.push(`extension:${extStr}`);
         rooms.push(extStr);
       }
-      // Also broadcast to general telephony room so any connected dashboard/tester receives it
-      rooms.push('telephony');
+
+      if (rooms.length === 0) {
+        clog.warn(`[Socket] emitSocketEvent called with no target room for "${eventName}"`);
+        return;
+      }
 
       // Count connected sockets in target rooms for logging
       let totalRecipients = 0;
@@ -118,16 +121,21 @@ export class AvayaController {
 
     // 2. ANSWERED / TALKING / ESTABLISHED / CONNECTED
     if (normalizedEvent === 'ANSWERED' || normalizedEvent === 'TALKING' || normalizedEvent === 'ESTABLISHED' || normalizedEvent === 'CONNECTED') {
-      const callDoc = await Call.findOne({
-        $or: [
-          ...(callerId ? [{ citizenMobile: callerId }] : []),
-          ...(calledId ? [{ citizenMobile: calledId }] : []),
-          ...(cleanCaller ? [{ citizenMobile: cleanCaller }] : []),
-          ...(cleanCalled ? [{ citizenMobile: cleanCalled }] : []),
-          ...(agent?._id ? [{ agent: agent._id }] : [])
-        ],
-        status: { $in: ['Ringing', 'Initiated', 'Pending', 'In Call'] }
-      }).sort({ createdAt: -1 });
+      let callDoc = null;
+      if (agent?._id) {
+        callDoc = await Call.findOne({
+          agent: agent._id,
+          status: { $in: ['Ringing', 'Initiated', 'Pending', 'In Call'] }
+        }).sort({ createdAt: -1 });
+      }
+
+      // Only search by mobile if no agent was found for this extension
+      if (!agent?._id && !callDoc && (cleanCaller || cleanCalled || callerId || calledId)) {
+        callDoc = await Call.findOne({
+          citizenMobile: { $in: [cleanCaller, cleanCalled, callerId, calledId].filter(Boolean) },
+          status: { $in: ['Ringing', 'Initiated', 'Pending', 'In Call'] }
+        }).sort({ createdAt: -1 });
+      }
 
       if (callDoc) {
         callDoc.status = 'In Call';
@@ -143,16 +151,24 @@ export class AvayaController {
     // 3. DROPPED / DISCONNECTED / IDLE / HANGUP
     if (normalizedEvent === 'DROPPED' || normalizedEvent === 'DISCONNECTED' || normalizedEvent === 'IDLE' || normalizedEvent === 'HANGUP') {
       const duration = `${durationSeconds || 0}s`;
-      const callDoc = await Call.findOne({
-        $or: [
-          ...(callerId ? [{ citizenMobile: callerId }] : []),
-          ...(calledId ? [{ citizenMobile: calledId }] : []),
-          ...(cleanCaller ? [{ citizenMobile: cleanCaller }] : []),
-          ...(cleanCalled ? [{ citizenMobile: cleanCalled }] : []),
-          ...(agent?._id ? [{ agent: agent._id }] : [])
-        ],
-        status: { $in: ['In Call', 'Ringing', 'Initiated', 'Pending'] }
-      }).sort({ createdAt: -1 });
+      let callDoc = null;
+
+      // Scope call completion strictly to this agent's own call.
+      // If a supervisor (CCS) drops from a conference, do NOT match or terminate the CCE's active call!
+      if (agent?._id) {
+        callDoc = await Call.findOne({
+          agent: agent._id,
+          status: { $in: ['In Call', 'Ringing', 'Initiated', 'Pending'] }
+        }).sort({ createdAt: -1 });
+      }
+
+      // Only search by mobile if no agent was found for this extension
+      if (!agent?._id && !callDoc && (cleanCaller || cleanCalled || callerId || calledId)) {
+        callDoc = await Call.findOne({
+          citizenMobile: { $in: [cleanCaller, cleanCalled, callerId, calledId].filter(Boolean) },
+          status: { $in: ['In Call', 'Ringing', 'Initiated', 'Pending'] }
+        }).sort({ createdAt: -1 });
+      }
 
       if (callDoc) {
         callDoc.status = 'Completed';
@@ -433,6 +449,9 @@ export class AvayaController {
       timestamp: new Date().toISOString()
     };
     AvayaController.emitSocketEvent('call:transferred', payload, (user.id || user._id)?.toString(), extension);
+    if (targetUserId && destination) {
+      AvayaController.emitSocketEvent('call:transferred', payload, targetUserId.toString(), destination);
+    }
 
     return new ApiResponse({
       res,
@@ -475,6 +494,7 @@ export class AvayaController {
       timestamp: new Date().toISOString()
     };
     AvayaController.emitSocketEvent('call:consulting', payload, (user.id || user._id)?.toString(), extension);
+    AvayaController.emitSocketEvent('call:consulting', payload, targetUserId.toString(), destination);
 
     return new ApiResponse({
       res,
@@ -528,6 +548,9 @@ export class AvayaController {
 
     const payload = { event: 'CONFERENCE_STARTED', extension, destination, timestamp: new Date().toISOString() };
     AvayaController.emitSocketEvent('call:conference', payload, (user.id || user._id)?.toString(), extension);
+    if (targetUserId && destination) {
+      AvayaController.emitSocketEvent('call:conference', payload, targetUserId.toString(), destination);
+    }
 
     return new ApiResponse({ res, status: 200, data, message: 'Conference call initiated successfully' });
   });

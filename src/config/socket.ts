@@ -46,9 +46,6 @@ export const initSocket = (server: HttpServer) => {
     const userId = (socket as any).user?.id;
     clog.info(`[Socket] Client connected: ${socket.id} (userId: ${userId})`);
 
-    // Auto-join general telephony channel so all authenticated clients can monitor call events
-    socket.join('telephony');
-
     if (userId) {
       // User joins a personal room to receive targeted messages
       socket.join(userId.toString());
