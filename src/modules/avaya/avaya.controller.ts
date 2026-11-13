@@ -6,6 +6,7 @@ import { AvayaService } from './avaya.service.js';
 import { Call } from '../call/call.model.js';
 import { Grievance } from '../grievance/grievance.model.js';
 import { Citizen } from '../citizen/citizen.model.js';
+import '../address/address.model.js';
 import { User } from '../users/user.model.js';
 import { TimelineService } from '../timeline/timeline.service.js';
 import { timelineTemplates } from '../timeline/timeline.template.js';
@@ -90,7 +91,17 @@ export class AvayaController {
 
     // 1. RINGING / ALERTING / OFFERED
     if (normalizedEvent === 'RINGING' || normalizedEvent === 'ALERTING' || normalizedEvent === 'OFFERED') {
-      const citizen = cleanCaller ? await Citizen.findOne({ mobile: cleanCaller }).lean() : null;
+      const citizen = cleanCaller
+        ? await Citizen.findOne({ mobile: cleanCaller })
+            .populate('address.district')
+            .populate('address.block')
+            .populate('address.panchayat')
+            .populate('address.urbanPanchayat')
+            .populate('address.ward')
+            .populate('address.village')
+            .populate('address.thana')
+            .lean()
+        : null;
       const recentGrievances = cleanCaller
         ? await Grievance.find({ 'citizenInfo.mobile': cleanCaller })
             .select('grievanceId status priority classification createdAt')
